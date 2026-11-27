@@ -1572,6 +1572,7 @@ fun ComposeView(
           style = MaterialTheme.typography.body2,
           color = if (composeState.value.inProgress) MaterialTheme.colors.secondary else MaterialTheme.colors.primary,
           disabled = composeState.value.inProgress,
+          mirrorIcon = true,
           click = { withApi { sendRequest() } }
         )
       }

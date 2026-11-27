@@ -392,7 +392,7 @@ fun ChatItemInfoView(chatRh: Long?, ci: ChatItem, ciInfo: ChatItemInfo, devTools
           Modifier.size(36.dp),
           contentAlignment = Alignment.Center
         ) {
-          Icon(
+          AutoMirroredIcon(
             painterResource(MR.images.ic_arrow_forward),
             contentDescription = null,
             tint = CurrentColors.value.colors.secondary
@@ -411,11 +411,19 @@ fun ChatItemInfoView(chatRh: Long?, ci: ChatItem, ciInfo: ChatItemInfo, devTools
         }
       }
       Box(modifier, contentAlignment = Alignment.Center) {
-        Icon(
-          painterResource(icon),
-          contentDescription = null,
-          tint = statusColor
-        )
+        if (status is GroupSndStatus.Forwarded) {
+          AutoMirroredIcon(
+            painterResource(icon),
+            contentDescription = null,
+            tint = statusColor
+          )
+        } else {
+          Icon(
+            painterResource(icon),
+            contentDescription = null,
+            tint = statusColor
+          )
+        }
       }
     }
   }

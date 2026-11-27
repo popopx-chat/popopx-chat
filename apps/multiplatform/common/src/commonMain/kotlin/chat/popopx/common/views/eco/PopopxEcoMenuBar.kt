@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,6 +27,7 @@ import chat.popopx.common.eco.PopopxEcoUplink
 import chat.popopx.common.eco.PopopxChannelPublicURI
 import chat.popopx.common.eco.PopopxH5Launcher
 import chat.popopx.common.eco.PopopxH5OpenOutcome
+import chat.popopx.common.ui.theme.PopopxSeparator
 import chat.popopx.common.views.helpers.generalGetString
 import chat.popopx.res.*
 import dev.icerock.moko.resources.compose.painterResource
@@ -84,6 +86,10 @@ fun PopopxEcoMenuBar(contactId: Long, onHideKeyboard: () -> Unit) {
   }
 
   Column(Modifier.fillMaxWidth()) {
+    // iOS draws a full-width separator above the row (BotMenuBarView.swift:108-110): the bar is a second
+    // level of chrome, and the line is what tells the eye the input area starts below it.
+    Box(Modifier.fillMaxWidth().height(1.dp).background(PopopxSeparator))
+    Spacer(Modifier.height(4.dp))
     if (menu == null) {
       PopopxEcoMenuPlainRow(onHideKeyboard = onHideKeyboard)
     } else {
@@ -93,12 +99,12 @@ fun PopopxEcoMenuBar(contactId: Long, onHideKeyboard: () -> Unit) {
           openParentId = null
           fireItem(item)
         })
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(4.dp))
       }
       Row(
-        Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
       ) {
         menu.items.forEach { item ->
           val hasSub = item.subItems.isNotEmpty()
@@ -126,7 +132,7 @@ fun PopopxEcoMenuBar(contactId: Long, onHideKeyboard: () -> Unit) {
       Text(
         shown,
         Modifier.fillMaxWidth().padding(bottom = 4.dp),
-        fontSize = 12.sp,
+        fontSize = 13.sp,
         color = MaterialTheme.colors.secondary,
         textAlign = TextAlign.Center
       )
@@ -164,31 +170,35 @@ private fun ecoMenuPopupRows(menu: PopopxEcoMenu, openParentId: String?): List<P
 
 @Composable
 private fun PopopxEcoMenuKey(item: PopopxEcoMenu.Item, isOpen: Boolean, enabled: Boolean, onTap: () -> Unit, modifier: Modifier = Modifier) {
-  val shape = RoundedCornerShape(8.dp)
-  Column(
+  // The key is a card-coloured pill 12dp round and 44dp tall, matching iOS's `menuKey`
+  // (BotMenuBarView.swift:180-223): card fill + hairline when closed, brand fill with no stroke when open.
+  val shape = RoundedCornerShape(12.dp)
+  Row(
     modifier
+      .heightIn(min = 44.dp)
       .clip(shape)
       .background(if (isOpen) MaterialTheme.colors.primary else MaterialTheme.colors.surface)
-      .border(1.dp, if (isOpen) MaterialTheme.colors.primary else MaterialTheme.colors.onSurface.copy(alpha = 0.12f), shape)
+      .border(0.5.dp, if (isOpen) Color.Transparent else PopopxSeparator, shape)
       .then(if (enabled) Modifier.clickable(onClick = onTap) else Modifier)
-      .padding(horizontal = 8.dp, vertical = 8.dp),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center
+      .alpha(if (enabled) 1f else 0.45f)
+      .padding(horizontal = 12.dp, vertical = 8.dp),
+    horizontalArrangement = Arrangement.Center,
+    verticalAlignment = Alignment.CenterVertically
   ) {
     Text(
       item.title,
-      fontSize = 13.sp,
+      fontSize = 15.sp,
       color = if (isOpen) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface,
       maxLines = 2,
-      textAlign = TextAlign.Center,
-      modifier = Modifier.alpha(if (enabled) 1f else 0.45f)
+      textAlign = TextAlign.Center
     )
     if (item.subItems.isNotEmpty()) {
+      Spacer(Modifier.width(4.dp))
       Icon(
         painterResource(if (isOpen) MR.images.ic_chevron_down else MR.images.ic_chevron_up),
         null,
-        Modifier.size(14.dp),
-        tint = if (isOpen) MaterialTheme.colors.onPrimary.copy(alpha = 0.7f) else MaterialTheme.colors.secondary
+        Modifier.size(12.dp),
+        tint = MaterialTheme.colors.secondary
       )
     }
   }
@@ -196,21 +206,22 @@ private fun PopopxEcoMenuKey(item: PopopxEcoMenu.Item, isOpen: Boolean, enabled:
 
 @Composable
 private fun PopopxEcoMenuPopup(rows: List<PopopxEcoMenu.Item>, onSelect: (PopopxEcoMenu.Item) -> Unit) {
-  val shape = RoundedCornerShape(12.dp)
+  val shape = RoundedCornerShape(16.dp)
   Column(
     Modifier.fillMaxWidth().clip(shape).background(MaterialTheme.colors.surface)
-      .border(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f), shape)
+      .border(0.5.dp, PopopxSeparator, shape)
       .padding(vertical = 4.dp)
   ) {
     rows.forEachIndexed { index, item ->
-      if (index > 0) Spacer(Modifier.height(1.dp).fillMaxWidth().background(MaterialTheme.colors.onSurface.copy(alpha = 0.08f)))
+      if (index > 0) Spacer(Modifier.height(0.5.dp).fillMaxWidth().background(PopopxSeparator))
       Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).clickable { onSelect(item) }.padding(horizontal = 12.dp, vertical = 12.dp),
+        Modifier.fillMaxWidth().clickable { onSelect(item) }
+          .heightIn(min = 44.dp).padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
       ) {
-        Text(item.title, fontSize = 13.sp, color = MaterialTheme.colors.onSurface, maxLines = 2, modifier = Modifier.weight(1f))
-        Spacer(Modifier.width(8.dp))
-        Icon(painterResource(ecoMenuGlyph(item)), null, Modifier.size(16.dp), tint = MaterialTheme.colors.secondary)
+        Text(item.title, fontSize = 15.sp, color = MaterialTheme.colors.onSurface, maxLines = 2, modifier = Modifier.weight(1f))
+        Spacer(Modifier.width(12.dp))
+        Icon(painterResource(ecoMenuGlyph(item)), null, Modifier.size(14.dp), tint = MaterialTheme.colors.secondary)
       }
     }
   }
@@ -219,10 +230,10 @@ private fun PopopxEcoMenuPopup(rows: List<PopopxEcoMenu.Item>, onSelect: (Popopx
 @Composable
 private fun PopopxEcoMenuPlainRow(onHideKeyboard: () -> Unit) {
   Row(
-    Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp),
+    Modifier.fillMaxWidth().heightIn(min = 44.dp).padding(horizontal = 12.dp, vertical = 4.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    Text(generalGetString(MR.strings.eco_menu_label), fontSize = 13.sp, color = MaterialTheme.colors.secondary)
+    Text(generalGetString(MR.strings.eco_menu_label), fontSize = 15.sp, color = MaterialTheme.colors.secondary)
     Spacer(Modifier.weight(1f))
     PopopxEcoMenuCollapseKey(onHideKeyboard = onHideKeyboard)
   }
@@ -230,12 +241,12 @@ private fun PopopxEcoMenuPlainRow(onHideKeyboard: () -> Unit) {
 
 @Composable
 private fun PopopxEcoMenuCollapseKey(onHideKeyboard: () -> Unit) {
-  val shape = RoundedCornerShape(8.dp)
+  val shape = RoundedCornerShape(12.dp)
   Icon(
     painterResource(MR.images.ic_keyboard),
     generalGetString(MR.strings.eco_menu_collapse),
     Modifier.size(44.dp).clip(shape).background(MaterialTheme.colors.surface)
-      .border(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f), shape)
+      .border(0.5.dp, PopopxSeparator, shape)
       .clickable { onHideKeyboard() }
       .padding(11.dp),
     tint = MaterialTheme.colors.secondary

@@ -294,6 +294,10 @@ class PopopxApp: Application(), LifecycleEventObserver {
         MessagesFetcherWorker.cancelAll()
       }
 
+      override fun androidOpenAppSettings() {
+        PopopxApp.context.openAppSettingsInSystem()
+      }
+
       override fun androidChatInitializedAndStarted() {
         // Prevents from showing "Enable notifications" alert when onboarding wasn't complete yet
         if (chatModel.controller.appPrefs.onboardingStage.get() == OnboardingStage.OnboardingComplete) {

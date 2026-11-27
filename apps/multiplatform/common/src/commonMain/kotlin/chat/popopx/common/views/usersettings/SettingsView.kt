@@ -387,7 +387,7 @@ fun SettingsActionItem(icon: Painter, text: String, click: (() -> Unit)? = null,
 }
 
 @Composable
-fun SettingsActionItemWithContent(icon: Painter?, text: String? = null, click: (() -> Unit)? = null, iconColor: Color = MaterialTheme.colors.secondary, textColor: Color = MaterialTheme.colors.onBackground, disabled: Boolean = false, extraPadding: Boolean = false, content: @Composable RowScope.() -> Unit) {
+fun SettingsActionItemWithContent(icon: Painter?, text: String? = null, click: (() -> Unit)? = null, iconColor: Color = MaterialTheme.colors.secondary, textColor: Color = MaterialTheme.colors.onBackground, disabled: Boolean = false, extraPadding: Boolean = false, iconMirrorInRtl: Boolean = false, content: @Composable RowScope.() -> Unit) {
   SectionItemView(
     click,
     extraPadding = extraPadding,
@@ -398,7 +398,11 @@ fun SettingsActionItemWithContent(icon: Painter?, text: String? = null, click: (
     disabled = disabled
   ) {
     if (icon != null) {
-      Icon(icon, text, Modifier, tint = if (disabled) MaterialTheme.colors.secondary else iconColor)
+      if (iconMirrorInRtl) {
+        AutoMirroredIcon(icon, text, Modifier, tint = if (disabled) MaterialTheme.colors.secondary else iconColor)
+      } else {
+        Icon(icon, text, Modifier, tint = if (disabled) MaterialTheme.colors.secondary else iconColor)
+      }
       TextIconSpaced(extraPadding)
     }
     if (text != null) {
@@ -423,9 +427,10 @@ fun SettingsPreferenceItem(
   pref: SharedPreference<Boolean>,
   iconColor: Color = MaterialTheme.colors.secondary,
   enabled: Boolean = true,
+  iconMirrorInRtl: Boolean = false,
   onChange: ((Boolean) -> Unit)? = null,
 ) {
-  SettingsActionItemWithContent(icon, text, iconColor = iconColor,) {
+  SettingsActionItemWithContent(icon, text, iconColor = iconColor, iconMirrorInRtl = iconMirrorInRtl) {
     SharedPreferenceToggle(pref, enabled, onChange)
   }
 }

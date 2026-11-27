@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import chat.popopx.common.model.*
 import chat.popopx.common.platform.appPreferences
 import chat.popopx.common.ui.theme.isInDarkTheme
+import chat.popopx.common.views.helpers.AutoMirroredIcon
 import chat.popopx.res.*
 
 @Composable
@@ -107,7 +108,7 @@ private fun CIMetaText(
   }
   if (showViaProxy && meta.sentViaProxy == true) {
     Spacer(Modifier.width(4.dp))
-    Icon(painterResource(MR.images.ic_arrow_forward), null, Modifier.height(17.dp), tint = MaterialTheme.colors.secondary)
+    AutoMirroredIcon(painterResource(MR.images.ic_arrow_forward), null, Modifier.height(17.dp), tint = MaterialTheme.colors.secondary)
   }
   if (showStatus) {
     Spacer(Modifier.width(4.dp))

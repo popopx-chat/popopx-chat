@@ -2,6 +2,7 @@ package chat.popopx.app.mesh
 
 import chat.popopx.common.mesh.PopopxBluetoothState
 import chat.popopx.common.mesh.PopopxMeshBody
+import chat.popopx.common.mesh.PopopxMeshControlFrame
 import chat.popopx.common.mesh.PopopxMeshEvent
 import chat.popopx.common.mesh.PopopxMeshEventHub
 import chat.popopx.common.mesh.PopopxMeshInbound
@@ -148,6 +149,74 @@ class PopopxCabinStoreTest {
     store.ingest(PopopxMeshEvent.SendFailed("p1", peerID(0x22), PopopxMeshSendFailure.LinkDropped))
     assertTrue(store.privateThreads.value.getValue(key).single().failed)
     assertFalse(store.broadcasts.value.single().failed)
+  }
+
+  @Test
+  fun aDecryptedDirectFrameProvesTheChannelAndAnInvitationIsKeptOnePerPeer() {
+    val store = PopopxCabinStore(PopopxMeshEventHub())
+    val key = ByteArray(32) { (it + 3).toByte() }
+    val keyHex = key.meshHex()
+
+    // A flood is readable without any session, so it must not count as a channel.
+    store.ingest(PopopxMeshEvent.Inbound(inbound("b1", 0x11, "flood", broadcast = true, meshKey = key)))
+    assertEquals(emptySet<String>(), store.channels.value)
+
+    // A sealed 1:1 that decrypts could not have been read without the session this list counts.
+    store.ingest(PopopxMeshEvent.Inbound(inbound("d1", 0x22, "sealed", broadcast = false, meshKey = key)))
+    assertEquals(setOf(keyHex), store.channels.value)
+
+    val first = PopopxMeshInbound(
+      messageId = "c1",
+      sender = peerID(0x22),
+      senderMeshPublicKey = key,
+      recipient = peerID(0x7F),
+      hopCount = 1,
+      isBroadcast = false,
+      receivedAtMillis = 1_000L,
+      body = PopopxMeshBody.Control(PopopxMeshControlFrame.PairingRequest("link-a")),
+    )
+    store.ingest(PopopxMeshEvent.Inbound(first))
+    assertEquals(listOf("link-a"), store.pendingPairings.value.map { it.inviteLink })
+
+    // A repeat from the same key replaces its earlier invitation instead of stacking a second card.
+    store.ingest(
+      PopopxMeshEvent.Inbound(
+        PopopxMeshInbound(
+          messageId = "c2",
+          sender = peerID(0x22),
+          senderMeshPublicKey = key,
+          recipient = peerID(0x7F),
+          hopCount = 1,
+          isBroadcast = false,
+          receivedAtMillis = 2_000L,
+          body = PopopxMeshBody.Control(PopopxMeshControlFrame.PairingRequest("link-b")),
+        )
+      )
+    )
+    assertEquals(listOf("link-b"), store.pendingPairings.value.map { it.inviteLink })
+    assertEquals(2_000L, store.pendingPairings.value.single().receivedAtMillis)
+
+    // A frame from a sender whose key is unresolved cannot be filed under a key, so it is not an invitation here.
+    store.ingest(
+      PopopxMeshEvent.Inbound(
+        PopopxMeshInbound(
+          messageId = "c3",
+          sender = peerID(0x44),
+          senderMeshPublicKey = null,
+          recipient = peerID(0x7F),
+          hopCount = 1,
+          isBroadcast = false,
+          receivedAtMillis = 3_000L,
+          body = PopopxMeshBody.Control(PopopxMeshControlFrame.PairingRequest("link-c")),
+        )
+      )
+    )
+    assertEquals(1, store.pendingPairings.value.size)
+
+    // The fuse's teardown keeps nothing: a closed switch leaves no "channel established" behind it.
+    store.stop()
+    assertEquals(emptySet<String>(), store.channels.value)
+    assertEquals(emptyList(), store.pendingPairings.value)
   }
 
   @Test

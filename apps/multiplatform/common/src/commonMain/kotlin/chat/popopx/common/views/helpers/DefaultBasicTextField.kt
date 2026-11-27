@@ -18,6 +18,7 @@ import dev.icerock.moko.resources.compose.painterResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import chat.popopx.common.views.database.PassphraseStrength
@@ -173,7 +174,8 @@ fun DefaultConfigurableTextField(
     textStyle = TextStyle.Default.copy(
       color = color,
       fontWeight = FontWeight.Normal,
-      fontSize = fontSize
+      fontSize = fontSize,
+      textDirection = TextDirection.Ltr
     ),
     interactionSource = interactionSource,
     decorationBox = @Composable { innerTextField ->

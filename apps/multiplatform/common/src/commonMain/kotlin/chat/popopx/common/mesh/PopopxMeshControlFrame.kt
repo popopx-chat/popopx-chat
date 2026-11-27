@@ -6,7 +6,7 @@ package chat.popopx.common.mesh
  * itself contain colons, because an invite link does.
  */
 sealed class PopopxMeshControlFrame(val text: String) {
-  class PairingRequest(inviteLink: String) : PopopxMeshControlFrame(PAIRING_REQUEST_PREFIX + inviteLink)
+  class PairingRequest(val inviteLink: String) : PopopxMeshControlFrame(PAIRING_REQUEST_PREFIX + inviteLink)
 
   class PairingAck(meshPublicKey: String) : PopopxMeshControlFrame(PAIRING_ACK_PREFIX + meshPublicKey)
 

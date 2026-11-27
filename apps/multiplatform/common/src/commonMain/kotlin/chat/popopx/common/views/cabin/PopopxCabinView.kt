@@ -1,64 +1,94 @@
 package chat.popopx.common.views.cabin
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import chat.popopx.common.mesh.PopopxBluetoothState
 import chat.popopx.common.mesh.PopopxMeshBody
 import chat.popopx.common.mesh.PopopxMeshConfig
+import chat.popopx.common.mesh.PopopxMeshControlFrame
 import chat.popopx.common.mesh.PopopxMeshEngine
-import chat.popopx.common.mesh.PopopxMeshEnvelope
 import chat.popopx.common.mesh.PopopxMeshEvent
 import chat.popopx.common.mesh.PopopxMeshEventHub
 import chat.popopx.common.mesh.PopopxMeshFusePhase
 import chat.popopx.common.mesh.PopopxMeshInbound
 import chat.popopx.common.mesh.PopopxMeshKillSwitch
 import chat.popopx.common.mesh.PopopxMeshPeer
-import chat.popopx.common.mesh.PopopxMeshSendError
 import chat.popopx.common.mesh.PopopxMeshSendFailure
 import chat.popopx.common.mesh.meshHex
 import chat.popopx.common.platform.ColumnWithScrollBar
-import chat.popopx.common.ui.theme.DEFAULT_PADDING
-import chat.popopx.common.ui.theme.DEFAULT_PADDING_HALF
+import chat.popopx.common.ui.theme.PopopxBrand
+import chat.popopx.common.ui.theme.PopopxMesh
+import chat.popopx.common.ui.theme.PopopxMeshInk
+import chat.popopx.common.ui.theme.PopopxOnMesh
+import chat.popopx.common.ui.theme.sectionCardColor
 import chat.popopx.common.views.helpers.AppBarTitle
-import chat.popopx.common.views.helpers.DefaultBasicTextField
 import chat.popopx.res.*
+import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import java.util.UUID
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.sin
 
-// The Cabin tab: the offline Bluetooth mesh's screen, ported from
-// `apps/ios/PopopxMeshKit/Sources/PopopxMeshUI/MeshPlazaView.swift` and the node list of
-// `Shared/Features/Cabin/PopopxCabinView.swift`. It is reached only through `PopopxTab.CABIN`, which the
-// tab bar shows on Android alone, so the desktop tree and its 376 snapshot baselines never compose this file.
+// The Cabin tab: the offline Bluetooth mesh's root page, ported screen for screen from
+// `apps/ios/Shared/Features/Cabin/PopopxCabinView.swift` — header, master-switch/radio card, the channels
+// card (C2) and the nearby-nodes card with its radar (C1). The hall screen lives in
+// `PopopxCabinHallView.kt`, the channels and pending pairings in `PopopxCabinChannelsView.kt`, and the
+// settings centre in `PopopxCabinSettingsView.kt`, on the same atoms. It is reached only through `PopopxTab.CABIN`, which the tab bar shows on Android alone, so the
+// desktop tree and its 376 snapshot baselines never compose this file.
 //
-// Three things are deliberately absent, and the screen says so rather than faking them:
-// - mesh groups. The group key tree is HOLD this phase, so the offline channel is iOS' *broadcast plaza*
-//   (`MeshPlazaView`), not a group chat.
-// - a nickname. iOS persists one in the mesh sandbox and restarts the mesh to advertise a new value
-//   (`PopopxMeshKillSwitch.setNickname`); that store is not ported, so the engine starts unnamed and the
-//   list shows wire ids.
-// - pairing, proximity, health and the SMP router. A peer with no mesh session is reported as having none;
-//   nothing here falls back to the internet, which is the whole point of the screen.
+// Two things are still deliberately absent, and the screens say so rather than faking them:
+// - pairing, proximity, health and the SMP router. A peer with no mesh session is reported as having
+//   none; nothing here falls back to the internet, which is the whole point of the screen. The channels
+//   card keeps iOS' third row and states "not in this build" because GROUP_STATE/GROUP_MESSAGE are relayed
+//   but not read on this platform.
+// - the nickname is ported now (`PopopxMeshNicknameStore` + `PopopxMeshKillSwitch.setNickname`), so the
+//   engine advertises whatever the hall's nickname card last saved.
+//
+// Reduce Motion: iOS stops the radar pulse when the system asks. Android has no shared
+// reduce-motion reading in this tree, so the pulse follows the platform animator scale — with
+// animations switched off it snaps to its end state instead of looping.
 
 /** One line of a Cabin timeline. */
 class PopopxCabinPost(
@@ -103,14 +133,18 @@ class PopopxCabinPost(
 object PopopxCabinReach {
   /** `PopopxMeshReachEstimate.metresPerHop`. */
   const val METRES_PER_HOP: Int = 30
-
-  fun metres(hops: Int): Int = maxOf(0, hops) * METRES_PER_HOP
-
-  fun radius(hops: Int): String {
-    val metres = metres(hops)
-    return if (metres >= 1_000) "%.1f km".format(metres / 1_000.0) else "$metres m"
-  }
 }
+
+/**
+ * One pairing invitation this device received, as the sealed control frame carried it. Kept from the
+ * moment it decrypts until the fuse goes off: it is a real frame that arrived, not a claim about a
+ * pairing layer, and [inviteLink] is the peer's own argument.
+ */
+class PopopxCabinPairingRequest(
+  val meshPublicKeyHex: String,
+  val inviteLink: String,
+  val receivedAtMillis: Long,
+)
 
 /**
  * The Cabin's mirror of the mesh — the reduced form of `PopopxMeshStateSource`, keeping its reduction
@@ -129,6 +163,9 @@ class PopopxCabinStore(
   val peers = MutableStateFlow<List<PopopxMeshPeer>>(emptyList())
   val broadcasts = MutableStateFlow<List<PopopxCabinPost>>(emptyList())
   val privateThreads = MutableStateFlow<Map<String, List<PopopxCabinPost>>>(emptyMap())
+  /** Mesh public keys this device has actually held a Noise session with this run. */
+  val channels = MutableStateFlow<Set<String>>(emptySet())
+  val pendingPairings = MutableStateFlow<List<PopopxCabinPairingRequest>>(emptyList())
 
   private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
   private var pump: Job? = null
@@ -156,6 +193,8 @@ class PopopxCabinStore(
     peers.value = emptyList()
     broadcasts.value = emptyList()
     privateThreads.value = emptyMap()
+    channels.value = emptySet()
+    pendingPairings.value = emptyList()
   }
 
   /**
@@ -175,7 +214,18 @@ class PopopxCabinStore(
         peers.value = peers.value.filter { it.peerID != event.peerID }
 
       is PopopxMeshEvent.Inbound -> {
-        val post = PopopxCabinPost.of(event.inbound) ?: return
+        val inbound = event.inbound
+        val senderKey = inbound.senderMeshPublicKey?.meshHex()
+        // A sealed 1:1 that decrypts proves the session behind the "encrypted channel" count; the
+        // pairing frame rides the same kind of session, so it proves one too. A broadcast proves nothing
+        // about sessions and never counts here.
+        if (!inbound.isBroadcast && senderKey != null) {
+          channels.value = channels.value + senderKey
+          (inbound.controlFrame as? PopopxMeshControlFrame.PairingRequest)?.let { request ->
+            notePendingPairing(senderKey, request.inviteLink, inbound.receivedAtMillis)
+          }
+        }
+        val post = PopopxCabinPost.of(inbound) ?: return
         if (event.inbound.isBroadcast) {
           broadcasts.value = append(post, broadcasts.value)
         } else {
@@ -223,10 +273,31 @@ class PopopxCabinStore(
     privateThreads.value = privateThreads.value + (meshPublicKeyHex to append(post, current))
   }
 
+  /** Records that a sealed exchange with this key actually happened — the private chat calls it after a send. */
+  fun noteChannel(meshPublicKeyHex: String) {
+    channels.value = channels.value + meshPublicKeyHex
+  }
+
+  /**
+   * Forgets every session claim. The fuse's own teardown kills the sessions, and the screens call this the
+   * moment the master switch closes, so a closed fuse never leaves a "channel established" behind it.
+   */
+  fun clearChannels() {
+    channels.value = emptySet()
+  }
+
+  /** One invitation per peer, latest wins: a repeat from the same key replaces its earlier link. */
+  private fun notePendingPairing(meshPublicKeyHex: String, inviteLink: String, atMillis: Long) {
+    val request = PopopxCabinPairingRequest(meshPublicKeyHex, inviteLink, atMillis)
+    val rest = pendingPairings.value.filter { it.meshPublicKeyHex != meshPublicKeyHex }
+    pendingPairings.value = (rest + request).sortedByDescending { it.receivedAtMillis }
+  }
+
   /** Re-seeds from a live engine, because a screen that mounts after the first announce must not wait for the next one. */
   suspend fun seed(engine: PopopxMeshEngine) {
     radioState.value = engine.bluetoothState
     peers.value = engine.peers()
+    channels.value = engine.channelMeshPublicKeyHexes()
   }
 
   private fun markFailed(messageId: String) {
@@ -264,27 +335,16 @@ fun PopopxCabinView() {
   val radio by store.radioState.collectAsState()
   val peers by store.peers.collectAsState()
   val posts by store.broadcasts.collectAsState()
-  val threads by store.privateThreads.collectAsState()
+  val channels by store.channels.collectAsState()
 
-  val draft = rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
-  val chatDraft = rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("")) }
-  val selected = rememberSaveable { mutableStateOf<String?>(null) }
-  val failure = remember { mutableStateOf<PopopxMeshSendFailure?>(null) }
-  // Why a tap on an author did nothing. Said in the one place this screen explains a refusal, because a
-  // silent non-response reads as a broken button.
-  val unanswered = remember { mutableStateOf<String?>(null) }
-  val noKeyWords = stringResource(MR.strings.cabin_author_no_key)
-
-  // A tap on a sender opens the 1:1 panel for that sender — the same `selected` the node list sets, so
-  // there is one thread, one composer and one send path rather than a second one bolted to the timeline.
-  val selectAuthor: (PopopxCabinPost) -> Unit = { post ->
-    val key = post.meshPublicKeyHex
-    if (key == null) {
-      unanswered.value = noKeyWords
-    } else {
-      selected.value = key
-      failure.value = null
-      unanswered.value = null
+  // iOS refreshes the relative readings every 2 seconds (`refreshInterval`); without a tick a row's
+  // "last heard" freezes at whatever it was when the last peer event arrived, and the reachability
+  // dot would keep claiming "online" long after the 15-second window closed.
+  var nowMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+  LaunchedEffect(Unit) {
+    while (true) {
+      delay(2_000)
+      nowMillis = System.currentTimeMillis()
     }
   }
 
@@ -295,342 +355,525 @@ fun PopopxCabinView() {
     fuse.restore()
     fuse.engine()?.let { store.seed(it) }
   }
+  // The fuse's teardown kills every Noise session; a closed switch must not leave "N established" behind it.
+  LaunchedEffect(enabled) {
+    if (!enabled) store.clearChannels()
+  }
 
   AppBarTitle(stringResource(MR.strings.cabin_title))
   ColumnWithScrollBar(Modifier.fillMaxSize()) {
-    Column(Modifier.padding(horizontal = DEFAULT_PADDING)) {
-      PopopxCabinStatus(radio = radio, phase = phase, peers = peers, enabled = enabled)
+    Column(
+      Modifier
+        .padding(horizontal = CABIN_GUTTER)
+        .padding(top = 8.dp, bottom = CABIN_GUTTER * 3),
+      verticalArrangement = Arrangement.spacedBy(CABIN_SECTION_GAP),
+    ) {
+      CabinHeader(enabled)
 
-      PopopxCabinSwitchRow(
+      PopopxCabinStatusCard(
+        radio = radio,
+        phase = phase,
         enabled = enabled,
-        busy = phase == PopopxMeshFusePhase.STARTING || phase == PopopxMeshFusePhase.STOPPING,
-      ) { next ->
-        uiScope.launch { fuse.setEnabled(next) }
-      }
+        latestBroadcastAt = posts.lastOrNull { !it.mine }?.atMillis,
+        nowMillis = nowMillis,
+      ) { next -> uiScope.launch { fuse.setEnabled(next) } }
 
-      Spacer(Modifier.height(DEFAULT_PADDING))
-      Text(stringResource(MR.strings.cabin_nodes_heading), fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-      Spacer(Modifier.height(DEFAULT_PADDING_HALF))
-      if (peers.isEmpty()) {
-        Text(stringResource(MR.strings.cabin_nodes_empty), color = MaterialTheme.colors.secondary, fontSize = 13.sp)
-      } else {
-        peers.forEach { peer ->
-          PopopxCabinPeerRow(peer, selected.value == peer.meshPublicKey?.meshHex()) {
-            selected.value = peer.meshPublicKey?.meshHex()
-            failure.value = null
-            unanswered.value = null
-          }
-        }
-      }
+      PopopxCabinChannelsCard(
+        enabled = enabled,
+        broadcastCount = posts.size,
+        channelCount = if (enabled) peers.count { peer -> peer.meshPublicKey?.meshHex()?.let { it in channels } == true } else 0,
+        onHall = { showPopopxCabinHall() },
+        onEncryptedChannels = { showPopopxCabinChannels() },
+      )
 
-      Spacer(Modifier.height(DEFAULT_PADDING))
-      Text(stringResource(MR.strings.cabin_broadcast_heading), fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-      Spacer(Modifier.height(DEFAULT_PADDING_HALF))
-      if (posts.isEmpty()) {
-        Text(stringResource(MR.strings.cabin_broadcast_empty), color = MaterialTheme.colors.secondary, fontSize = 13.sp)
-      } else {
-        posts.forEach { post -> PopopxCabinPostRow(post, cabinAuthorLabel(post, peers), selectAuthor) }
-      }
-      Spacer(Modifier.height(DEFAULT_PADDING_HALF))
-      PopopxCabinComposer(
-        value = draft,
-        placeholder = stringResource(MR.strings.cabin_broadcast_placeholder),
-        action = stringResource(MR.strings.cabin_broadcast_send),
-        // `MeshPlazaViewModel.canBroadcast`: the radio has to be able to carry it, and a draft has to exist.
-        enabled = radio.isUsable && draft.value.text.isNotBlank(),
-      ) {
-        val text = draft.value.text.trim().take(MAX_DRAFT_CHARACTERS)
-        draft.value = TextFieldValue("")
-        uiScope.launch {
-          val engine = fuse.engine()
-          // iOS appends the draft to the plaza whether or not the radio took it, and marks the row.
-          val result = runCatching { requireNotNull(engine).sendBroadcast(text) }
-          val messageId = result.getOrNull() ?: UUID.randomUUID().toString().lowercase()
-          store.noteLocal(text, messageId, failed = result.isFailure)
-          failure.value = (result.exceptionOrNull() as? PopopxMeshSendError)?.failure
-        }
-      }
-
-      val peer = selected.value
-      Spacer(Modifier.height(DEFAULT_PADDING))
-      Text(stringResource(MR.strings.cabin_chat_heading), fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-      Spacer(Modifier.height(DEFAULT_PADDING_HALF))
-      if (peer == null) {
-        Text(stringResource(MR.strings.cabin_chat_none), color = MaterialTheme.colors.secondary, fontSize = 13.sp)
-      } else {
-        val thread = threads[peer].orEmpty()
-        if (thread.isEmpty()) {
-          Text(stringResource(MR.strings.cabin_chat_empty), color = MaterialTheme.colors.secondary, fontSize = 13.sp)
-        } else {
-          thread.forEach { post -> PopopxCabinPostRow(post, cabinAuthorLabel(post, peers), selectAuthor) }
-        }
-        PopopxCabinComposer(
-          value = chatDraft,
-          placeholder = stringResource(MR.strings.cabin_chat_placeholder),
-          action = stringResource(MR.strings.cabin_chat_send),
-          enabled = radio.isUsable && chatDraft.value.text.isNotBlank(),
-        ) {
-          val text = chatDraft.value.text.trim().take(MAX_DRAFT_CHARACTERS)
-          chatDraft.value = TextFieldValue("")
-          uiScope.launch {
-            val engine = fuse.engine()
-            val envelope = PopopxMeshEnvelope.text(UUID.randomUUID().toString().lowercase(), text)
-            val result = runCatching { requireNotNull(engine).send(envelope, peer) }
-            store.noteLocalPrivate(text, peer, envelope.id, failed = result.isFailure)
-            failure.value = (result.exceptionOrNull() as? PopopxMeshSendError)?.failure
-          }
-        }
-      }
-
-      val refusal = failure.value?.let { cabinFailureWords(it) } ?: unanswered.value
-      if (refusal != null) {
-        Spacer(Modifier.height(DEFAULT_PADDING_HALF))
-        Text(
-          refusal,
-          color = MaterialTheme.colors.error,
-          fontSize = 12.sp,
-          maxLines = 2,
-        )
-      }
-      Spacer(Modifier.height(DEFAULT_PADDING * 2))
+      PopopxCabinNearbyCard(
+        peers = peers,
+        radio = radio,
+        enabled = enabled,
+        nowMillis = nowMillis,
+        onOpenChat = { peer ->
+          val key = cabinPeerKey(peer) ?: return@PopopxCabinNearbyCard
+          showPopopxCabinPrivateChat(key)
+        },
+        onTurnOnFuse = { uiScope.launch { fuse.setEnabled(true) } },
+        onRescan = { uiScope.launch { fuse.engine()?.let { store.seed(it) } } },
+      )
     }
   }
 }
 
+// MARK: - header
+
 /**
- * The three facts iOS keeps apart — the radio, the fuse, and what the radio has actually reached — as three
- * lines. A single "connected/disconnected" label would collapse them, and they disagree in real life: the
- * radio can be on with the fuse off, and the fuse on with nothing in range.
+ * The page header plus iOS' top-trailing "Settings" capsule (`meshSettingsEntry`). Android's tab shell
+ * draws no per-page top bar, so the capsule sits at the top of the page content, level with the title;
+ * the dot on it is the fuse state, the same fact the first card in the sheet reports.
  */
 @Composable
-private fun PopopxCabinStatus(
-  radio: PopopxBluetoothState,
-  phase: PopopxMeshFusePhase,
-  peers: List<PopopxMeshPeer>,
+private fun CabinHeader(enabled: Boolean) {
+  val relayHopCap = PopopxMeshConfig.default.fragmentRelayTtlCap
+  val broadcastTTL = PopopxMeshConfig.default.ttlDefault
+  val entryLabel = stringResource(MR.strings.cabin_settings_entry)
+  val stateWords = stringResource(
+    if (enabled) MR.strings.cabin_settings_fuse_open else MR.strings.cabin_settings_fuse_closed
+  )
+  Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+      Text(
+        stringResource(MR.strings.cabin_page_title),
+        fontSize = 22.sp,
+        fontWeight = FontWeight.SemiBold,
+      )
+      Text(
+        stringResource(MR.strings.cabin_page_explainer, relayHopCap, broadcastTTL),
+        fontSize = 13.sp,
+        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+      )
+    }
+    Spacer(Modifier.width(12.dp))
+    Row(
+      Modifier
+        .heightIn(min = 44.dp)
+        .background(sectionCardColor(), RoundedCornerShape(12.dp))
+        .clickable { showPopopxCabinSettings() }
+        .padding(horizontal = 10.dp)
+        .semantics {
+          contentDescription = entryLabel
+          stateDescription = stateWords
+        },
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      Icon(painterResource(MR.images.ic_settings), null, Modifier.size(16.dp), tint = PopopxMeshInk)
+      Box(
+        Modifier
+          .size(6.dp)
+          .background(
+            if (enabled) PopopxMesh else MaterialTheme.colors.onSurface.copy(alpha = cabinLabelHintAlpha),
+            CircleShape,
+          )
+      )
+      Text(stringResource(MR.strings.cabin_settings_capsule), fontSize = 13.sp, maxLines = 1)
+    }
+  }
+}
+
+// MARK: - channels
+
+/**
+ * `PopopxCabinView.channelsCard`: the channel entries of the page. The hall and the encrypted-channel
+ * screens are real; the offline group row keeps iOS' three-row shape and says "not in this build" instead
+ * of opening a screen whose engine layer (GROUP_STATE / GROUP_MESSAGE) is not mounted on this platform.
+ */
+@Composable
+private fun PopopxCabinChannelsCard(
   enabled: Boolean,
+  broadcastCount: Int,
+  channelCount: Int,
+  onHall: () -> Unit,
+  onEncryptedChannels: () -> Unit,
 ) {
-  Column(
-    Modifier
-      .fillMaxWidth()
-      .background(MaterialTheme.colors.background, RoundedCornerShape(12.dp))
-      .padding(12.dp),
-    verticalArrangement = Arrangement.spacedBy(4.dp)
+  CabinSectionCard(
+    title = stringResource(MR.strings.cabin_channels_title),
+    footnote = stringResource(MR.strings.cabin_channels_footnote),
   ) {
-    Text(
-      if (radio.isUsable) {
-        val hops = maxOf(1, PopopxMeshConfig.default.ttlDefault)
-        stringResource(MR.strings.cabin_neighbours, peers.size) +
-          " · " + stringResource(MR.strings.cabin_reach, hops, PopopxCabinReach.radius(hops))
-      } else {
-        cabinRadioTitle(radio)
+    CabinPickerRow(
+      label = stringResource(MR.strings.cabin_hall_row),
+      value = when {
+        !enabled -> stringResource(MR.strings.cabin_fuse_off_value)
+        broadcastCount == 0 -> stringResource(MR.strings.cabin_hall_empty)
+        else -> stringResource(MR.strings.cabin_hall_count, broadcastCount)
       },
-      fontSize = 13.sp,
-      color = MaterialTheme.colors.secondary,
+      icon = MR.images.ic_forum,
+      onClick = onHall,
     )
-    Text(cabinFuseTitle(phase, enabled), fontSize = 13.sp, color = MaterialTheme.colors.secondary)
-    Text(
-      if (peers.isEmpty()) {
-        stringResource(MR.strings.cabin_nodes_none)
+    CabinDivider()
+    CabinPickerRow(
+      label = stringResource(MR.strings.cabin_channels_row),
+      value = if (!enabled) {
+        stringResource(MR.strings.cabin_fuse_off_value)
       } else {
-        val direct = peers.count { it.isDirect }
-        stringResource(MR.strings.cabin_nodes_summary, direct, peers.size - direct)
+        stringResource(MR.strings.cabin_encrypted_channels_value, channelCount)
       },
-      fontSize = 13.sp,
-      color = MaterialTheme.colors.secondary,
+      icon = MR.images.ic_lock_filled,
+      onClick = onEncryptedChannels,
+    )
+    CabinDivider()
+    CabinPickerRow(
+      label = stringResource(MR.strings.cabin_groups_row),
+      value = stringResource(MR.strings.cabin_groups_absent),
+      icon = MR.images.ic_group_filled,
+      enabled = false,
+      onClick = {},
     )
   }
 }
 
-/** `PopopxMeshBannerModel.radioTitle`, case for case, so both platforms name a state the same way. */
+// MARK: - master switch and radio
+
+/**
+ * The master switch + the radio + the time of the last broadcast heard within range, as the three facts
+ * iOS keeps apart. A single "connected/disconnected" label would collapse them, and they disagree in real
+ * life: the radio can be on with the fuse off, and the fuse on with nothing in range.
+ */
 @Composable
-private fun cabinRadioTitle(state: PopopxBluetoothState): String = when (state) {
-  PopopxBluetoothState.POWERED_OFF -> stringResource(MR.strings.cabin_radio_off)
-  PopopxBluetoothState.UNAUTHORIZED -> stringResource(MR.strings.cabin_radio_unauthorized)
-  PopopxBluetoothState.RESETTING -> stringResource(MR.strings.cabin_radio_resetting)
-  PopopxBluetoothState.UNSUPPORTED -> stringResource(MR.strings.cabin_radio_unsupported)
-  PopopxBluetoothState.POWERED_ON, PopopxBluetoothState.UNKNOWN -> stringResource(MR.strings.cabin_radio_unavailable)
+private fun PopopxCabinStatusCard(
+  radio: PopopxBluetoothState,
+  phase: PopopxMeshFusePhase,
+  enabled: Boolean,
+  latestBroadcastAt: Long?,
+  nowMillis: Long,
+  onToggle: (Boolean) -> Unit,
+) {
+  val busy = phase == PopopxMeshFusePhase.STARTING || phase == PopopxMeshFusePhase.STOPPING
+  val windowSeconds = PopopxMeshConfig.default.peerReachabilityTimeout.toInt()
+  CabinSectionCard(
+    title = stringResource(MR.strings.cabin_status_title),
+    footnote = if (enabled) {
+      stringResource(MR.strings.cabin_status_footnote, windowSeconds)
+    } else {
+      stringResource(MR.strings.cabin_fuse_off_footnote)
+    },
+  ) {
+    Row(
+      Modifier.fillMaxWidth().heightIn(min = 44.dp).padding(vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Column(Modifier.weight(1f)) {
+        Text(stringResource(MR.strings.cabin_switch), fontSize = 17.sp)
+        Spacer(Modifier.height(2.dp))
+        Text(
+          if (enabled) stringResource(MR.strings.cabin_fuse_note_on) else stringResource(MR.strings.cabin_fuse_note_off),
+          fontSize = 13.sp,
+          color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        )
+      }
+      Spacer(Modifier.width(12.dp))
+      Switch(
+        checked = enabled,
+        onCheckedChange = onToggle,
+        enabled = !busy,
+        colors = SwitchDefaults.colors(
+          checkedThumbColor = Color.White,
+          checkedTrackColor = PopopxBrand,
+          uncheckedThumbColor = Color.White,
+          uncheckedTrackColor = MaterialTheme.colors.onSurface.copy(alpha = 0.18f),
+        )
+      )
+    }
+    CabinDivider()
+    Row(
+      Modifier.fillMaxWidth().padding(vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      CabinIconBadge(
+        if (radio.isUsable) MR.images.ic_wifi_tethering else MR.images.ic_wifi_off,
+        if (radio.isUsable) PopopxMeshInk else MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+      )
+      Spacer(Modifier.width(12.dp))
+      Column(Modifier.weight(1f)) {
+        Text(cabinRadioWords(radio), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(2.dp))
+        Text(
+          radioFootnote(enabled, latestBroadcastAt, nowMillis),
+          fontSize = 13.sp,
+          color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        )
+      }
+    }
+  }
 }
 
 @Composable
-private fun cabinFuseTitle(phase: PopopxMeshFusePhase, enabled: Boolean): String = when {
-  phase == PopopxMeshFusePhase.OFF && !enabled -> stringResource(MR.strings.cabin_fuse_off)
-  phase == PopopxMeshFusePhase.OFF -> stringResource(MR.strings.cabin_fuse_stopped)
-  phase == PopopxMeshFusePhase.STARTING -> stringResource(MR.strings.cabin_fuse_starting)
-  phase == PopopxMeshFusePhase.STOPPING -> stringResource(MR.strings.cabin_fuse_stopping)
-  else -> stringResource(MR.strings.cabin_fuse_on)
+private fun radioFootnote(enabled: Boolean, latestBroadcastAt: Long?, nowMillis: Long): String = when {
+  !enabled -> stringResource(MR.strings.cabin_fuse_off_radio_note)
+  latestBroadcastAt == null -> stringResource(MR.strings.cabin_no_broadcast_yet)
+  else -> stringResource(MR.strings.cabin_last_broadcast, cabinSince(latestBroadcastAt, nowMillis))
 }
 
-/** `MeshPlazaView.words(for:)`, branch for branch — including the radio case, which reuses the banner's wording. */
+// MARK: - nearby nodes (radar + per-device rows)
+
+/**
+ * `PopopxCabinNearbyCard` of iOS: the radar, the overflow note, the one real enable button when the master
+ * switch is closed, and the per-device rows. The hop ceiling, TTL, silence window and dense-network
+ * thresholds are read from `PopopxMeshConfig`, the same constants the iOS view cites, rather than passed in.
+ */
 @Composable
-private fun cabinFailureWords(failure: PopopxMeshSendFailure): String = when (failure) {
+internal fun PopopxCabinNearbyCard(
+  peers: List<PopopxMeshPeer>,
+  radio: PopopxBluetoothState,
+  enabled: Boolean,
+  nowMillis: Long,
+  onOpenChat: (PopopxMeshPeer) -> Unit,
+  onTurnOnFuse: () -> Unit,
+  onRescan: () -> Unit,
+) {
+  val hopCap = PopopxMeshConfig.default.fragmentRelayTtlCap
+  val broadcastTTL = PopopxMeshConfig.default.ttlDefault
+  val denseHopCap = PopopxMeshConfig.default.denseBroadcastTtlCap
+  val highDegreeThreshold = PopopxMeshConfig.default.highDegreeThreshold
+  val windowSeconds = PopopxMeshConfig.default.peerReachabilityTimeout.toInt()
+  // A closed master switch means no scanning and no relaying, so a table left over from before it was
+  // closed must not stay on screen looking alive; iOS' fold answers with empty tables in that case too.
+  val visible = if (enabled) peers else emptyList()
+  val directCount = visible.count { it.isDirect }
+  val footnote = when {
+    !enabled -> stringResource(MR.strings.cabin_fuse_off_footnote)
+    directCount > highDegreeThreshold -> stringResource(MR.strings.cabin_nearby_dense_note, highDegreeThreshold, denseHopCap)
+    else -> stringResource(
+      MR.strings.cabin_nearby_footnote,
+      windowSeconds,
+      PopopxCabinReach.METRES_PER_HOP,
+      broadcastTTL,
+      cabinReachRadius(broadcastTTL),
+    )
+  }
+  CabinSectionCard(
+    title = stringResource(MR.strings.cabin_nearby_title, hopCap),
+    footnote = footnote,
+  ) {
+    PopopxCabinRadar(
+      peers = visible,
+      hopCap = hopCap,
+      markerLimit = RADAR_MARKER_LIMIT,
+      scanning = enabled && radio.isUsable,
+      nowMillis = nowMillis,
+    )
+    if (visible.size > RADAR_MARKER_LIMIT) {
+      Text(
+        stringResource(MR.strings.cabin_radar_overflow, visible.size, RADAR_MARKER_LIMIT),
+        fontSize = 13.sp,
+        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+      )
+    } else {
+      Spacer(Modifier.height(16.dp))
+    }
+    when {
+      !enabled -> CabinPrimaryButton(
+        stringResource(MR.strings.cabin_fuse_turn_on),
+        MR.images.ic_wifi_tethering,
+        modifier = Modifier.fillMaxWidth(),
+        action = onTurnOnFuse,
+      )
+      visible.isEmpty() -> {
+        Text(
+          if (radio.isUsable) {
+            stringResource(MR.strings.cabin_nearby_empty_scanning)
+          } else {
+            cabinRadioWords(radio)
+          },
+          fontSize = 13.sp,
+          color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+        )
+        Spacer(Modifier.height(8.dp))
+        CabinSecondaryButton(
+          stringResource(MR.strings.cabin_nearby_rescan),
+          MR.images.ic_refresh,
+          modifier = Modifier.fillMaxWidth(),
+          action = onRescan,
+        )
+      }
+      else -> visible.forEachIndexed { index, peer ->
+        PopopxCabinNodeRow(
+          peer = peer,
+          reachable = cabinIsReachable(peer, nowMillis),
+          nowMillis = nowMillis,
+          onOpenChat = { onOpenChat(peer) },
+        )
+        if (index < visible.size - 1) CabinDivider()
+      }
+    }
+  }
+}
+
+/** The radar draws at most this many dots on one screen; the extras are still listed in full in the rows below. */
+private const val RADAR_MARKER_LIMIT = 12
+
+private val radarSide = 144.dp
+private val radarDotSide = 20.dp
+
+/**
+ * The concentric radar of nearby nodes. The static part is rings + hop numbers; the moving ring is one
+ * teal pulse travelling outward. Position uses only two real numbers: radius = hops / ceiling, angle = the
+ * index spread evenly around the circle. There is no fake data.
+ */
+@Composable
+private fun PopopxCabinRadar(
+  peers: List<PopopxMeshPeer>,
+  hopCap: Int,
+  markerLimit: Int,
+  scanning: Boolean,
+  nowMillis: Long,
+) {
+  val mesh = PopopxMesh
+  val shown = peers.take(markerLimit)
+  val onlineCount = peers.count { cabinIsReachable(it, nowMillis) }
+  val label = stringResource(MR.strings.cabin_radar_label, onlineCount, peers.size)
+  val transition = rememberInfiniteTransition()
+  val pulse by transition.animateFloat(
+    initialValue = 0f,
+    targetValue = 1f,
+    animationSpec = infiniteRepeatable(
+      animation = tween(durationMillis = 2_200, easing = LinearOutSlowInEasing),
+      repeatMode = RepeatMode.Restart,
+    ),
+  )
+  Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    Box(
+      Modifier
+        .size(radarSide)
+        .semantics { contentDescription = label },
+      contentAlignment = Alignment.Center,
+    ) {
+      Canvas(Modifier.fillMaxSize()) {
+        val stroke = 1.5.dp.toPx()
+        val half = size.minDimension / 2
+        for (index in 0..2) {
+          // The further out, the more solid; the outermost ring is the hop-ceiling ring.
+          val pad = size.minDimension * (0.055f + 0.135f * (2 - index))
+          drawCircle(
+            color = mesh.copy(alpha = 0.16f + 0.10f * index),
+            radius = half - pad,
+            style = Stroke(width = stroke),
+          )
+        }
+        if (scanning) {
+          val scale = 0.18f + 0.82f * pulse
+          drawCircle(
+            color = mesh.copy(alpha = 0.6f - 0.54f * pulse),
+            radius = half * scale,
+            style = Stroke(width = stroke),
+          )
+        }
+      }
+      shown.forEachIndexed { index, peer ->
+        val hops = peer.hopCount.coerceIn(0, max(hopCap, 1))
+        val radius: Dp = (radarSide / 2) * (0.18f + 0.74f * hops / max(hopCap, 1))
+        val degrees = index.toFloat() / max(shown.size, 1) * 360f - 90f
+        val radians = degrees * PI.toFloat() / 180f
+        val dx: Dp = radius * cos(radians)
+        val dy: Dp = radius * sin(radians)
+        val online = cabinIsReachable(peer, nowMillis)
+        Box(
+          Modifier
+            .offset {
+              IntOffset(
+                (dx - radarDotSide / 2).roundToPx(),
+                (dy - radarDotSide / 2).roundToPx(),
+              )
+            }
+            .size(radarDotSide)
+            .background(if (online) mesh else Color.Transparent, CircleShape)
+            .then(
+              if (online) {
+                Modifier
+              } else {
+                Modifier.border(1.5.dp, MaterialTheme.colors.onSurface.copy(alpha = cabinLabelHintAlpha), CircleShape)
+              }
+            ),
+          contentAlignment = Alignment.Center,
+        ) {
+          Text(
+            peer.hopCount.toString(),
+            fontSize = 11.sp,
+            color = if (online) PopopxOnMesh else MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+          )
+        }
+      }
+      // The centre is this device: the mesh ink carries "this device is itself in the mesh".
+      Box(
+        Modifier.size(28.dp).background(PopopxMeshInk.copy(alpha = 0.16f), CircleShape),
+        contentAlignment = Alignment.Center,
+      ) {
+        Icon(
+          painterResource(MR.images.ic_wifi_tethering),
+          null,
+          Modifier.size(14.dp),
+          tint = PopopxMeshInk,
+        )
+      }
+    }
+  }
+}
+
+/** One device row of the nearby card and of the encrypted-channel lists: name, route facts, hop badge. */
+@Composable
+internal fun PopopxCabinNodeRow(
+  peer: PopopxMeshPeer,
+  reachable: Boolean,
+  nowMillis: Long,
+  onOpenChat: () -> Unit,
+) {
+  val key = cabinPeerKey(peer)
+  val label = cabinPeerLabel(peer.nickname, key, peer.peerID.hex)
+  val parts = mutableListOf(
+    if (peer.isDirect) stringResource(MR.strings.cabin_link_direct) else stringResource(MR.strings.cabin_link_relayed),
+    stringResource(MR.strings.cabin_last_heard, cabinSince(peer.lastSeenAtMillis, nowMillis)),
+  )
+  peer.rssi?.let { parts.add("${it.toInt()} dBm") }
+  if (!reachable) parts.add(stringResource(MR.strings.cabin_out_of_range))
+  if (key == null) parts.add(stringResource(MR.strings.cabin_no_key_mark))
+  Row(
+    Modifier
+      .fillMaxWidth()
+      .clip(RoundedCornerShape(10.dp))
+      .clickable(enabled = key != null, onClick = onOpenChat)
+      .padding(vertical = 8.dp, horizontal = 4.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Box(Modifier.size(16.dp), contentAlignment = Alignment.Center) {
+      Box(
+        Modifier
+          .fillMaxSize()
+          .border(
+            1.5.dp,
+            if (reachable) PopopxMesh else MaterialTheme.colors.onSurface.copy(alpha = cabinLabelHintAlpha),
+            CircleShape,
+          )
+      )
+      if (reachable) Box(Modifier.size(4.dp).background(PopopxMesh, CircleShape))
+    }
+    Spacer(Modifier.width(12.dp))
+    Column(Modifier.weight(1f)) {
+      Text(
+        label,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.SemiBold,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        // A fallback label is a machine value (a key or wire-id prefix) and keeps its LTR order under RTL.
+        style = if (peer.nickname.isNullOrBlank()) TextStyle(textDirection = TextDirection.Ltr) else TextStyle.Default,
+      )
+      Spacer(Modifier.height(2.dp))
+      Text(
+        parts.joinToString(" · "),
+        fontSize = 13.sp,
+        color = MaterialTheme.colors.onSurface.copy(alpha = cabinSecondaryAlpha),
+      )
+    }
+    Spacer(Modifier.width(8.dp))
+    CabinHopBadge(peer.hopCount)
+  }
+}
+
+// MARK: - failure words
+
+/** `MeshPlazaView.words(for:)`, branch for branch — including the radio case, which reuses the page's wording. */
+@Composable
+internal fun cabinFailureWords(failure: PopopxMeshSendFailure): String = when (failure) {
   is PopopxMeshSendFailure.NoLinkToPeer -> stringResource(MR.strings.cabin_fail_no_link)
   is PopopxMeshSendFailure.LinkDropped -> stringResource(MR.strings.cabin_fail_link_dropped)
   is PopopxMeshSendFailure.TtlExhausted -> stringResource(MR.strings.cabin_fail_ttl_exhausted)
   is PopopxMeshSendFailure.Oversized ->
     stringResource(MR.strings.cabin_fail_oversized, failure.payloadBytes, failure.limitBytes)
   is PopopxMeshSendFailure.NoSessionWithPeer -> stringResource(MR.strings.cabin_fail_no_session)
-  is PopopxMeshSendFailure.RadioUnavailable -> cabinRadioTitle(failure.state)
+  is PopopxMeshSendFailure.RadioUnavailable -> cabinRadioWords(failure.state)
 }
 
-@Composable
-private fun PopopxCabinSwitchRow(enabled: Boolean, busy: Boolean, onToggle: (Boolean) -> Unit) {
-  Column(Modifier.fillMaxWidth().padding(top = DEFAULT_PADDING_HALF)) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-      Text(
-        stringResource(MR.strings.cabin_switch),
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Medium,
-        modifier = Modifier.weight(1f),
-      )
-      Text(
-        if (busy) {
-          stringResource(MR.strings.cabin_switch_busy)
-        } else {
-          stringResource(if (enabled) MR.strings.cabin_switch_on else MR.strings.cabin_switch_off)
-        },
-        fontSize = 13.sp,
-        color = if (enabled) MaterialTheme.colors.primary else MaterialTheme.colors.secondary,
-        modifier = Modifier
-          .clip(RoundedCornerShape(14.dp))
-          .background(if (enabled) MaterialTheme.colors.primary.copy(alpha = 0.12f) else MaterialTheme.colors.background)
-          .clickable(enabled = !busy) { onToggle(!enabled) }
-          .padding(horizontal = 12.dp, vertical = 6.dp),
-      )
-    }
-    Text(
-      stringResource(MR.strings.cabin_switch_note),
-      fontSize = 12.sp,
-      color = MaterialTheme.colors.secondary,
-    )
-  }
-}
+/** One bubble's worth of text on one screen — `PopopxMeshPlazaModel.maxDraftCharacters`. */
+internal const val CABIN_MAX_DRAFT_CHARACTERS: Int = 512
 
-@Composable
-private fun PopopxCabinPeerRow(peer: PopopxMeshPeer, isSelected: Boolean, onSelect: () -> Unit) {
-  val key = peer.meshPublicKey?.meshHex()
-  Row(
-    Modifier
-      .fillMaxWidth()
-      .clip(RoundedCornerShape(10.dp))
-      .background(if (isSelected) MaterialTheme.colors.primary.copy(alpha = 0.08f) else MaterialTheme.colors.background)
-      .clickable(enabled = key != null, onClick = onSelect)
-      .padding(vertical = 8.dp),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    Column(Modifier.weight(1f)) {
-      Text(key?.take(12) ?: peer.peerID.hex, fontSize = 14.sp)
-      Text(
-        // iOS distinguishes the two reachabilities, and the difference is the point of the screen: a direct
-        // link is a device in the room, a relayed one is a friend of a friend.
-        if (peer.isDirect) stringResource(MR.strings.cabin_link_direct) else stringResource(MR.strings.cabin_link_relayed),
-        fontSize = 12.sp,
-        color = MaterialTheme.colors.secondary,
-      )
-    }
-    if (!peer.isDirect) {
-      Text(
-        stringResource(MR.strings.cabin_hops, peer.hopCount),
-        fontSize = 12.sp,
-        color = MaterialTheme.colors.secondary,
-      )
-    }
-  }
-}
-
-/**
- * `PopopxCabinNode.label` — announce nickname, then the public-key abbreviation, then the 8-byte wire id.
- * Read at render time rather than stamped onto the row, because the nickname of a sender arrives AFTER that
- * sender's first broadcast: a label frozen at ingest would show hex for a neighbour the mesh has since
- * heard named.
- */
-@Composable
-private fun cabinAuthorLabel(post: PopopxCabinPost, peers: List<PopopxMeshPeer>): String {
-  val key = post.meshPublicKeyHex
-  val known = peers.firstOrNull {
-    if (key != null) it.meshPublicKey?.meshHex() == key else it.peerID.hex == post.author
-  }
-  val nickname = known?.nickname?.trim()
-  if (!nickname.isNullOrEmpty()) return nickname
-  if (key != null) return cabinAbbreviate(key)
-  return post.author.take(8)
-}
-
-/** `PopopxMeshBannerModel.shorten`, via `PopopxCabinLabel.abbreviate`: past 16 characters, 16 and an ellipsis. */
-private fun cabinAbbreviate(hex: String): String =
-  if (hex.length > 16) hex.substring(0, 16) + "…" else hex
-
-@Composable
-private fun PopopxCabinPostRow(
-  post: PopopxCabinPost,
-  label: String,
-  onAuthor: (PopopxCabinPost) -> Unit,
-) {
-  Column(
-    Modifier
-      .fillMaxWidth()
-      .padding(vertical = 4.dp),
-  ) {
-    Row(Modifier.fillMaxWidth()) {
-      Text(
-        if (post.mine) stringResource(MR.strings.cabin_you) else label,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Medium,
-        color = MaterialTheme.colors.secondary,
-        // The name is the affordance, as it is on iOS, and it stays tappable when the key is missing so
-        // the screen can say why nothing happened instead of appearing dead.
-        modifier = if (post.mine) {
-          Modifier.weight(1f)
-        } else {
-          Modifier
-            .weight(1f)
-            .clip(RoundedCornerShape(6.dp))
-            .clickable { onAuthor(post) }
-            .padding(horizontal = 4.dp, vertical = 2.dp)
-        },
-      )
-      if (post.failed) {
-        Text(stringResource(MR.strings.cabin_failed), fontSize = 11.sp, color = MaterialTheme.colors.error)
-      }
-    }
-    Text(post.text, fontSize = 14.sp)
-  }
-}
-
-@Composable
-private fun PopopxCabinComposer(
-  value: MutableState<TextFieldValue>,
-  placeholder: String,
-  action: String,
-  enabled: Boolean,
-  onSubmit: () -> Unit,
-) {
-  Row(
-    Modifier.fillMaxWidth(),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    DefaultBasicTextField(
-      modifier = Modifier
-        .weight(1f)
-        .background(MaterialTheme.colors.background, shape = RoundedCornerShape(12.dp))
-        .padding(horizontal = 12.dp, vertical = 10.dp),
-      state = value,
-      placeholder = { Text(placeholder, color = MaterialTheme.colors.secondary, fontSize = 14.sp) },
-      keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = ImeAction.Send),
-      onValueChange = { value.value = it },
-    )
-    Text(
-      action,
-      fontSize = 14.sp,
-      fontWeight = FontWeight.Medium,
-      color = if (enabled) MaterialTheme.colors.onPrimary else MaterialTheme.colors.secondary,
-      modifier = Modifier
-        .clip(RoundedCornerShape(14.dp))
-        .background(if (enabled) MaterialTheme.colors.primary else MaterialTheme.colors.surface)
-        .clickable(enabled = enabled, onClick = onSubmit)
-        .padding(horizontal = 14.dp, vertical = 10.dp),
-    )
-  }
-}
-
-private const val MAX_DRAFT_CHARACTERS = 512
+private val CABIN_GUTTER = 16.dp
+private val CABIN_SECTION_GAP = 24.dp

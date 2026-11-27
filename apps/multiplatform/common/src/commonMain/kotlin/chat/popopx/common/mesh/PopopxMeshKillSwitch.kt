@@ -34,6 +34,7 @@ enum class PopopxMeshFusePhase {
  */
 class PopopxMeshKillSwitch(
   private val defaults: Settings = settings,
+  private val nicknameStore: PopopxMeshNicknameStore = PopopxMeshNicknameStore(defaults),
   private val makeEngine: () -> PopopxMeshEngine = { PopopxMeshEngine() },
 ) {
   /** iOS serialises this on `@MainActor`; one mutex is the same guarantee without forcing the caller onto a thread. */
@@ -43,6 +44,9 @@ class PopopxMeshKillSwitch(
 
   val isEnabled: MutableStateFlow<Boolean> = MutableStateFlow(persistedIsEnabled())
   val phase: MutableStateFlow<PopopxMeshFusePhase> = MutableStateFlow(PopopxMeshFusePhase.OFF)
+
+  /** The advertised display name, as the hall and the settings screen see it; null means "never chosen". */
+  val nickname: MutableStateFlow<String?> = MutableStateFlow(nicknameStore.read())
 
   /** Straight from disk, without waiting on a transition: the settings row and this cannot disagree. */
   fun persistedIsEnabled(): Boolean =
@@ -76,6 +80,25 @@ class PopopxMeshKillSwitch(
     }
   }
 
+  /**
+   * Stores the nickname and re-applies it to the mesh. The engine reads its advertised name only in `start`, so
+   * changing it while the fuse is open restarts the mesh; sessions re-handshake on the next send, which is cheap
+   * next to the alternative of a name the user typed that nothing ever shows (`PopopxMeshKillSwitch.setNickname`).
+   */
+  suspend fun setNickname(raw: String) = transition.withLock {
+    nicknameStore.write(raw)
+    nickname.value = nicknameStore.read()
+    if (!persistedIsEnabled()) return@withLock
+    restartEverything()
+  }
+
+  suspend fun clearNickname() = transition.withLock {
+    nicknameStore.clear()
+    nickname.value = null
+    if (!persistedIsEnabled()) return@withLock
+    restartEverything()
+  }
+
   /** The engine the fuse mounted, or null while the mesh is off. The UI reads peers through this. */
   fun engine(): PopopxMeshEngine? = mounted
 
@@ -83,9 +106,24 @@ class PopopxMeshKillSwitch(
     val engine = mounted ?: makeEngine().also { mounted = it }
     val mine = ++generation
     phase.value = PopopxMeshFusePhase.STARTING
-    engine.start()
+    engine.start(nickname.value)
     // A newer transition owns the answer now; reporting `on` for a start it has abandoned would be a lie
     // the UI cannot tell apart from the truth.
+    if (mine != generation) return
+    phase.value = PopopxMeshFusePhase.ON
+  }
+
+  /**
+   * The nickname's landing point (`PopopxMeshKillSwitch.restart()`): the engine reads its advertised name only
+   * in `start`, so a changed name needs a stop/start cycle on the *same* engine — sessions re-handshake on the
+   * next send, and the radio instance the fuse already owns is not replaced by a second one.
+   */
+  private suspend fun restartEverything() {
+    val engine = mounted ?: return
+    val mine = ++generation
+    phase.value = PopopxMeshFusePhase.STARTING
+    engine.stop()
+    engine.start(nickname.value)
     if (mine != generation) return
     phase.value = PopopxMeshFusePhase.ON
   }

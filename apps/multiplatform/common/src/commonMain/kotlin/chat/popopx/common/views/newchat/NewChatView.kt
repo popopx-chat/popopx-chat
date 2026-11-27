@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -515,7 +516,26 @@ private fun InviteView(rhId: Long?, connLinkInvitation: CreatedConnLink, contact
       stringResource(MR.strings.or_show_this_qr_code).uppercase(),
       titleButton = if (connLinkInvitation.connShortLink != null) {{ ToggleShortLinkButton(showShortLink) }} else null
     ) {
-      POPOPXCreatedLinkQRCode(connLinkInvitation, short = showShortLink.value, encodedURI = shareForm.display, onShare = { chatModel.markShowingInvitationUsed() })
+      // The link row above already carries the copy/share pair, so the plate prints the link and the
+      // code only; showing the two actions a second time inside the same screen would be noise.
+      PopopxQRPlate(shareForm.display, withActions = false)
+      // The same invitation as the full-screen pass card iOS shows from its add-friend page
+      // (PopopxQRCardSheet). The inline plate stays: it is the quick view, the card is the surface you
+      // hold up to a camera.
+      Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        SimpleButton(
+          stringResource(MR.strings.qr_card_show_action),
+          icon = painterResource(MR.images.ic_qr_code),
+          click = {
+            showPopopxQRCardSheet(
+              shareForm.display,
+              chatModel.currentUser.value?.displayName?.takeIf { it.isNotBlank() }
+                ?: generalGetString(MR.strings.profile_qr_identity_fallback),
+              shareForm.original.takeIf { shareForm.isSealed }
+            )
+          }
+        )
+      }
     }
   }
 
@@ -574,7 +594,7 @@ private fun InviteView(rhId: Long?, connLinkInvitation: CreatedConnLink, contact
           color = MaterialTheme.colors.onBackground
         )
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
-          Icon(
+          AutoMirroredIcon(
             painter = painterResource(MR.images.ic_arrow_forward_ios),
             contentDescription = stringResource(MR.strings.new_chat_share_profile),
             tint = MaterialTheme.colors.secondary,
@@ -732,7 +752,7 @@ fun LinkTextView(link: String, share: Boolean) {
         value = link,
         onValueChange = {  },
         enabled = false,
-        textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colors.onBackground),
+        textStyle = TextStyle(fontSize = 16.sp, color = MaterialTheme.colors.onBackground, textDirection = TextDirection.Ltr),
         singleLine = true,
         decorationBox = @Composable { innerTextField ->
           TextFieldDefaults.TextFieldDecorationBox(

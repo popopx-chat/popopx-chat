@@ -28,10 +28,9 @@ import kotlinx.serialization.json.JsonPrimitive
  *     base64 TEXT is pinned as a must-fail vector (`wrongTextSignatureIsRefused`).
  *  3. Nothing is stored, marked paired, or spent on an offer that fails.
  *
- * This module only PASTES codes. iOS has no camera path for node pairing at all
- * (MacNodePairingSheet.swift:12-20: "there is no camera step on iPhone or iPad, and the Mac
- * itself has no camera here either") — the brief keeps paste-and-verify, so no QR machinery
- * needed porting.
+ * This module verifies a code; it does not care how the string reached it. The pairing sheet offers
+ * the camera scan and the paste field as two actions (MacNodePairingSheet.swift:126-149), and both
+ * hand the string to the same gate below — a scan is not a second, weaker verification path.
  */
 object PopopxNodePairing {
   /**

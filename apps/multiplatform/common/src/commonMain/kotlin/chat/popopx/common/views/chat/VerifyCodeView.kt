@@ -14,7 +14,9 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import chat.popopx.common.platform.*
@@ -79,6 +81,7 @@ private fun VerifyCodeLayout(
       SelectionContainer(Modifier.padding(vertical = DEFAULT_PADDING_HALF, horizontal = DEFAULT_PADDING_HALF)) {
         Text(
           splitCode,
+          style = TextStyle(textDirection = TextDirection.Ltr),
           fontFamily = FontFamily.Monospace,
           fontSize = 18.sp,
           maxLines = 20

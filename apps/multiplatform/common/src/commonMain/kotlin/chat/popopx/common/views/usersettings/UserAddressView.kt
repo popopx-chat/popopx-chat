@@ -347,20 +347,23 @@ private fun UserAddressLayout(
         } else {
           val addressSettingsState = remember { mutableStateOf(AddressSettingsState(settings = userAddress.addressSettings)) }
           val savedAddressSettingsState = remember { mutableStateOf(addressSettingsState.value) }
+          // The single sealed form this card prints, encodes and shares; memoised by address, so the
+          // plate's caption, its QR and both share rows carry one link.
+          val shareForm = PopopxInviteShareForm.make(userAddress.connLinkContact, short = showShortLink.value)
 
           SectionViewWithButton(
             stringResource(MR.strings.for_social_media),
             titleButton = if (userAddress.connLinkContact.connShortLink != null) {{ ToggleShortLinkButton(showShortLink) }} else null
           ) {
-            POPOPXCreatedLinkQRCode(userAddress.connLinkContact, short = showShortLink.value)
+            PopopxQRPlate(shareForm.display)
             if (userAddress.shouldBeUpgraded) {
               AddShortLinkButton(text = stringResource(MR.strings.add_short_link)) { showAddShortLinkAlert(null) }
             }
             ShareAddressButton {
               if (userAddress.shouldBeUpgraded) {
-                showAddShortLinkAlert { share(PopopxInviteShareForm.make(userAddress.connLinkContact, short = showShortLink.value).display) }
+                showAddShortLinkAlert { share(shareForm.display) }
               } else {
-                share(PopopxInviteShareForm.make(userAddress.connLinkContact, short = showShortLink.value).display)
+                share(shareForm.display)
               }
             }
             ShareViaChatButton {

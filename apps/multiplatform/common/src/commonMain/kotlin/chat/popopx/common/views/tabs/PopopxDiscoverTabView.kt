@@ -50,7 +50,10 @@ import chat.popopx.common.ui.theme.DEFAULT_PADDING_HALF
 import chat.popopx.common.views.helpers.AppBarTitle
 import chat.popopx.common.views.helpers.DefaultBasicTextField
 import chat.popopx.common.views.helpers.ModalManager
+import chat.popopx.common.views.newchat.PopopxCardActionButton
+import chat.popopx.common.views.newchat.QRCodeScanner
 import chat.popopx.res.*
+import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 
@@ -66,7 +69,11 @@ import kotlinx.coroutines.launch
 // - the per-action send. iOS's detail sheet shows the three commands as readable text, not as
 //   buttons (DiscoverServiceDetailSheet.swift:418-445: "Nothing is sent from this preview"), so
 //   this sheet renders the same preview and offers no control that would do nothing.
-// - the QR camera. Bonding is paste-and-verify only, by ruling.
+//
+// The Mac-node QR camera is no longer absent: bonding offers the same two actions iOS does — scan the
+// node's QR code (the shared `QRCodeScanner`) or reveal the paste field. Both feed the one engine
+// entry, `acceptPastedCode`, so a scanned string passes through exactly the same signature and
+// freshness checks a pasted one does; the camera grants no shortcut into the pairing state.
 
 @Composable
 fun PopopxDiscoverTabView() {
@@ -367,70 +374,105 @@ private fun PopopxNodePairingSheet(close: () -> Unit) {
   // sentence, so this screen structurally cannot tell "not a code" from "forged code".
   val verdict = remember(code.value.text) { engine.acceptPastedCode(code.value.text) }
   var bondedTo: String? by remember { mutableStateOf(null) }
+  // iOS's shape (MacNodePairingSheet.swift:126-149): Scan is the primary action, paste is revealed
+  // behind its own button. The field also appears by itself once a scan or paste put a string in
+  // `code`, so the result being verified is never invisible.
+  var scanning by remember { mutableStateOf(false) }
+  var pasteFieldShown by remember { mutableStateOf(false) }
+  val scannerEnabled = remember { mutableStateOf(true) }
 
   ColumnWithScrollBar {
-    AppBarTitle(stringResource(MR.strings.discover_pairing_title))
+    AppBarTitle(stringResource(if (scanning) MR.strings.discover_pairing_scan else MR.strings.discover_pairing_title))
     Column(Modifier.padding(horizontal = DEFAULT_PADDING)) {
-      Text(stringResource(MR.strings.discover_pairing_intro), style = MaterialTheme.typography.body2)
-      Spacer(Modifier.height(DEFAULT_PADDING_HALF))
-      DefaultBasicTextField(
-        modifier = Modifier
-          .fillMaxWidth()
-          .background(MaterialTheme.colors.background, shape = RoundedCornerShape(12.dp))
-          .padding(horizontal = 12.dp, vertical = 10.dp),
-        state = code,
-        textStyle = TextStyle(textDirection = TextDirection.Ltr),
-        placeholder = {
-          Text(
-            stringResource(MR.strings.discover_paste_placeholder),
-            color = MaterialTheme.colors.secondary,
-            fontSize = MaterialTheme.typography.body1.fontSize
-          )
-        },
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-        onValueChange = { code.value = it },
-      )
-      when (val result = verdict) {
-        is PopopxPairingAccept.Pending -> {
-          Text(
-            result.offer.nodeId,
-            style = MaterialTheme.typography.body2.copy(textDirection = TextDirection.Ltr),
-            modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
-          )
-          Text(
-            stringResource(MR.strings.discover_pairing_window),
-            fontSize = 12.sp,
-            color = MaterialTheme.colors.secondary
-          )
-          Text(
-            stringResource(MR.strings.discover_bond_action),
-            fontSize = 14.sp,
-            color = MaterialTheme.colors.primary,
+      if (scanning) {
+        // The shared camera from the connect screen. Recognition hands the string to the same
+        // `acceptPastedCode` verdict below — a scan grants no shortcut into the pairing state.
+        QRCodeScanner(scannerEnabled) { text ->
+          code.value = TextFieldValue(text.trim())
+          scanning = false
+          true
+        }
+      } else {
+        Text(stringResource(MR.strings.discover_pairing_intro), style = MaterialTheme.typography.body2)
+        Spacer(Modifier.height(DEFAULT_PADDING_HALF))
+        PopopxCardActionButton(
+          stringResource(MR.strings.discover_pairing_scan),
+          painterResource(MR.images.ic_qr_code_scanner),
+          primary = true,
+          Modifier.fillMaxWidth()
+        ) {
+          scannerEnabled.value = true
+          scanning = true
+        }
+        Spacer(Modifier.height(8.dp))
+        PopopxCardActionButton(
+          stringResource(MR.strings.discover_pairing_paste),
+          painterResource(MR.images.ic_content_paste),
+          primary = false,
+          Modifier.fillMaxWidth()
+        ) { pasteFieldShown = true }
+        if (pasteFieldShown || code.value.text.isNotEmpty()) {
+          Spacer(Modifier.height(DEFAULT_PADDING_HALF))
+          DefaultBasicTextField(
             modifier = Modifier
-              .clickable { bondedTo = if (engine.bond(result.offer)) result.offer.nodeId else null }
-              .padding(top = 8.dp, bottom = 8.dp)
+              .fillMaxWidth()
+              .background(MaterialTheme.colors.background, shape = RoundedCornerShape(12.dp))
+              .padding(horizontal = 12.dp, vertical = 10.dp),
+            state = code,
+            textStyle = TextStyle(textDirection = TextDirection.Ltr),
+            placeholder = {
+              Text(
+                stringResource(MR.strings.discover_paste_placeholder),
+                color = MaterialTheme.colors.secondary,
+                fontSize = MaterialTheme.typography.body1.fontSize
+              )
+            },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            onValueChange = { code.value = it },
           )
         }
-        is PopopxPairingAccept.Rejected -> Text(
-          PopopxDiscoverCopy.GENERIC_PAIRING_NOTICE,
-          fontSize = 13.sp,
-          color = MaterialTheme.colors.error,
-          modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
-        )
-        else -> {}
+        when (val result = verdict) {
+          is PopopxPairingAccept.Pending -> {
+            Text(
+              result.offer.nodeId,
+              style = MaterialTheme.typography.body2.copy(textDirection = TextDirection.Ltr),
+              modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
+            )
+            Text(
+              stringResource(MR.strings.discover_pairing_window),
+              fontSize = 12.sp,
+              color = MaterialTheme.colors.secondary
+            )
+            Text(
+              stringResource(MR.strings.discover_bond_action),
+              fontSize = 14.sp,
+              color = MaterialTheme.colors.primary,
+              modifier = Modifier
+                .clickable { bondedTo = if (engine.bond(result.offer)) result.offer.nodeId else null }
+                .padding(top = 8.dp, bottom = 8.dp)
+            )
+          }
+          is PopopxPairingAccept.Rejected -> Text(
+            PopopxDiscoverCopy.GENERIC_PAIRING_NOTICE,
+            fontSize = 13.sp,
+            color = MaterialTheme.colors.error,
+            modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
+          )
+          else -> {}
+        }
+        bondedTo?.let { nodeId ->
+          Text(
+            stringResource(MR.strings.discover_bonded_format).format(nodeId),
+            fontSize = 13.sp,
+            color = MaterialTheme.colors.primary
+          )
+        }
+        // Ruling ③: the bond is half of it. `PopopxSubscriptionEngine` can store a node and still have
+        // `contactId = null`, which makes every protocol that ANSWERS the node — the feed's TOFU gate, the
+        // upgrade card's two buttons — refuse quietly forever. iOS asks "which conversation is this Mac?"
+        // (MacNodePairingSheet.swift:401-413); this asks the same question in the same sheet.
+        engine.binding?.let { PopopxNodeContactPicker(it) }
       }
-      bondedTo?.let { nodeId ->
-        Text(
-          stringResource(MR.strings.discover_bonded_format).format(nodeId),
-          fontSize = 13.sp,
-          color = MaterialTheme.colors.primary
-        )
-      }
-      // Ruling ③: the bond is half of it. `PopopxSubscriptionEngine` can store a node and still have
-      // `contactId = null`, which makes every protocol that ANSWERS the node — the feed's TOFU gate, the
-      // upgrade card's two buttons — refuse quietly forever. iOS asks "which conversation is this Mac?"
-      // (MacNodePairingSheet.swift:401-413); this asks the same question in the same sheet.
-      engine.binding?.let { PopopxNodeContactPicker(it) }
       Spacer(Modifier.height(DEFAULT_PADDING))
       SheetDone(close)
     }

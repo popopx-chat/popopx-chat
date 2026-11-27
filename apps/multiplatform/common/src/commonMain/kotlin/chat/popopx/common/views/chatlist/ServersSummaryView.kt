@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import chat.popopx.common.model.AgentSMPServerStatsData
@@ -190,6 +191,7 @@ private fun SMPServerView(srvSumm: SMPServerSummary, statsStartedAt: Instant, rh
   ) {
     Text(
       serverAddress(srvSumm.smpServer),
+      style = TextStyle(textDirection = TextDirection.Ltr),
       modifier = Modifier.weight(10f, fill = true)
     )
     if (srvSumm.subs != null) {
@@ -264,6 +266,7 @@ private fun XFTPServerView(srvSumm: XFTPServerSummary, statsStartedAt: Instant, 
   ) {
     Text(
       serverAddress(srvSumm.xftpServer),
+      style = TextStyle(textDirection = TextDirection.Ltr),
       modifier = Modifier.weight(10f, fill = true)
     )
     if (srvSumm.rcvInProgress || srvSumm.sndInProgress || srvSumm.delInProgress) {

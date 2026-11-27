@@ -34,3 +34,25 @@ val FileDark = Color(94, 94, 98, 255)
 
 val MenuTextColor: Color @Composable get () = if (isInDarkTheme()) LocalContentColor.current.copy(alpha = 0.8f) else Color.Black
 val NoteFolderIconColor: Color @Composable get() = MaterialTheme.appColors.primaryVariant2
+
+// Semantic colours the iOS surface spec defines and Material 1's ColorPalette does not carry, ported
+// from PopopxPalette (apps/ios/Shared/Theme/PopopxTheme.swift:76-129): the row separator, the hairline
+// hint an outlined control strokes itself with, and the mesh / success inks a card's state line uses.
+// A card reads these instead of inventing a per-surface alpha.
+val PopopxSeparator: Color @Composable get() = MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+val PopopxLabelHint: Color @Composable get() = MaterialTheme.colors.onSurface.copy(alpha = 0.40f)
+val PopopxMesh: Color @Composable get() = if (isInDarkTheme()) Color(0xFF00D2B8) else Color(0xFF00A896)
+val PopopxOnMesh: Color @Composable get() = if (isInDarkTheme()) Color(0xFF00211C) else Color(0xFF00251F)
+val PopopxMeshInk: Color @Composable get() = if (isInDarkTheme()) Color(0xFF00D2B8) else Color(0xFF00705F)
+val PopopxSuccessInk: Color @Composable get() = if (isInDarkTheme()) Color(0xFF30D158) else Color(0xFF1E7A34)
+
+// The brand fill and the two inks a filled badge needs. The navy is the one the tab bar and the QR
+// codes already carry (views/tabs/PopopxMainTabView.kt, views/newchat/QRCode.kt), lifted on dark so
+// the same hue stays legible on an OLED surface.
+val PopopxBrand: Color @Composable get() = if (isInDarkTheme()) Color(0xFF7FB0E8) else Color(0xFF062D56)
+val PopopxOnBrand: Color @Composable get() = if (isInDarkTheme()) Color(0xFF0A0A1F) else Color(0xFFFFFFFF)
+val PopopxDangerFill: Color @Composable get() = if (isInDarkTheme()) Color(0xFFFF453A) else Color(0xFFD70015)
+val PopopxOnDanger: Color @Composable get() = Color(0xFFFFFFFF)
+val PopopxSuccess: Color @Composable get() = if (isInDarkTheme()) Color(0xFF30D158) else Color(0xFF34C759)
+val PopopxOnSuccess: Color @Composable get() = Color(0xFFFFFFFF)
+val PopopxHairlineInner: Color @Composable get() = MaterialTheme.colors.onSurface.copy(alpha = 0.10f)

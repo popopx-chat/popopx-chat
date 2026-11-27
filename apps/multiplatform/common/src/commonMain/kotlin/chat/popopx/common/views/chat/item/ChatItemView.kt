@@ -246,7 +246,7 @@ fun ChatItemView(
     }
 
     @Composable
-    fun GoToItemInnerButton(alignStart: Boolean, icon: ImageResource, iconSize: Dp = 22.dp, parentActivated: State<Boolean>, onClick: () -> Unit) {
+    fun GoToItemInnerButton(alignStart: Boolean, icon: ImageResource, iconSize: Dp = 22.dp, parentActivated: State<Boolean>, mirrorInRtl: Boolean = false, onClick: () -> Unit) {
       val buttonInteractionSource = remember { MutableInteractionSource() }
       val buttonHovered = buttonInteractionSource.collectIsHoveredAsState()
       val buttonPressed = buttonInteractionSource.collectIsPressedAsState()
@@ -281,7 +281,11 @@ fun ChatItemView(
           .size(22.dp),
         interactionSource = buttonInteractionSource
       ) {
-        Icon(painterResource(icon), null, Modifier.size(iconSize), tint = iconTint)
+        if (mirrorInRtl) {
+          AutoMirroredIcon(painterResource(icon), null, Modifier.size(iconSize), tint = iconTint)
+        } else {
+          Icon(painterResource(icon), null, Modifier.size(iconSize), tint = iconTint)
+        }
       }
     }
 
@@ -297,7 +301,7 @@ fun ChatItemView(
           }
         }
       } else if (chatTypeApiIdMsgId != null) {
-        GoToItemInnerButton(alignStart, MR.images.ic_arrow_forward, 22.dp, parentActivated) {
+        GoToItemInnerButton(alignStart, MR.images.ic_arrow_forward, 22.dp, parentActivated, mirrorInRtl = true) {
           val (chatType, apiId, msgId) = chatTypeApiIdMsgId
           withBGApi {
             openChat(secondaryChatsCtx = null, rhId, chatType, apiId, msgId)

@@ -50,6 +50,9 @@ interface PlatformInterface {
   suspend fun androidUnfinishedBadgePurchases(): List<BadgePurchaseOutcome> = emptyList()
   fun androidManageBadgeSubscription(productId: String) {}
   val androidApiLevel: Int? get() = null
+  // The Cabin settings centre's "Open Settings" cell, shown only while Bluetooth is off or not allowed.
+  // No-op off Android: there is no per-app settings page to open elsewhere.
+  fun androidOpenAppSettings() {}
   // The build distributed via Google Play, which has to follow its policies
   val androidIsPlayStoreBuild: Boolean get() = false
   @Composable fun androidLockPortraitOrientation() {}

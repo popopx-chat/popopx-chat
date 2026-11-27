@@ -302,6 +302,16 @@ class PopopxMeshEngine(
     meshHexByPeerID[peerIDHex.lowercase()]
   }
 
+  /**
+   * The peers this device holds an established Noise session with — the local fact behind the Cabin's
+   * "local encrypted channels" count. iOS counts binding-table rows plus module 3's paired state; this
+   * build keeps no binding table and no pairing layer, so a session that actually exists is the one
+   * honest criterion, and the engine's own table is the only place that knows it.
+   */
+  suspend fun channelMeshPublicKeyHexes(): Set<String> = withContext(dispatcher) {
+    peersByHex.values.filter { it.session != null }.map { it.meshPublicKeyHex }.toSet()
+  }
+
   /** Direct neighbours, which is what decides a broadcast's TTL. */
   internal suspend fun directNeighbourCount(): Int = withContext(dispatcher) {
     peersByHex.values.count { it.isDirect }

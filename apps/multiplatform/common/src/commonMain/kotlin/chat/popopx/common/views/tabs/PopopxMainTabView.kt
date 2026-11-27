@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -21,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import chat.popopx.common.AppLock
 import chat.popopx.common.StartPartOfScreen
 import chat.popopx.common.cfgsec.PopopxOfficialConfigLinks
 import chat.popopx.common.cfgsec.PopopxServerConfigSignalHandler
@@ -30,6 +30,7 @@ import chat.popopx.common.eco.PopopxEcoSessionStore
 import chat.popopx.common.model.*
 import chat.popopx.common.platform.*
 import chat.popopx.common.ui.theme.DEFAULT_PADDING
+import chat.popopx.common.ui.theme.isInDarkTheme
 import chat.popopx.common.views.cabin.PopopxCabinView
 import chat.popopx.common.views.chatlist.unreadCountStr
 import chat.popopx.common.views.contacts.ContactListNavLinkView
@@ -37,7 +38,7 @@ import chat.popopx.common.views.helpers.AnimatedViewState
 import chat.popopx.common.views.helpers.LocalAppBarHandler
 import chat.popopx.common.views.helpers.rememberAppBarHandler
 import chat.popopx.common.views.helpers.withBGApi
-import chat.popopx.common.views.usersettings.SettingsView
+import chat.popopx.common.views.me.PopopxMeView
 import chat.popopx.res.*
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.StringResource
@@ -68,12 +69,17 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 // 3. opening a conversation from another tab switches the tab back to Chats, because a chat opened
 //    while the Contacts tab is showing must be found again when the slide-over is dismissed.
 
+// The glyph of each tab carries the same meaning as the SF Symbol on iOS (MainTabView.swift:87-97):
+// two overlapping bubbles (`bubble.left.and.bubble.right`), two people (`person.2`), a broadcasting
+// mast (`antenna.radiowaves.left.and.right` — the offline mesh, not the Bluetooth logo), a compass
+// (`safari`) and an outlined person in a circle (`person.crop.circle`). All five are outlines so no
+// single tab reads as a different state rather than a different place.
 enum class PopopxTab(val title: StringResource, val icon: ImageResource) {
-  CHATS(MR.strings.main_tab_messages, MR.images.ic_chat_bubble),
+  CHATS(MR.strings.main_tab_messages, MR.images.ic_forum),
   CONTACTS(MR.strings.main_tab_contacts, MR.images.ic_group),
-  CABIN(MR.strings.cabin_title, MR.images.ic_bluetooth),
-  DISCOVER(MR.strings.main_tab_discover, MR.images.ic_travel_explore),
-  ME(MR.strings.main_tab_me, MR.images.ic_account_circle_filled),
+  CABIN(MR.strings.cabin_title, MR.images.ic_wifi_tethering),
+  DISCOVER(MR.strings.main_tab_discover, MR.images.ic_explore),
+  ME(MR.strings.main_tab_me, MR.images.ic_account_circle),
   ;
 
   companion object {
@@ -116,7 +122,7 @@ fun PopopxTabScaffold(userPickerState: MutableStateFlow<AnimatedViewState>) {
         PopopxTab.CONTACTS -> WithAppBar { PopopxContactsTabView() }
         PopopxTab.CABIN -> WithAppBar { PopopxCabinView() }
         PopopxTab.DISCOVER -> WithAppBar { PopopxDiscoverTabView() }
-        PopopxTab.ME -> WithAppBar { SettingsView(chatModel, AppLock::setPerformLA, close = { }) }
+        PopopxTab.ME -> WithAppBar { PopopxMeView() }
       }
     }
     PopopxTabBar(tab) { selected.value = it.ordinal }
@@ -182,16 +188,51 @@ private fun popopxContactChat(chat: Chat): Boolean {
   }
 }
 
+// The bar's selected tint is the popopx brand navy the product's QR codes already carry
+// (views/newchat/QRCode.kt), not MaterialTheme.colors.primary: that token is the per-chat accent the
+// user can override in Appearance, and a bar that changes colour with a chat theme stops identifying
+// the app. The dark-mode value is the same hue lifted for the dark surface — #062D56 on it is 1.3:1.
+private val PopopxTabTintLight = Color(0xFF062D56)
+private val PopopxTabTintDark = Color(0xFF7FB0E8)
+
+/**
+ * `ChatModel.totalUnreadCountForAllUsers()` (ChatModel.swift:1191-1210), field for field: each
+ * conversation contributes what its own notification setting says it contributes (`enableNtfs` all →
+ * unread count, mentions only → the mentions count), the official configuration conversations are
+ * excluded, and every non-active profile adds its user-level count. Summing `users[].unreadCount`
+ * alone would ignore `enableNtfs` and would badge the hidden configuration chats.
+ */
+private fun popopxTabBadge(): Int {
+  var unread = 0
+  chatModel.chats.value.forEach { chat ->
+    if (popopxServerConfigHiddenChat(chat)) return@forEach
+    when (chat.chatInfo.chatSettings?.enableNtfs) {
+      MsgFilter.All -> unread += chat.chatStats.unreadCount
+      MsgFilter.Mentions -> unread += chat.chatStats.unreadMentions
+      else -> {}
+    }
+  }
+  chatModel.users.forEach { if (!it.user.activeUser) unread += it.unreadCount }
+  return unread
+}
+
 @Composable
 private fun PopopxTabBar(selected: PopopxTab, onSelect: (PopopxTab) -> Unit) {
-  val unread = chatModel.users.sumOf { it.unreadCount }
-  Surface(
-    modifier = Modifier.fillMaxWidth(),
-    color = MaterialTheme.colors.surface,
-    contentColor = MaterialTheme.colors.onSurface,
-    elevation = 8.dp
-  ) {
-    Column {
+  val unread = popopxTabBadge()
+  Column(Modifier.fillMaxWidth()) {
+    // A floating rounded material surface with the screen visible in the 12dp gutters, the Android
+    // counterpart of iOS's `toolbarBackground(PopopxMaterial.bar, for: .tabBar)` inset bar
+    // (MainTabView.swift:208-209). The navigation-bar inset stays outside the surface so the bar
+    // floats above the system gesture area rather than stretching into it.
+    Surface(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(start = 12.dp, end = 12.dp, top = 4.dp),
+      shape = RoundedCornerShape(20.dp),
+      color = MaterialTheme.colors.surface,
+      contentColor = MaterialTheme.colors.onSurface,
+      elevation = 12.dp
+    ) {
       Row(Modifier.fillMaxWidth()) {
         // The tab the red line keeps off every other platform, filtered where the bar is built rather than
         // inside the page: an entry that renders nothing would still take a slot in the row.
@@ -199,14 +240,19 @@ private fun PopopxTabBar(selected: PopopxTab, onSelect: (PopopxTab) -> Unit) {
           PopopxTabBarItem(tab, tab == selected, if (tab == PopopxTab.CHATS) unread else 0, onSelect)
         }
       }
-      Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
     }
+    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
   }
 }
 
 @Composable
 private fun RowScope.PopopxTabBarItem(tab: PopopxTab, isSelected: Boolean, unread: Int, onSelect: (PopopxTab) -> Unit) {
-  val tint = if (isSelected) MaterialTheme.colors.primary else MaterialTheme.colors.secondary
+  val tint = if (isSelected) {
+    if (isInDarkTheme()) PopopxTabTintDark else PopopxTabTintLight
+  } else {
+    MaterialTheme.colors.secondary
+  }
   Column(
     Modifier
       .weight(1f)
@@ -225,7 +271,7 @@ private fun RowScope.PopopxTabBarItem(tab: PopopxTab, isSelected: Boolean, unrea
           maxLines = 1,
           modifier = Modifier
             .offset(x = offset, y = -offset)
-            .background(MaterialTheme.colors.secondary, shape = CircleShape)
+            .background(MaterialTheme.colors.error, shape = CircleShape)
             .padding(horizontal = 4.dp, vertical = 1.dp)
         )
       }

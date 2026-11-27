@@ -60,9 +60,10 @@ object PopopxMeshWipe {
   }
 
   /**
-   * Step 3: the durable mapping table and the two switches in `UserDefaults` — iOS erases both keychain
-   * services and both preference keys here (`IdentityMappingStore.swift:325-336`). The cache files that
-   * follow are step 4's job on Android, where the mesh sandbox is in the overwrite set.
+   * Step 3: the durable mapping table, the two switches in `UserDefaults` — iOS erases both keychain
+   * services and both preference keys here (`IdentityMappingStore.swift:325-336`) — and the plaza nickname
+   * (iOS' `PanicWipeManager` detail lists it as part of the cache folder it clears, `:748`). The cache files
+   * that follow are step 4's job on Android, where the mesh sandbox is in the overwrite set.
    *
    * `hasKey` rather than a typed read: the enabled flag is written as a boolean by the host and a
    * `getStringOrNull` against a boolean-backed key is a `ClassCastException` on Android's
@@ -78,7 +79,12 @@ object PopopxMeshWipe {
     }
     defaults.remove(PopopxMeshSecretStore.PAIRING_POLICY_KEY)
     defaults.remove(PopopxMeshSecretStore.MESH_ENABLED_KEY)
-    if (defaults.hasKey(PopopxMeshSecretStore.PAIRING_POLICY_KEY) || defaults.hasKey(PopopxMeshSecretStore.MESH_ENABLED_KEY)) {
+    defaults.remove(PopopxMeshNicknameStore.KEY)
+    if (
+      defaults.hasKey(PopopxMeshSecretStore.PAIRING_POLICY_KEY) ||
+      defaults.hasKey(PopopxMeshSecretStore.MESH_ENABLED_KEY) ||
+      defaults.hasKey(PopopxMeshNicknameStore.KEY)
+    ) {
       reasons.add("mesh switches: the kill-switch keys survived removal")
     }
     return reasons

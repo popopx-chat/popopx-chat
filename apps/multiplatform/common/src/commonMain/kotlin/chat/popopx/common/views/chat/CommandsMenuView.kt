@@ -24,6 +24,7 @@ import chat.popopx.common.ui.theme.DEFAULT_PADDING
 import chat.popopx.common.ui.theme.DEFAULT_PADDING_HALF
 import chat.popopx.common.views.chat.group.*
 import chat.popopx.common.views.chat.item.sendCommandMsg
+import chat.popopx.common.views.helpers.AutoMirroredIcon
 import chat.popopx.common.views.helpers.commandMenuAnimSpec
 import chat.popopx.res.*
 import dev.icerock.moko.resources.compose.painterResource
@@ -123,7 +124,7 @@ fun CommandsMenuView(
       contentAlignment = Alignment.Center
     ) {
       Row(Modifier.padding(horizontal = DEFAULT_PADDING), verticalAlignment = Alignment.CenterVertically) {
-        Icon(
+        AutoMirroredIcon(
           painterResource(MR.images.ic_arrow_back_ios_new),
           contentDescription = null,
           tint = MaterialTheme.colors.secondary
@@ -202,7 +203,7 @@ fun CommandsMenuView(
               overflow = TextOverflow.Ellipsis
             )
             Spacer(Modifier.width(DEFAULT_PADDING_HALF))
-            Icon(
+            AutoMirroredIcon(
               painterResource(MR.images.ic_chevron_right),
               contentDescription = null,
               tint = MaterialTheme.colors.secondary

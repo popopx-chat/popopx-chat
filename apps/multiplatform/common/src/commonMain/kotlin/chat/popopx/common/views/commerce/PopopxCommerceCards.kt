@@ -2,11 +2,10 @@ package chat.popopx.common.views.commerce
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -15,6 +14,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +31,10 @@ import chat.popopx.common.signal.PopopxRedemptionOutcome
 import chat.popopx.common.signal.PopopxSignalFailure
 import chat.popopx.common.signal.PopopxSignalTarget
 import chat.popopx.common.signal.PopopxSilentSignalingRouter
+import chat.popopx.common.ui.theme.PopopxLabelHint
+import chat.popopx.common.ui.theme.PopopxMeshInk
+import chat.popopx.common.ui.theme.PopopxSeparator
+import chat.popopx.common.ui.theme.PopopxSuccessInk
 import chat.popopx.res.*
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
@@ -129,9 +133,9 @@ private fun PopopxGiftCardCard(payload: PopopxGiftCardPayload, context: PopopxCo
       MR.images.ic_id_card,
       stringResource(MR.strings.commerce_badge_days_product, payload.period.days, stringResource(MR.strings.commerce_badge_product_name)),
       if (payload.note.isEmpty()) stringResource(MR.strings.commerce_gift_caption) else stringResource(MR.strings.commerce_note_format, payload.note),
-      MaterialTheme.colors.primary,
+      PopopxMeshInk,
     )
-    Divider(Modifier.fillMaxWidth(), thickness = 1.dp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.1f))
+    Divider(Modifier.fillMaxWidth(), thickness = 0.5.dp, color = PopopxSeparator)
     val contactId = (context.target as? PopopxSignalTarget.Contact)?.chatId
     val outcome = immediate ?: router.outcomesByVoucher[payload.voucherId]
     when {
@@ -151,7 +155,7 @@ private fun PopopxGiftCardCard(payload: PopopxGiftCardPayload, context: PopopxCo
         CommerceNote(
           MR.images.ic_check_circle_filled,
           stringResource(MR.strings.commerce_badge_redeemed_days, payload.period.days),
-          MaterialTheme.colors.primary,
+          PopopxSuccessInk,
         )
       outcome is PopopxRedemptionOutcome.Failed ->
         CommerceNote(MR.images.ic_error, commerceGloss(outcome.reason, false), MaterialTheme.colors.error)
@@ -185,10 +189,10 @@ private fun PopopxCreditGiftCard(payload: PopopxCreditGiftPayload, context: Popo
       MR.images.ic_id_card,
       stringResource(MR.strings.commerce_credit_title),
       if (payload.note.isEmpty()) stringResource(MR.strings.commerce_credit_caption) else stringResource(MR.strings.commerce_note_format, payload.note),
-      MaterialTheme.colors.primary,
+      PopopxMeshInk,
     )
     CommerceAmount(payload.creditsAmount)
-    Divider(Modifier.fillMaxWidth(), thickness = 1.dp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.1f))
+    Divider(Modifier.fillMaxWidth(), thickness = 0.5.dp, color = PopopxSeparator)
     val contactId = (context.target as? PopopxSignalTarget.Contact)?.chatId
     val outcome = immediate ?: router.outcomesByVoucher[payload.voucherId]
     when {
@@ -206,7 +210,7 @@ private fun PopopxCreditGiftCard(payload: PopopxCreditGiftPayload, context: Popo
         CommerceNote(
           MR.images.ic_check_circle_filled,
           stringResource(MR.strings.commerce_credit_redeemed_amount, payload.creditsAmount),
-          MaterialTheme.colors.primary,
+          PopopxSuccessInk,
         )
       outcome is PopopxRedemptionOutcome.Failed ->
         CommerceNote(MR.images.ic_error, commerceGloss(outcome.reason, true), MaterialTheme.colors.error)
@@ -248,18 +252,17 @@ private fun PopopxRedPacketCard(payload: PopopxRedPacketPayload, context: Popopx
     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
       Text(
         stringResource(MR.strings.commerce_credits_amount, payload.amount),
-        fontSize = 20.sp,
-        fontWeight = FontWeight.SemiBold,
+        fontSize = 13.sp,
         color = MaterialTheme.colors.onSurface,
       )
       Text(
         if (payload.recipients > 1) stringResource(MR.strings.commerce_packet_split, payload.recipients)
         else stringResource(MR.strings.commerce_packet_single),
-        fontSize = 12.sp,
+        fontSize = 13.sp,
         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
       )
     }
-    Divider(Modifier.fillMaxWidth(), thickness = 1.dp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.1f))
+    Divider(Modifier.fillMaxWidth(), thickness = 0.5.dp, color = PopopxSeparator)
     val share = payload.amountPerRecipient
     val pending = credits.pendingPacket(payload.packetId)
     when {
@@ -270,7 +273,7 @@ private fun PopopxRedPacketCard(payload: PopopxRedPacketPayload, context: Popopx
         CommerceNote(
           MR.images.ic_check_circle_filled,
           stringResource(MR.strings.commerce_packet_claimed, share),
-          MaterialTheme.colors.primary,
+          PopopxSuccessInk,
         )
         if (receiptStuck) {
           TextButton(onClick = {
@@ -350,17 +353,16 @@ private fun PopopxChannelAccessCard(payload: PopopxChannelAccessPayload, context
     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
       Text(
         stringResource(MR.strings.commerce_credits_amount, payload.price),
-        fontSize = 20.sp,
-        fontWeight = FontWeight.SemiBold,
+        fontSize = 13.sp,
         color = MaterialTheme.colors.onSurface,
       )
       Text(
         stringResource(MR.strings.commerce_channel_per_period, (PopopxCommerceLimits.CHANNEL_TICKET_SECONDS / 86_400).toInt()),
-        fontSize = 12.sp,
+        fontSize = 13.sp,
         color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
       )
     }
-    Divider(Modifier.fillMaxWidth(), thickness = 1.dp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.1f))
+    Divider(Modifier.fillMaxWidth(), thickness = 0.5.dp, color = PopopxSeparator)
     // `refresh` is read so a settle that wrote a ticket repaints this row without any polling.
     val ticket = if (refresh >= 0) credits.validTicket(context.chatId) else null
     when {
@@ -387,7 +389,7 @@ private fun PopopxChannelAccessCard(payload: PopopxChannelAccessPayload, context
         CommerceNote(
           MR.images.ic_check_circle_filled,
           stringResource(MR.strings.commerce_channel_active_until, commerceDay(ticket.expiresAtMs)),
-          MaterialTheme.colors.primary,
+          PopopxSuccessInk,
         )
         CommerceActionButton(stringResource(MR.strings.commerce_channel_renew), loading = false) { confirming = true }
       }
@@ -456,26 +458,30 @@ private fun PopopxChannelAccessCard(payload: PopopxChannelAccessPayload, context
  */
 @Composable
 private fun CommerceSurface(content: @Composable ColumnScope.() -> Unit) {
-  val shape = RoundedCornerShape(10.dp)
+  // iOS's `PopopxCommerceCardSurface` (PopopxCommerceCards.swift:103-120): 16dp round, 0.5dp hairline,
+  // 16dp in, 12dp between the rows — the same plate the service card uses, because both are "a thing you tap".
+  val shape = RoundedCornerShape(16.dp)
   Column(
     Modifier
       .fillMaxWidth()
       .clip(shape)
       .background(MaterialTheme.colors.surface)
-      .border(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f), shape)
-      .padding(12.dp),
-    verticalArrangement = Arrangement.spacedBy(8.dp),
+      .border(0.5.dp, PopopxSeparator, shape)
+      .padding(16.dp),
+    verticalArrangement = Arrangement.spacedBy(12.dp),
     content = content,
   )
 }
 
 @Composable
 private fun CommerceHeader(icon: ImageResource, title: String, caption: String, ink: Color) {
-  Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+  // iOS's header (PopopxCommerceCards.swift:122-146): a bare tinted glyph beside an emphasis title over a
+  // footnote caption — no chip, because these cards are already a surface of their own.
+  Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
     Icon(painterResource(icon), null, Modifier.size(18.dp), tint = ink)
     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
       Text(title, style = MaterialTheme.typography.body1, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colors.onSurface)
-      Text(caption, fontSize = 12.sp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
+      Text(caption, fontSize = 13.sp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
     }
   }
 }
@@ -485,16 +491,17 @@ private fun CommerceHeader(icon: ImageResource, title: String, caption: String, 
 private fun CommerceNote(icon: ImageResource, text: String, ink: Color) {
   Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
     Icon(painterResource(icon), null, Modifier.size(14.dp), tint = ink)
-    Text(text, fontSize = 12.sp, color = ink, modifier = Modifier.weight(1f))
+    Text(text, fontSize = 13.sp, color = ink, modifier = Modifier.weight(1f))
   }
 }
 
 @Composable
 private fun CommerceAmount(amount: Int) {
+  // iOS prints the face value in `PopopxType.metric` (footnote, tabular digits, :296-300): the number is a
+  // figure in a sentence, not a headline.
   Text(
     stringResource(MR.strings.commerce_credits_amount, amount),
-    fontSize = 20.sp,
-    fontWeight = FontWeight.SemiBold,
+    fontSize = 13.sp,
     color = MaterialTheme.colors.onSurface,
   )
 }
@@ -507,16 +514,25 @@ private fun CommerceAmount(amount: Int) {
 @Composable
 private fun CommerceActionButton(label: String, loading: Boolean, primary: Boolean = false, onTap: suspend () -> Unit) {
   val scope = rememberCoroutineScope()
-  Button(
-    onClick = { if (!loading) scope.launch { onTap() } },
-    enabled = !loading,
-    colors = ButtonDefaults.buttonColors(
-      backgroundColor = if (primary) MaterialTheme.colors.primary else MaterialTheme.colors.surface,
-      contentColor = if (primary) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface,
-    ),
-    modifier = Modifier.fillMaxWidth(),
+  val shape = RoundedCornerShape(12.dp)
+  val fill = if (primary) MaterialTheme.colors.primary else MaterialTheme.colors.surface
+  val ink = if (primary) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
+  // iOS's `PopopxButton` secondary/primary roles (:100-117 of PopopxControls.swift): 12dp round, 44dp tall,
+  // emphasis label, and the secondary role outlined rather than a second filled bar.
+  Row(
+    Modifier
+      .fillMaxWidth()
+      .heightIn(min = 44.dp)
+      .clip(shape)
+      .background(fill)
+      .then(if (primary) Modifier else Modifier.border(1.dp, PopopxLabelHint, shape))
+      .then(if (loading) Modifier else Modifier.clickable { scope.launch { onTap() } })
+      .alpha(if (loading) 0.45f else 1f)
+      .padding(horizontal = 16.dp, vertical = 12.dp),
+    horizontalArrangement = Arrangement.Center,
+    verticalAlignment = Alignment.CenterVertically
   ) {
-    Text(label, fontSize = 14.sp, modifier = Modifier.padding(vertical = 4.dp))
+    Text(label, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = ink)
   }
 }
 

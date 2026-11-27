@@ -73,14 +73,22 @@ fun SimpleButtonIconEnded(
   style: TextStyle = MaterialTheme.typography.caption,
   color: Color = MaterialTheme.colors.primary,
   disabled: Boolean = false,
+  mirrorIcon: Boolean = false,
   click: () -> Unit
 ) {
   SimpleButtonFrame(click, disabled = disabled) {
     Text(text, style = style, color = color)
-    Icon(
-      icon, text, tint = color,
-      modifier = Modifier.padding(start = 8.dp)
-    )
+    if (mirrorIcon) {
+      AutoMirroredIcon(
+        icon, text, tint = color,
+        modifier = Modifier.padding(start = 8.dp)
+      )
+    } else {
+      Icon(
+        icon, text, tint = color,
+        modifier = Modifier.padding(start = 8.dp)
+      )
+    }
   }
 }
 

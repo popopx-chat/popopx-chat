@@ -278,7 +278,7 @@ private fun BackButton(modifier: Modifier = Modifier, color: Color = MaterialThe
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(4.dp)
   ) {
-    Icon(
+    AutoMirroredIcon(
       painterResource(MR.images.ic_arrow_back_ios_new),
       contentDescription = stringResource(MR.strings.back),
       tint = color,

@@ -18,6 +18,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import chat.popopx.common.model.ServerAddress.Companion.parseServerAddress
 import chat.popopx.common.views.helpers.*
@@ -348,9 +349,9 @@ fun ProtocolServerViewLink(
   Spacer(Modifier.padding(horizontal = 4.dp))
   val text = address?.hostnames?.firstOrNull() ?: srv.server
   if (srv.enabled) {
-    Text(text, color = MaterialTheme.colors.onBackground, maxLines = 1)
+    Text(text, color = MaterialTheme.colors.onBackground, maxLines = 1, style = TextStyle(textDirection = TextDirection.Ltr))
   } else {
-    Text(text, maxLines = 1, color = MaterialTheme.colors.secondary)
+    Text(text, maxLines = 1, color = MaterialTheme.colors.secondary, style = TextStyle(textDirection = TextDirection.Ltr))
   }
   // Only SMP rows carry a latency badge: the probe is defined on the SMP relay, and an xftp or relay
   // row showing a green pill would be a reading measured somewhere else.
