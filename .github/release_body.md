@@ -1,6 +1,11 @@
-POPOPX Chat 7.1.2 — the first release from this repository.
+POPOPX Chat 1.2.0 — the first open-source multi-platform release from this repository.
 
 POPOPX Chat is a fork of SimpleX Chat 7.1.2 (upstream tag `v7.1.2`, commit `50a575e44`), redistributed under the same AGPL-3.0 licence. SimpleX Chat and SimpleX Chat Ltd are the authors of the upstream project; the POPOPX name, identifiers, domain and artwork are ours.
+
+## Versions in this release
+
+- **Product version: 1.2.0** — the desktop, Android and iOS application version, and the version the desktop updater compares.
+- **Haskell core / CLI version: 7.1.2.0** — the library and command-line binaries. The `.deb` package version follows the release tag (`1.2.0`).
 
 ## What POPOPX changes
 
@@ -22,15 +27,16 @@ Built by this repository's CI from the tagged commit:
 | Linux (Ubuntu 24.04, aarch64) | `popopx-chat-ubuntu-24_04-aarch64`, `popopx-chat-ubuntu-24_04-aarch64.deb`, `popopx-desktop-ubuntu-24_04-aarch64.deb` |
 | Windows (x86_64) | `popopx-chat-windows-x86-64`, `popopx-desktop-windows-x86_64.msi` |
 | macOS (aarch64, x86_64) | `popopx-chat-macos-aarch64`, `popopx-chat-macos-x86-64` — command line only |
+| Android (arm64-v8a, FOSS) | `popopx-android-arm64-v8a-debug.apk` — debug-signed; installable, not a Play/release-signed build |
 
 The AppImage is built once per architecture, from the 22.04 leg, so its name carries no Ubuntu version.
 
 The SHA-256 of every asset is listed below, read from the digests GitHub recorded for the uploads.
 
-Not published in this release: the macOS `.dmg` (it needs a Developer ID signing and notarization credential that this repository does not have configured yet), Android APKs, and iOS builds.
+Not published in this release: the macOS `.dmg` (it needs a Developer ID signing and notarization credential that this repository does not have configured yet) and iOS builds.
 
 ## Known limits
 
-- **Relays.** The built-in SMP and XFTP servers are still the ones operated by SimpleX Chat Ltd, and `simplex.im` still appears in the shipped server configuration, until POPOPX operates its own relays. Nothing about how a message is routed has changed.
-- **Link verification on mobile.** `https://popopx.chat/.well-known/apple-app-site-association` and `https://popopx.chat/.well-known/assetlinks.json` are not served yet, so tapping an invite link does not open the app automatically.
-- **In-app updates on desktop.** This tag is `v7.1.2-popopx.1`, and the updater reads the `-popopx.1` label as a pre-release. The stable channel filters pre-releases out; the beta channel keeps them but its comparison ranks a labelled version *below* the same bare numbers, and an installed 7.1.2 reports those. So **neither** channel offers this release, and desktop updates are manual: download the asset for your platform below.
+- **Relays.** The built-in SMP and XFTP servers are still the ones operated by the upstream project, and `simplex.im` still appears in the shipped server configuration, until POPOPX operates its own relays. Nothing about how a message is routed has changed.
+- **Link verification on mobile.** `https://popopx.chat/.well-known/apple-app-site-association` and `https://popopx.chat/.well-known/assetlinks.json` are not served yet, so tapping an invite link does not open the app automatically. The Android APK in this release is debug-signed, so it is not a Play-signed build either.
+- **In-app updates on desktop.** This release is `v1.2.0`, the same version as the shipped desktop app, so the updater will not offer it. Future stable tags (`v1.2.1`, ...) will be offered. The Haskell core version `7.1.2.0` is not the application version; the updater compares the application version.

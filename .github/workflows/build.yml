@@ -1373,6 +1373,62 @@ jobs:
             !dist-newstyle/src
           key: ${{ steps.keys.outputs.dist }}-O0-${{ env.branch }}-${{ github.sha }}
 
+  build-android:
+    name: "build-android: FOSS arm64 debug APK"
+    timeout-minutes: 300
+    needs: [maybe-release, variables, check-smp-links, check-brand-clean]
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      CORE_PKG: android-core-arm64-v8a.tar.gz
+      APK: android-foss-arm64-v8a-debug.apk
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Show runner
+        run: |
+          lsb_release -ds
+          nproc
+          free -h
+          df -h /
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME/platforms" "$ANDROID_HOME/build-tools" "$ANDROID_HOME/ndk" || true
+
+      - name: Build core library
+        run: scripts/ci/android/build-core.sh ~/core/${{ env.CORE_PKG }}
+
+      - name: Install core library
+        run: scripts/ci/android/install-core.sh ~/core/${{ env.CORE_PKG }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: corretto
+          java-version: ${{ needs.variables.outputs.JAVA_VER }}
+
+      - name: Build app
+        working-directory: apps/multiplatform
+        run: |
+          ./gradlew --no-daemon --console=plain -Ppopopx.assets.dir=../../assets -Pandroid.injected.build.abi=arm64-v8a :android:assembleFossDebug
+          mkdir -p "$RUNNER_TEMP/apk"
+          cp "android/build/intermediates/apk/foss/debug/$APK" "$RUNNER_TEMP/apk"
+          ls -la "$RUNNER_TEMP/apk"
+          unzip -l "$RUNNER_TEMP/apk/$APK" | grep -E ' lib/'
+
+      - name: Upload APK
+        uses: ./.github/actions/prepare-release
+        with:
+          bin_path: ${{ runner.temp }}/apk/${{ env.APK }}
+          bin_name: popopx-android-arm64-v8a-debug.apk
+          github_ref: ${{ github.ref }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
 # =========================
 #   Releases and packages
 # =========================
@@ -1390,7 +1446,7 @@ jobs:
   release-hashes:
     name: "Add asset hashes to release notes"
     timeout-minutes: 30
-    needs: [build-linux, build-macos, build-windows]
+    needs: [build-linux, build-linux-full, build-linux-push, build-macos, build-windows, build-android]
     if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
     permissions:
@@ -1427,7 +1483,8 @@ jobs:
     # along with its inputs, and a required check that never reports blocks the branch forever.
     if: always()
     needs: [variables, maybe-release, check-smp-links, check-brand-clean, build-linux, build-ios,
-            build-macos, build-windows, build-linux-full, build-linux-push, build-linux-ghc8, release-hashes]
+            build-macos, build-windows, build-linux-full, build-linux-push, build-linux-ghc8, build-android,
+            release-hashes]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # The table is read entirely from the needs context, so this job gets no token at all.

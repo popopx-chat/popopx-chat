@@ -50,7 +50,8 @@ summary:
    name from the build tree instead of hard-coding it.
 
 5. **Download links** (2026-11-13) — every user-facing link that pointed at an APK asset now points at
-   the Google Play listing, because this fork publishes no APK (see "What is still unset"). 25 URLs in
+   the Google Play listing, because this fork had no APK at the time (see "What is still unset"; the
+   v1.2.0 release now attaches a debug-signed arm64 APK). 25 URLs in
    README, `docs/DOWNLOADS.md`, the three `docs/lang/*/README.md` and 8 website pages. This leaves pages
    that show a Play badge next to a badge still labelled "APK"; relabelling or removing those is a copy
    decision, not a wire one. The three places that then still named upstream's APK were
@@ -848,19 +849,24 @@ yet. Before any build of this fork is distributed:
   links and `autoVerify` cannot be claimed by an installed app yet, link unescaping falls back to the
   scheme, and the dependency's served `assetlinks.json` stopped being the mismatched half of the pair on
   2026-11-14 — its fingerprints are ours now (see "the other half of the pair" under the signing identity
-  below). It still verifies nothing, for a different reason: this fork publishes no APK. The relay presets and the directory/badge service
+  below). It still verifies nothing: the debug-signed GitHub APK is not the Play-signed build those
+  fingerprints describe. The relay presets and the directory/badge service
   still name infrastructure SimpleX Chat Ltd operates, because a preset needs their key material and
   `popopx.im` relays have none published yet. `chat@popopx.chat` is unverified rather than known dead:
   measured 2026-11-17, no MX record is published for the domain (`dig +short MX popopx.chat` is empty
   while `dig +short A popopx.chat` answers `43.129.4.33` and the site there answers `200`), and the
   host's SMTP behaviour was not measured - an A-record fallback may accept mail. So nothing here claims
   the address is dead, and nothing here promises it is read either.
-- **This fork publishes no Android APK.** `.github/workflows/build.yml` builds and signs nothing for
-  Android; `scripts/ci/android/release-apk.sh` downloads **upstream's** release APK and verifies
-  SimpleX's signing certificate, which is what the emulator smoke test installs. The gradle output
-  names (`popopx-arm64-v8a.apk`, `popopx-armv7a.apk`) are therefore only local artifacts. Ruled
-  2026-11-13: the documentation links point at the stores (item 5 above) — but note that our Play
-  listing is itself not published yet, so those links 404 *for us* until it is.
+- **Android APK.** The `v1.2.0` tag job (`build-android` in `.github/workflows/build.yml`) builds a
+  **debug-signed, arm64-v8a FOSS APK** and attaches it to the GitHub release as
+  `popopx-android-arm64-v8a-debug.apk`. It is not release-signed and does not read the release signing
+  key; the release build type still has no `signingConfig`. `scripts/ci/android/release-apk.sh` still
+  downloads **upstream's** release APK and verifies its signing certificate for the emulator smoke
+  test, and `scripts/popopx-chat-reproduce-builds-android.sh` still reproduces upstream's APK, not
+  ours. The gradle release names (`popopx-arm64-v8a.apk`, `popopx-armv7a.apk`) remain local-only until
+  a release signing config is wired. Ruled 2026-11-13: the documentation links point at the stores
+  (item 5 above) — but note that our Play listing is itself not published yet, so those links 404
+  *for us* until it is.
 - **The bug-report address is ours.** Every holder of `github.com/simplex-chat/simplex-chat/issues`
   moved to our repository on 2026-11-13, once our own tracker existed (`fork:false`, issues enabled) -
   the earlier hold was written as "until our own is set up". Holders: the desktop startup dialog
@@ -1208,12 +1214,14 @@ yet. Before any build of this fork is distributed:
     digest above (this LibreSSL rejects the `file:` scheme on `-passin`/`-passout` with "Error reading
     password from BIO", so pass it as `env:`). Gradle then needs a `signingConfig` reading
     `storeFile`/`storePassword`/`keyAlias = "popopx-release"`. Nothing reads
-    it yet — `apps/android/build.gradle.kts` carries no `signingConfig` at all (measured the same day), which
-    is the "this fork publishes no APK" item above. **Losing this key pair loses the signature**: an update
+    it yet — the v1.2.0 tag job publishes a **debug-signed** APK, and
+    `apps/multiplatform/android/build.gradle.kts` still carries no release `signingConfig` (measured
+    2026-11-27). **Losing this key pair loses the signature**: an update
     signed with a different certificate is refused, and with Play App Signing the upload key can be rotated
     but this is the digest F-Droid and any sideloaded install trust — back it up off this machine before the
-    first signed APK, where Play App Signing's and F-Droid's own fingerprints join this same array. The
-    release published 2026-11-15 is #56 and ships no APK, so that deadline moved rather than passed.
+    first release-signed APK, where Play App Signing's and F-Droid's own fingerprints join this same array.
+    The 2026-11-15 release #56 shipped no APK; the v1.2.0 APK is debug-signed, so this deadline still has
+    not passed.
     Ship route: popopxmq `25d7213d` = tag `popopx-pin-4` was the pin at the time, our pin moved with it (`cabal.project:24`,
     `scripts/nix/sha256map.nix:2`). The hash came from the command that file's own generator calls
     (`nix-prefetch-git --fetch-submodules`, per `scripts/nix/update-sha256.awk`), and the method was proven
@@ -1464,7 +1472,8 @@ checksums in `<tag>-popopx-chat/_sha256sums`.
 
 The Android script reproduces upstream's APK, not ours: `REPO_NAME`, `REPO`, `SIMPLEX_REPO` and
 `SIMPLEX_KEY` (the signing certificate fingerprint) name upstream's artefacts, which is why they keep
-upstream's spelling, and this fork publishes no APK. It raises `kernel.pid_max` through sudo or doas,
+upstream's spelling, and the fork's GitHub APK is debug-signed, so this script does not verify it. It
+raises `kernel.pid_max` through sudo or doas,
 builds `aarch64` and `armv7a` (override with `ARCHES`), and compares the rebuilt APK once
 `apksigcopier` has copied upstream's signature onto it. No workflow calls it; it is run by hand.
 
