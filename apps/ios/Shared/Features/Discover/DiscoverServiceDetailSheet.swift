@@ -368,9 +368,12 @@ struct PopopxDiscoverDetailHero: View {
 // MARK: - Rows
 
 struct PopopxDiscoverDetailFactRow: View {
+    @Environment(\.layoutDirection) private var layoutDirection
+
     let label: String
     let value: String
     var emphasised = false
+    var valueIsLTR = false
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceS) {
@@ -382,7 +385,8 @@ struct PopopxDiscoverDetailFactRow: View {
             Text(value)
                 .font(emphasised ? PopopxType.emphasis : PopopxType.meta)
                 .foregroundStyle(emphasised ? PopopxPalette.label : PopopxPalette.labelSecondary)
-                .multilineTextAlignment(.trailing)
+                .multilineTextAlignment(valueIsLTR ? .leading : .trailing)
+                .environment(\.layoutDirection, valueIsLTR ? .leftToRight : layoutDirection)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityElement(children: .combine)

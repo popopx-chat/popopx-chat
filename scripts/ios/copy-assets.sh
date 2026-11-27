@@ -13,6 +13,27 @@ set -eu
 #
 # Manual usage: ./scripts/copy-assets.sh path/to/assets
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# These localizations are added outside the Xcode project: project.pbxproj is not edited, so the
+# Resources phase never sees them. Copy them into the built app here, renaming the Info.plist
+# table to the name the bundle loads. Kept before the assets-flag exit so normal builds get them.
+if [ -n "${TARGET_BUILD_DIR:-}" ] && [ -n "${UNLOCALIZED_RESOURCES_FOLDER_PATH:-}" ]; then
+  DEST_DIR="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH"
+  for lang in ar ko pt-BR; do
+    SRC_LANG="$SCRIPT_DIR/../../apps/ios/$lang.lproj"
+    if [ -d "$SRC_LANG" ]; then
+      mkdir -p "$DEST_DIR/$lang.lproj"
+      if [ -f "$SRC_LANG/Localizable.strings" ]; then
+        cp "$SRC_LANG/Localizable.strings" "$DEST_DIR/$lang.lproj/Localizable.strings"
+      fi
+      if [ -f "$SRC_LANG/POPOPX--iOS--InfoPlist.strings" ]; then
+        cp "$SRC_LANG/POPOPX--iOS--InfoPlist.strings" "$DEST_DIR/$lang.lproj/InfoPlist.strings"
+      fi
+    fi
+  done
+fi
+
 # Skip if the assets flag is not set (unless run manually outside Xcode).  Both spellings count:
 # Local.xcconfig is not tracked here, so a setup written before the rename must keep working.
 if [ -n "${SWIFT_ACTIVE_COMPILATION_CONDITIONS:-}" ]; then
@@ -22,7 +43,6 @@ if [ -n "${SWIFT_ACTIVE_COMPILATION_CONDITIONS:-}" ]; then
   esac
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 IOS_DIR="$SCRIPT_DIR/../../apps/ios/Shared/POPOPXAssets.xcassets"
 
 ASSETS_ROOT="${1:-${POPOPX_ASSETS_DIR:-${SIMPLEX_ASSETS_DIR:-}}}"

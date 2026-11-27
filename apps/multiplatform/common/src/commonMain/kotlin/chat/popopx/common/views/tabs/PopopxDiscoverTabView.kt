@@ -21,9 +21,11 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import chat.popopx.common.copilot.PopopxEcoAssistantHost
@@ -223,6 +225,7 @@ private fun PopopxDiscoverServiceSheet(service: PopopxNodeServiceId, close: () -
           Text(action.title, style = MaterialTheme.typography.body2, modifier = Modifier.weight(1f))
           Text(
             "${service.rawValue} · ${action.action}",
+            style = TextStyle(textDirection = TextDirection.Ltr),
             fontSize = 11.sp,
             color = MaterialTheme.colors.secondary,
             maxLines = 1
@@ -240,11 +243,19 @@ private fun PopopxDiscoverServiceSheet(service: PopopxNodeServiceId, close: () -
       SectionItemView({ clipboard.setText(AnnotatedString(PopopxNodeConsole.copyText())) }) {
         Column(Modifier.weight(1f)) {
           Text(stringResource(MR.strings.discover_bridge_address), fontSize = 12.sp, color = MaterialTheme.colors.secondary)
-          Text(PopopxNodeConsole.consoleDisplayUrl(), style = MaterialTheme.typography.body2)
+          Text(
+            PopopxNodeConsole.consoleDisplayUrl(),
+            style = MaterialTheme.typography.body2.copy(textDirection = TextDirection.Ltr)
+          )
         }
         Text(stringResource(MR.strings.copy_verb), fontSize = 13.sp, color = MaterialTheme.colors.primary)
       }
-      Text(PopopxNodeConsole.tokenContractText(), fontSize = 12.sp, color = MaterialTheme.colors.secondary)
+      Text(
+        PopopxNodeConsole.tokenContractText(),
+        style = TextStyle(textDirection = TextDirection.Ltr),
+        fontSize = 12.sp,
+        color = MaterialTheme.colors.secondary
+      )
       Text(
         PopopxNodeConsole.LOCAL_ONLY_NOTE,
         fontSize = 12.sp,
@@ -368,6 +379,7 @@ private fun PopopxNodePairingSheet(close: () -> Unit) {
           .background(MaterialTheme.colors.background, shape = RoundedCornerShape(12.dp))
           .padding(horizontal = 12.dp, vertical = 10.dp),
         state = code,
+        textStyle = TextStyle(textDirection = TextDirection.Ltr),
         placeholder = {
           Text(
             stringResource(MR.strings.discover_paste_placeholder),
@@ -380,7 +392,11 @@ private fun PopopxNodePairingSheet(close: () -> Unit) {
       )
       when (val result = verdict) {
         is PopopxPairingAccept.Pending -> {
-          Text(result.offer.nodeId, style = MaterialTheme.typography.body2, modifier = Modifier.padding(top = DEFAULT_PADDING_HALF))
+          Text(
+            result.offer.nodeId,
+            style = MaterialTheme.typography.body2.copy(textDirection = TextDirection.Ltr),
+            modifier = Modifier.padding(top = DEFAULT_PADDING_HALF)
+          )
           Text(
             stringResource(MR.strings.discover_pairing_window),
             fontSize = 12.sp,

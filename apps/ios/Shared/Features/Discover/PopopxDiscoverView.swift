@@ -159,7 +159,7 @@ struct PopopxDiscoverBanner: View {
 
                 Spacer(minLength: PopopxMetrics.spaceXS)
 
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(PopopxPalette.labelHint)
             }
@@ -359,7 +359,7 @@ struct PopopxDiscoverAssistantEntry: View {
 
                 Spacer(minLength: PopopxMetrics.spaceXS)
 
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(PopopxPalette.labelHint)
             }

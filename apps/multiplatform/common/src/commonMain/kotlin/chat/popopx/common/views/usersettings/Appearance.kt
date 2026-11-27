@@ -1204,6 +1204,7 @@ object AppearanceScope {
       "it" to "Italiano",
       "iw" to "עִברִית",
       "ja" to "日本語",
+      "ko" to "한국어",
       "lt" to "Lietuvių",
       "nl" to "Nederlands",
       "pl" to "Polski",

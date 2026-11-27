@@ -165,6 +165,7 @@ struct MacNodePairingSheet: View {
                 text: $pastedCode,
                 systemImage: "textformat"
             )
+            .environment(\.layoutDirection, .leftToRight)
             PopopxButton(DiscoverCopy.pasteAction, systemImage: "checkmark", role: .primary, fullWidth: false) {
                 accept(pastedCode)
             }
@@ -244,10 +245,11 @@ struct PopopxNodeOfferConfirmCard: View {
     var body: some View {
         PopopxSectionCard(DiscoverCopy.pairingConfirmTitle) {
             VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
-                PopopxDiscoverDetailFactRow(label: DiscoverCopy.pairingNodeLabel, value: offer.nodeId)
+                PopopxDiscoverDetailFactRow(label: DiscoverCopy.pairingNodeLabel, value: offer.nodeId, valueIsLTR: true)
                 PopopxDiscoverDetailFactRow(
                     label: DiscoverCopy.pairingKeyLabel,
-                    value: String(offer.publicKeyBase64URL.prefix(12)) + "…"
+                    value: String(offer.publicKeyBase64URL.prefix(12)) + "…",
+                    valueIsLTR: true
                 )
                 PopopxDiscoverDetailFactRow(
                     label: DiscoverCopy.pairingExpiresLabel,
@@ -285,7 +287,7 @@ struct PopopxNodeBoundCard: View {
     var body: some View {
         PopopxSectionCard(DiscoverCopy.pairingBoundTitle) {
             VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
-                PopopxDiscoverDetailFactRow(label: DiscoverCopy.pairingNodeLabel, value: binding.nodeId)
+                PopopxDiscoverDetailFactRow(label: DiscoverCopy.pairingNodeLabel, value: binding.nodeId, valueIsLTR: true)
                 PopopxDiscoverDetailFactRow(
                     label: DiscoverCopy.pairingChatLabel,
                     value: binding.contactDisplayName ?? DiscoverCopy.roomNeedsChat
@@ -628,8 +630,8 @@ struct PopopxDiscoverBridgePane: View {
                     .foregroundStyle(PopopxPalette.labelSecondary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                PopopxDiscoverDetailFactRow(label: DiscoverCopy.bridgeAddressLabel, value: Self.address)
-                PopopxDiscoverDetailFactRow(label: DiscoverCopy.bridgeTokenLabel, value: Self.tokenContract)
+                PopopxDiscoverDetailFactRow(label: DiscoverCopy.bridgeAddressLabel, value: Self.address, valueIsLTR: true)
+                PopopxDiscoverDetailFactRow(label: DiscoverCopy.bridgeTokenLabel, value: Self.tokenContract, valueIsLTR: true)
 
                 PopopxDiscoverDetailNote(text: DiscoverCopy.bridgeTokenHint, systemImage: "key")
                 PopopxDiscoverDetailNote(text: DiscoverCopy.bridgeSecretHint, systemImage: "number")

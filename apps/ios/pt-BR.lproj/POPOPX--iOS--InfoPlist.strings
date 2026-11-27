@@ -1,0 +1,11 @@
+"CFBundleName" = "POPOPX";
+"NSBluetoothAlwaysUsageDescription" = "O POPOPX usa o Bluetooth para descobrir dispositivos POPOPX por perto e trocar mensagens offline quando não há conexão com a internet.";
+"NSCalendarsFullAccessUsageDescription" = "O POPOPX lê seu calendário neste dispositivo para que seu assistente saiba quando você está livre e só grava um evento depois que você toca em \"Confirmar e gravar no calendário\". Títulos, locais e participantes são usados para calcular horários livres e depois são descartados; nada sai deste dispositivo.";
+"NSCalendarsUsageDescription" = "O POPOPX lê seu calendário neste dispositivo para que seu assistente saiba quando você está livre e só grava um evento depois que você toca em \"Confirmar e gravar no calendário\". Nada sai deste dispositivo.";
+"NSCameraUsageDescription" = "O POPOPX usa a câmera para escanear códigos QR ao se conectar com outras pessoas e para chamadas de vídeo.";
+"NSFaceIDUsageDescription" = "O POPOPX usa o Face ID para autenticação.";
+"NSLocalNetworkUsageDescription" = "O POPOPX usa o acesso à rede local para permitir usar um perfil de chat por meio de um computador na mesma rede.";
+"NSLocationWhenInUseUsageDescription" = "Compartilhe sua localização em conversas ou coordenadas de mapa personalizadas. Os dados de localização trafegam apenas por canais com criptografia de ponta a ponta.";
+"NSMicrophoneUsageDescription" = "O POPOPX usa o microfone para chamadas de áudio e vídeo e para gravar mensagens de voz.";
+"NSNearbyInteractionUsageDescription" = "O POPOPX usa a interação por proximidade para medir a distância até um dispositivo de alguém que você está encontrando pessoalmente, para que adicionar um amigo só aconteça quando a pessoa estiver ao alcance do braço. Nenhuma localização é lida ou armazenada.";
+"NSPhotoLibraryAddUsageDescription" = "O POPOPX usa o acesso à Fototeca para salvar as fotos que você tira e recebe.";

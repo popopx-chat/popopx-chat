@@ -90,6 +90,9 @@
 		<string>bg</string>
 		<string>tr</string>
 		<string>hu</string>
+		<string>ar</string>
+		<string>ko</string>
+		<string>pt-BR</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Share your location in chats or custom map coordinates. Location data travels only over end-to-end encrypted channels.</string>

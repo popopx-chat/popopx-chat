@@ -116,6 +116,7 @@ android {
         "it",
         "iw",
         "ja",
+        "ko",
         "lt",
         "nl",
         "pl",
