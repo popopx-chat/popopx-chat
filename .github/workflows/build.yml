@@ -983,23 +983,17 @@ jobs:
         if: matrix.should_run == true && matrix.arch == 'aarch64'
         timeout-minutes: 120
         shell: bash
-        run: |
-          i=1
-          attempts=1
-          ${{ (github.ref == 'refs/heads/stable' || startsWith(github.ref, 'refs/tags/v')) }} && attempts=3
-          while [ "$i" -le "$attempts" ]; do
-            if cabal test --test-show-details=direct ${{ env.ghc_options }}; then
-              break
-            else
-              echo "Attempt $i failed, retrying..."
-              i=$((i + 1))
-              sleep 1
-            fi
-          done
-          if [ "$i" -gt "$attempts" ]; then
-            echo "All "$attempts" attempts failed."
-            exit 1
-          fi
+        env:
+          TESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.tests || '' }}
+          PR_BODY: ${{ github.event.pull_request.draft == true && github.event.pull_request.body || '' }}
+          ATTEMPTS: ${{ (github.ref == 'refs/heads/stable' || startsWith(github.ref, 'refs/tags/v')) && 3 || 1 }}
+          # The command is `cabal test`, not the suite binary, so every hspec token has to travel as
+          # --test-option=TOKEN before scripts/ci/run-tests.sh can hand it to the suite.
+          TEST_OPT_PREFIX: --test-option=
+        # This was a private copy of the retry loop in scripts/ci/run-tests.sh and it carried neither of
+        # that script's guards: `cabal test` exits 0 when hspec runs nothing, the same green-that-ran-
+        # nothing the Linux leg had until W1. One script now decides for both platforms.
+        run: scripts/ci/run-tests.sh cabal test --test-show-details=direct ${{ env.ghc_options }}
 
       - name: Remove -O2 build directory
         id: remove-o2
@@ -1411,3 +1405,54 @@ jobs:
             -q '.[] | "SHA2-256(\(.name))= \(.digest | sub("^sha256:"; ""))"' | sort > hashes.txt
           { cat .github/release_body.md; echo; cat hashes.txt; } > body.md
           jq -Rs '{body: .}' body.md | gh api -X PATCH "${api}/${id}" --input -
+
+# =============================
+#       Aggregate verdict
+# =============================
+
+# Branch protection can only require a check whose name is a stable string. Every build leg here is a
+# matrix job, and a matrix job that never expands reports under its *unexpanded* title - literally
+# "build-macos: ${{ matrix.os }} (CLI,Desktop), GHC: ${{ matrix.ghc }}" - so none of them can be pinned,
+# and on a daily push that placeholder is the only name five of the six heavy legs ever get. This job
+# has no matrix of its own, so "CI Gate" is the same string on push, on schedule and on dispatch alike.
+  ci-gate:
+    name: "CI Gate"
+    # always(): the verdict has to be published even when a leg failed. Without it this job is skipped
+    # along with its inputs, and a required check that never reports blocks the branch forever.
+    if: always()
+    needs: [variables, maybe-release, check-smp-links, check-brand-clean, build-linux, build-ios,
+            build-macos, build-windows, build-linux-full, build-linux-push, build-linux-ghc8, release-hashes]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The table is read entirely from the needs context, so this job gets no token at all.
+    permissions: {}
+    steps:
+      - name: Aggregate every leg
+        shell: bash
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          set -euo pipefail
+          # These four carry no `if:` of their own, so a "skipped" one of them can only mean a job ahead
+          # of them died and its skip is hiding that. Every other leg may be skipped on purpose: that is
+          # exactly how a daily push differs from a full sweep, and how the tag-only legs stay silent.
+          mandatory=" variables maybe-release check-smp-links check-brand-clean "
+          rows=$(printf '%s' "$NEEDS" | jq -r 'to_entries[] | "\(.key)\t\(.value.result)"' | sort)
+          printf 'leg results:\n%s\n' "$rows"
+          bad=""
+          while IFS=$'\t' read -r job result; do
+            case "$mandatory" in *" $job "*) required=yes ;; *) required=no ;; esac
+            if [ "$result" = success ]; then
+              continue
+            fi
+            if [ "$result" = skipped ] && [ "$required" = no ]; then
+              continue
+            fi
+            bad+="$job=$result "
+          done <<< "$rows"
+          if [ -n "$bad" ]; then
+            echo "::error::CI Gate red:${bad}"
+            echo "A mandatory leg that was skipped means something before it failed; failing legs are named above."
+            exit 1
+          fi
+          echo "CI Gate green: every leg that ran succeeded, the rest were skipped by their own gate."

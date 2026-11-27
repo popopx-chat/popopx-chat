@@ -58,7 +58,8 @@ The reduced build runs one Linux job, build-linux (ubuntu-22.04 x86_64), for eve
   ```
   It then appends `--fail-on=empty`, but only if that binary accepts it (hspec-core 2.9+), and it fails
   the attempt whenever the run reports no executed example — that count is read from hspec's own summary
-  line, so a selection matching nothing is red on every toolchain.
+  line, so a selection matching nothing is red on every toolchain. A caller that wraps the suite (the
+  macOS leg goes through `cabal test`) sets `TEST_OPT_PREFIX=--test-option=` so each token still reaches it.
   `--ghc-options=-O0` matches the reduced build; the library and test-suite stanzas of popopx-chat.cabal set -O2. Test directories are created under tests/tmp (`tmpBracket` in tests/Test.hs).
 
 #### kotlin

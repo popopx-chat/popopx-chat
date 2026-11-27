@@ -10,9 +10,12 @@ fi
 if [ -n "${PR_BODY:-}" ]; then
   TESTS=$(printf '%s\n' "$PR_BODY" | tr -d '\r' | awk '/^```ci-tests[ \t]*$/ {f = 1; next} /^```[ \t]*$/ {f = 0} f')
 fi
+# A caller that goes through a launcher instead of the binary sets TEST_OPT_PREFIX so that every hspec
+# token still reaches the suite: `cabal test` only forwards options written as --test-option=TOKEN.
+prefix=${TEST_OPT_PREFIX:-}
 args=()
 while read -r p; do
-  if [ -n "$p" ]; then args+=(-m "$p"); fi
+  if [ -n "$p" ]; then args+=("${prefix}-m" "${prefix}$p"); fi
 done <<< "${TESTS:-}"
 # hspec's `--fail-on=empty` ("fail if all spec items have been filtered") fails the run when every
 # spec item was filtered out, which is the whole point of a selector: without it, a `-m` pattern that
@@ -25,8 +28,8 @@ done <<< "${TESTS:-}"
 # the run before executing anything ("option `--fail-on' doesn't allow an argument", seen on the first
 # full dispatch of this leg). Ask the binary instead of pinning a version, and let the example count
 # below carry the guard where the option is unavailable.
-if "$@" --fail-on=empty --help > /dev/null 2>&1; then
-  args+=(--fail-on=empty)
+if "$@" "${prefix}--fail-on=empty" "${prefix}--help" > /dev/null 2>&1; then
+  args+=("${prefix}--fail-on=empty")
   empty_guard=hspec
 else
   empty_guard=examples
