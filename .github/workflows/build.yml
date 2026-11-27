@@ -1174,7 +1174,7 @@ jobs:
           github_ref: ${{ github.ref }}
 
       - name: Configure pagefile (Windows)
-        uses: simplex-chat/configure-pagefile-action@v1.4
+        uses: popopx-chat/configure-pagefile-action@v1.4
         with:
           minimum-size: 16GB
           maximum-size: 16GB
