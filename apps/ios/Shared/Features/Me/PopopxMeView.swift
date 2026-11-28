@@ -815,19 +815,22 @@ private struct PopopxMeStatusCapsule: View {
 
     var body: some View {
         let tint = phase.isLit ? PopopxPalette.successInk : PopopxPalette.labelSecondary
-        HStack(spacing: PopopxMetrics.space2XS) {
+        // One `Text` rather than four fragments: the words wrap as a sentence when the name column is
+        // narrow (iPhone SE with a long locale), instead of each fragment being squeezed and the capsule
+        // cut with an ellipsis. Two lines is the ceiling — the header must never push the card taller
+        // than its avatar column. Where even two lines cannot hold the sentence (SE width plus a long
+        // badge date), the text shrinks a little rather than ending in "…".
+        HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.space2XS) {
             Image(systemName: "lock.fill")
                 .font(PopopxType.microTag)
                 .imageScale(.medium)
-            Text(Copy.smpEncrypted)
+            Text(verbatim: "\(Copy.smpEncrypted) · \(badgeWords)")
                 .font(PopopxType.microTag)
-            Text(verbatim: "·")
-                .font(PopopxType.microTag)
-            Text(badgeWords)
-                .font(PopopxType.microTag)
+                .minimumScaleFactor(0.75)
         }
         .foregroundStyle(tint)
-        .lineLimit(1)
+        .lineLimit(2)
+        .fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal, PopopxMetrics.spaceS)
         .padding(.vertical, PopopxMetrics.space2XS)
         .background(PopopxPalette.brand.opacity(0.10), in: .capsule)

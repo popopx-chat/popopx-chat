@@ -534,10 +534,16 @@ struct PopopxPickerRow: View {
                     .foregroundStyle(PopopxPalette.label)
                 Spacer(minLength: PopopxMetrics.spaceXS)
                 if let value {
+                    // Two lines instead of an ellipsis: the value is a whole phrase ("0 Compute Credits",
+                    // "Trial: 3 days left"), and lopping its tail off changes what it says. Wrapping also
+                    // survives the accessibility text sizes where a single line cannot fit at any width.
                     Text(value)
                         .font(PopopxType.meta)
                         .foregroundStyle(PopopxPalette.labelSecondary)
-                        .lineLimit(1)
+                        .multilineTextAlignment(.trailing)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .layoutPriority(1)
                 }
                 Image(systemName: "chevron.right")
                     .font(PopopxType.microTag)

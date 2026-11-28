@@ -7,6 +7,14 @@ The one malformed upstream source "Settled per job, 10% protocol fee" is
 reported as a known baseline rather than as a new-language failure: the string
 contains a literal percent sign followed by "p", which the shared validator
 mistakes for a %p specifier in every language, including the 18 existing ones.
+
+The iOS expected set is the union of two sources.  The exported xcloc only
+contains keys passed literally to NSLocalizedString, so screens that localize
+through a per-file ``key(_:)`` wrapper (onboarding, Cabin mesh, Me, Discover,
+Mac node) are invisible to xcodebuild -exportLocalizations.  Those keys must
+still exist in every language or the screen falls back to English, so every
+key of the complete zh-Hans reference is also expected, with the English key
+itself as the source text (this project uses English strings as keys).
 """
 
 from __future__ import annotations
@@ -21,6 +29,7 @@ import localizations as L
 
 IOS_NEW = ("ar", "ko", "pt-BR")
 IOS_XLIFF = REPO / "apps/ios/POPOPX Localizations/en.xcloc/Localized Contents/en.xliff"
+IOS_ZH_HANS = REPO / "apps/ios/zh-Hans.lproj/Localizable.strings"
 IOS_MAIN = (
     "en.lproj/Localizable.strings",
     "en.lproj/POPOPX--iOS--InfoPlist.strings",
@@ -43,6 +52,15 @@ def ios_units() -> dict[tuple[str, str], str]:
     return result
 
 
+def ios_expected(original: str, units: dict[tuple[str, str], str]) -> dict[str, str]:
+    expected = {key: source for (file, key), source in units.items() if file == original}
+    if original == IOS_MAIN[0]:
+        reference = dict(L.parse_strings(IOS_ZH_HANS.read_text(encoding="utf-8")))
+        for key in reference:
+            expected.setdefault(key, key)
+    return expected
+
+
 def check_ios() -> list[str]:
     problems = []
     units = ios_units()
@@ -54,7 +72,7 @@ def check_ios() -> list[str]:
             if not path.is_file():
                 problems.append(f"iOS {language}: missing {path.relative_to(REPO)}")
                 continue
-            expected = {key: source for (file, key), source in units.items() if file == original}
+            expected = ios_expected(original, units)
             try:
                 actual = dict(L.parse_strings(path.read_text(encoding="utf-8")))
             except Exception as error:  # noqa: BLE001 - report the real parse error

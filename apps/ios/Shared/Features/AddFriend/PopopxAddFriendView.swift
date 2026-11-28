@@ -77,8 +77,10 @@ struct PopopxAddFriendView: View {
 
     @State private var toast = PopopxToastModel()
     @State private var linkText = ""
-    /// nil = nothing on the clipboard that can be classified as a link; non-nil is already a whitespace-trimmed normalised string.
-    @State private var clipboardLink: String?
+    /// Whether the clipboard *type*-checks as a link; content is never read by the precheck.
+    @State private var clipboardHasLink = false
+    /// Monotonic token for `refreshClipboard`'s async precheck: results from an older probe are dropped.
+    @State private var clipboardProbe = 0
     @State private var showsScanner = false
     @State private var showsFaceToFace = false
     @State private var showsIdentityPicker = false
@@ -112,7 +114,7 @@ struct PopopxAddFriendView: View {
                     PopopxAddFriendHeader()
                     PopopxLinkSearchBlock(text: $linkText, submit: { raw in await submit(raw) })
                     PopopxQuickActionsBlock(
-                        clipboardLink: $clipboardLink,
+                        clipboardHasLink: $clipboardHasLink,
                         onPaste: { await pasteAndConnect() },
                         onFaceToFace: { showsFaceToFace = true }
                     )
@@ -163,6 +165,8 @@ struct PopopxAddFriendView: View {
                         Button(Copy.close) { dismiss() }
                             .font(PopopxType.emphasis)
                             .foregroundStyle(PopopxPalette.brand)
+                            .lineLimit(1)
+                            .fixedSize()
                             .frame(minHeight: PopopxMetrics.minHitTarget)
                             .buttonStyle(PopopxPressButtonStyle())
                     }
@@ -262,9 +266,15 @@ struct PopopxAddFriendView: View {
     }
 
     @MainActor private func pasteAndConnect() async {
-        // Read once more at the moment of the press: the clipboard may have changed after the button lit up.
-        refreshClipboard()
-        guard let link = clipboardLink else {
+        // Explicit tap: the user asked to paste, so this reads the clipboard itself. The silent
+        // precheck below only decides whether the button is lit — it never gates this read.
+        guard UIPasteboard.general.hasStrings, let raw = UIPasteboard.general.string else {
+            PopopxHaptics.notice(.warning)
+            toast.show(Copy.clipboardEmptyToast, kind: .danger)
+            return
+        }
+        let link = PopopxAddFriendLink.normalized(raw)
+        guard PopopxAddFriendLink.classify(link).canAdd else {
             PopopxHaptics.notice(.warning)
             toast.show(Copy.clipboardEmptyToast, kind: .danger)
             return
@@ -273,13 +283,25 @@ struct PopopxAddFriendView: View {
         await submit(link)
     }
 
+    /// The silent clipboard precheck.
+    ///
+    /// Reading `.string` on appearance or foreground return is what raised the system paste prompt
+    /// on this screen; `detectPatterns` and `hasURLs` answer "does the clipboard hold a link" from
+    /// the pasteboard's type information alone, which is why iOS raises no prompt for them. The
+    /// content itself is read at exactly one place — the explicit Paste press below — so the system
+    /// prompt can only follow a deliberate action. `hasURLs` is the companion signal that also
+    /// covers custom schemes (`popopx:/…`), which the web-URL detector does not recognise.
     @MainActor private func refreshClipboard() {
-        guard UIPasteboard.general.hasStrings, let raw = UIPasteboard.general.string else {
-            clipboardLink = nil
-            return
+        clipboardProbe += 1
+        let probe = clipboardProbe
+        UIPasteboard.general.detectPatterns(for: [.probableWebURL]) { result in
+            let matchedWebURL = (try? result.get())?.contains(.probableWebURL) ?? false
+            Task { @MainActor in
+                // A newer probe has started (the clipboard changed again): its result is the truth.
+                guard probe == clipboardProbe else { return }
+                clipboardHasLink = matchedWebURL || UIPasteboard.general.hasURLs
+            }
         }
-        let link = PopopxAddFriendLink.normalized(raw)
-        clipboardLink = PopopxAddFriendLink.classify(link).canAdd ? link : nil
     }
 
     // MARK: Minting
@@ -385,7 +407,7 @@ private struct PopopxLinkSearchBlock: View {
 // MARK: - Quick actions
 
 private struct PopopxQuickActionsBlock: View {
-    @Binding var clipboardLink: String?
+    @Binding var clipboardHasLink: Bool
     let onPaste: () async -> Void
     let onFaceToFace: () -> Void
 
@@ -396,12 +418,12 @@ private struct PopopxQuickActionsBlock: View {
                     PopopxButton(Copy.pasteAction, systemImage: "doc.on.clipboard", role: .secondary) {
                         await onPaste()
                     }
-                    .disabled(clipboardLink == nil)
+                    .disabled(!clipboardHasLink)
                     HStack(spacing: PopopxMetrics.space2XS) {
-                        if clipboardLink != nil {
+                        if clipboardHasLink {
                             PopopxBreathingDot()
                         }
-                        Text(clipboardLink == nil ? Copy.pasteNoteEmpty : Copy.pasteNoteReady)
+                        Text(clipboardHasLink ? Copy.pasteNoteReady : Copy.pasteNoteEmpty)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .font(PopopxType.caption)

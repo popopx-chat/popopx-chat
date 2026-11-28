@@ -2408,7 +2408,9 @@ private struct PopopxCabinMeshSettingsSheet: View {
                 Text(policyTitle(pairingPolicy))
                     .font(PopopxType.meta)
                     .foregroundStyle(PopopxPalette.labelSecondary)
-                    .lineLimit(1)
+                    .multilineTextAlignment(.trailing)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Text(Copy.pairingSheetSubtitle)
                 .font(PopopxType.caption)

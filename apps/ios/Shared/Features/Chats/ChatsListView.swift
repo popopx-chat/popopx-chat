@@ -490,15 +490,16 @@ struct ChatsListView: View {
     /// The same exclusion rule as the old list (Shared/Views/ChatList/ChatListView.swift:665).
     private func searchedEntries() -> [PopopxChatEntry] {
         let query = searchText.trimmed.localizedLowercase
-        // System config chat IDs for the current user, to be hidden from UI.
-        let systemConfigIds = chatModel.currentUser.map { PopopxServerConfigStore.systemConfigChatIds(for: $0.userId) } ?? []
+        // System config chats for the current user, to be hidden from UI — matched by kind and id.
+        let systemConfigRefs = chatModel.systemConfigChatRefs()
         var entries: [PopopxChatEntry] = []
         entries.reserveCapacity(chatModel.chats.count)
         for chat in chatModel.chats {
             let info = chat.chatInfo
             guard !info.chatDeleted, !info.contactCard else { continue }
             // Hide system config chats from the list.
-            guard !systemConfigIds.contains(info.apiId) else { continue }
+            if let ref = PopopxSystemChatRef(chatType: info.chatType, apiId: info.apiId),
+               systemConfigRefs.contains(ref) { continue }
             if !query.isEmpty, !info.chatViewName.localizedLowercase.contains(query) { continue }
             entries.append(PopopxChatEntry(
                 chat: chat,
@@ -741,6 +742,10 @@ struct ChatsListView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    /// The trailing edge's dissolve width: wide enough to read as a dissolve rather than a hard clip,
+    /// narrow enough not to dim a whole capsule.
+    private static let trailingFadeWidth = PopopxMetrics.spaceM
+
     var body: some View {
         // Horizontal scroll rather than wrapping: at accessibility font size the filter capsules do not fit on one row, and truncation is worse than scrolling.
         // The four capsules' occupancy budget on iPhone 15 Pro (393pt) at Large font size (inner padding 12×2=24, Chinese glyphs counted as 1em≈17pt,
@@ -756,6 +761,12 @@ struct ChatsListView: View {
         // The magnifier at the row end is pinned outside the scroll area: HStack lays out the fixed-width end first and ScrollView takes what is left,
         // so wrapping the search entry outside this layer cannot mis-measure the row's settings (the top-bar cluster was tripped by
         // `.fixedSize()` outside `ViewThatFits`, the same lesson).
+        // Device round 2 item 2: a capsule sliced at the scroll area's edge read as truncation, not as "swipe for more" — so the
+        // scroll area dissolves its first and last `trailingFadeWidth` points into the bar. The dissolve is unconditional: the
+        // frame-based "is anything still beyond the edge" probe this replaced never delivered on the iOS 26 runtime (the
+        // preference stayed at zero across a scroll), and a fade that only sometimes appears is worse than one that is always
+        // there. The mask is attached to the ScrollView's own frame, never to the row, which is what keeps the pinned magnifier
+        // at full contrast — nothing is drawn over it.
         HStack(spacing: 0) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: PopopxMetrics.spaceXS) {
@@ -767,6 +778,27 @@ struct ChatsListView: View {
                 .padding(.leading, PopopxMetrics.gutter)
                 .padding(.trailing, onSearch == nil ? PopopxMetrics.gutter : PopopxMetrics.spaceXS)
                 .padding(.vertical, PopopxMetrics.space2XS)
+            }
+            .mask {
+                GeometryReader { proxy in
+                    let width = max(proxy.size.width, 1)
+                    let fade = min(0.4, Self.trailingFadeWidth / width)
+                    // Symmetric dissolve on both physical edges: a capsule sliced at whichever edge
+                    // overflows reads as truncation, not as "swipe for more", and the two-edge form is
+                    // mirror-invariant — RTL gets the same dissolve without any direction branch.
+                    // The mask lives on the ScrollView's own frame, so the pinned magnifier outside
+                    // the scroll area is never dimmed.
+                    LinearGradient(
+                        stops: [
+                            .init(color: .clear, location: 0),
+                            .init(color: .black, location: fade),
+                            .init(color: .black, location: 1 - fade),
+                            .init(color: .clear, location: 1)
+                        ],
+                        startPoint: UnitPoint(x: 0, y: 0.5),
+                        endPoint: UnitPoint(x: 1, y: 0.5)
+                    )
+                }
             }
             if let onSearch {
                 Button(action: onSearch) {

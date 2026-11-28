@@ -167,6 +167,43 @@ struct PopopxServerConfigStagedFrame: Codable, Sendable {
     }
 }
 
+/// A system config conversation, typed.
+///
+/// Contact ids and group ids are independent sequences in the core, so a bare number cannot say which
+/// table it names. The flat `[Int64]` list this replaces mixed both, and hiding by `apiId` alone let the
+/// official service account's contact id hide a user group that happened to carry the same number.
+/// Persisting the kind with the id (`c:<id>` / `g:<id>`) makes that collision impossible.
+enum PopopxSystemChatRef: Hashable {
+    case contact(Int64)
+    case group(Int64)
+
+    /// Nil for chat kinds this mechanism never joins (notes, local).
+    init?(chatType: ChatType, apiId: Int64) {
+        switch chatType {
+        case .direct: self = .contact(apiId)
+        case .group: self = .group(apiId)
+        default: return nil
+        }
+    }
+
+    init?(rawValue: String) {
+        let parts = rawValue.split(separator: ":")
+        guard parts.count == 2, let id = Int64(parts[1]) else { return nil }
+        switch parts[0] {
+        case "c": self = .contact(id)
+        case "g": self = .group(id)
+        default: return nil
+        }
+    }
+
+    var rawValue: String {
+        switch self {
+        case .contact(let id): return "c:\(id)"
+        case .group(let id): return "g:\(id)"
+        }
+    }
+}
+
 // MARK: - Store
 
 /// All state for the configuration mechanism. Static, nonisolated, and cheap: the file reads happen on
@@ -188,8 +225,10 @@ enum PopopxServerConfigStore {
     /// Suffixed with a profile id, so the census above ("no existing key begins with `serverConfig`")
     /// still holds: the full key is this string, a dot, and a number.
     private static let keyOfficialSubscription = "serverConfigOfficialSubscription"
-    /// System config chat IDs per userId: stored as JSON dictionary [userId: [chatId]].
-    private static let keySystemConfigChatIds = "serverConfigSystemConfigChatIds"
+    /// System config chat refs per userId: JSON dictionary [userId: ["c:<id>" | "g:<id>"]].
+    private static let keySystemConfigChatRefs = "serverConfigSystemConfigChatRefs"
+    /// The previous, untyped form: JSON dictionary [userId: [chatId]]. Read only to migrate.
+    private static let keySystemConfigChatIdsLegacy = "serverConfigSystemConfigChatIds"
 
     /// How many floor records, broken entries and receipts are kept. Bounded because each is a JSON
     /// blob in `UserDefaults` that a device could otherwise accumulate forever; the newest entries are
@@ -347,43 +386,78 @@ enum PopopxServerConfigStore {
         groupDefaults.set(true, forKey: "\(keyOfficialSubscription).\(userId)")
     }
 
-    // MARK: System config chat IDs
+    // MARK: System config chats
 
-    /// Returns all system config chat IDs for a given userId.
-    static func systemConfigChatIds(for userId: Int64) -> Set<Int64> {
-        guard let data = groupDefaults.data(forKey: keySystemConfigChatIds),
-              let dict = try? JSONDecoder().decode([String: [Int64]].self, from: data),
-              let ids = dict[String(userId)] else {
-            return []
+    /// Returns all typed system config chat refs for a profile, migrating the legacy untyped entry as
+    /// far as `resolve` allows.
+    ///
+    /// Migration is incremental on purpose. A legacy id is moved only when its kind is proven by the
+    /// caller — which resolves it against the live chat table and reports a kind only when exactly one
+    /// chat of that number is silenced (this mechanism silences the conversation it joins). An id that
+    /// cannot be resolved yet stays in the legacy entry and is retried on the next call, because its
+    /// chat may simply not be loaded when the store is first read; dropping it would un-hide the
+    /// official chat permanently. An id that is ambiguous (two silenced chats of the same number, or
+    /// none) resolves nothing: hiding the wrong chat would hide a user's own conversation, while a
+    /// visible official chat is noise the user can mute.
+    static func systemConfigChatRefs(
+        for userId: Int64,
+        resolvingLegacy resolve: (Int64) -> PopopxSystemChatRef?
+    ) -> Set<PopopxSystemChatRef> {
+        let profileKey = String(userId)
+        var refsByUser = decoded([String: [String]].self, forKey: keySystemConfigChatRefs) ?? [:]
+        var rawRefs = refsByUser[profileKey] ?? []
+
+        var legacyByUser = decoded([String: [Int64]].self, forKey: keySystemConfigChatIdsLegacy) ?? [:]
+        if let legacyIds = legacyByUser[profileKey], !legacyIds.isEmpty {
+            var pending: [Int64] = []
+            var added = false
+            for id in legacyIds {
+                guard let ref = resolve(id) else {
+                    pending.append(id)
+                    continue
+                }
+                if !rawRefs.contains(ref.rawValue) {
+                    rawRefs.append(ref.rawValue)
+                    added = true
+                }
+            }
+            if added {
+                refsByUser[profileKey] = rawRefs
+                persist(refsByUser, forKey: keySystemConfigChatRefs)
+            }
+            if pending.count != legacyIds.count {
+                if pending.isEmpty {
+                    legacyByUser.removeValue(forKey: profileKey)
+                } else {
+                    legacyByUser[profileKey] = pending
+                }
+                persist(legacyByUser, forKey: keySystemConfigChatIdsLegacy)
+            }
         }
-        return Set(ids)
+
+        return Set(rawRefs.compactMap(PopopxSystemChatRef.init(rawValue:)))
     }
 
-    /// Adds a system config chat ID for a given userId.
-    static func addSystemConfigChatId(_ chatId: Int64, for userId: Int64) {
-        var dict: [String: [Int64]] = [:]
-        if let data = groupDefaults.data(forKey: keySystemConfigChatIds),
-           let existing = try? JSONDecoder().decode([String: [Int64]].self, from: data) {
-            dict = existing
-        }
-        var ids = dict[String(userId)] ?? []
-        guard !ids.contains(chatId) else { return }
-        ids.append(chatId)
-        dict[String(userId)] = ids
-        if let encoded = try? JSONEncoder().encode(dict) {
-            groupDefaults.set(encoded, forKey: keySystemConfigChatIds)
-        }
+    /// Adds a typed system config chat ref for a profile.
+    static func addSystemConfigChatRef(_ ref: PopopxSystemChatRef, for userId: Int64) {
+        var refsByUser = decoded([String: [String]].self, forKey: keySystemConfigChatRefs) ?? [:]
+        var rawRefs = refsByUser[String(userId)] ?? []
+        guard !rawRefs.contains(ref.rawValue) else { return }
+        rawRefs.append(ref.rawValue)
+        refsByUser[String(userId)] = rawRefs
+        persist(refsByUser, forKey: keySystemConfigChatRefs)
     }
 
-    /// Removes all system config chat IDs for a given userId (e.g., on profile deletion).
-    static func clearSystemConfigChatIds(for userId: Int64) {
-        guard let data = groupDefaults.data(forKey: keySystemConfigChatIds),
-              var dict = try? JSONDecoder().decode([String: [Int64]].self, from: data) else {
-            return
+    /// Removes all system config chats for a profile (e.g., on profile deletion), typed and legacy.
+    static func clearSystemConfigChats(for userId: Int64) {
+        let profileKey = String(userId)
+        if var refsByUser = decoded([String: [String]].self, forKey: keySystemConfigChatRefs),
+           refsByUser.removeValue(forKey: profileKey) != nil {
+            persist(refsByUser, forKey: keySystemConfigChatRefs)
         }
-        dict.removeValue(forKey: String(userId))
-        if let encoded = try? JSONEncoder().encode(dict) {
-            groupDefaults.set(encoded, forKey: keySystemConfigChatIds)
+        if var legacyByUser = decoded([String: [Int64]].self, forKey: keySystemConfigChatIdsLegacy),
+           legacyByUser.removeValue(forKey: profileKey) != nil {
+            persist(legacyByUser, forKey: keySystemConfigChatIdsLegacy)
         }
     }
 

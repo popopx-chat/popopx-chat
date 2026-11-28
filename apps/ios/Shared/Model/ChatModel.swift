@@ -1190,11 +1190,12 @@ final class ChatModel: ObservableObject {
     // Spec: spec/state.md#totalUnreadCountForAllUsers
     func totalUnreadCountForAllUsers() -> Int {
         var unread: Int = 0
-        // System config chat IDs for the current user, to be excluded from badge count.
-        let systemConfigIds = currentUser.map { PopopxServerConfigStore.systemConfigChatIds(for: $0.userId) } ?? []
+        // System config chats for the current user, to be excluded from badge count.
+        let systemConfigRefs = systemConfigChatRefs()
         for chat in chats {
-            // Skip system config chats.
-            guard !systemConfigIds.contains(chat.chatInfo.apiId) else { continue }
+            // Skip system config chats, matched by kind and id — the two id sequences collide.
+            if let ref = PopopxSystemChatRef(chatType: chat.chatInfo.chatType, apiId: chat.chatInfo.apiId),
+               systemConfigRefs.contains(ref) { continue }
             switch chat.chatInfo.chatSettings?.enableNtfs {
             case .all: unread += chat.chatStats.unreadCount
             case .mentions: unread += chat.chatStats.unreadMentions
@@ -1207,6 +1208,46 @@ final class ChatModel: ObservableObject {
             }
         }
         return unread
+    }
+
+    /// The typed system config conversations for the current profile.
+    ///
+    /// Reading the store is also where the legacy untyped entry migrates: each bare id is resolved
+    /// against the chats loaded so far, so an id whose chat is not loaded yet simply stays pending
+    /// and is retried on the next read. The silenced flag is the signature of the conversation this
+    /// mechanism joined — it is silenced on join — and the migration resolves a legacy id only when
+    /// exactly one chat of that number is silenced. Two silenced chats of the same number, or none,
+    /// resolve to nothing: hiding the wrong conversation would hide a user's own chat, so that
+    /// direction is never taken.
+    ///
+    /// A stored ref additionally hides a chat only while that chat still carries the silenced flag.
+    /// Refs can outlive the chats they named — a re-created profile restarts the id sequences while
+    /// the App Group defaults survive — and a number alone is what used to hide a user's own group;
+    /// the flag check makes such a stale ref inert instead of hiding an unrelated conversation.
+    func systemConfigChatRefs() -> Set<PopopxSystemChatRef> {
+        guard let userId = currentUser?.userId else { return [] }
+        let stored = PopopxServerConfigStore.systemConfigChatRefs(for: userId) { [weak self] id in
+            self?.resolveLegacySystemConfigRef(id)
+        }
+        return stored.filter { ref in
+            chats.contains { chat in
+                // `MsgFilter.none` spelled out: a bare `.none` here would resolve to `Optional.none`,
+                // turning the test into "settings are nil" and passing a chat that is not silenced.
+                PopopxSystemChatRef(chatType: chat.chatInfo.chatType, apiId: chat.chatInfo.apiId) == ref
+                    && chat.chatInfo.chatSettings?.enableNtfs == MsgFilter.none
+            }
+        }
+    }
+
+    private func resolveLegacySystemConfigRef(_ id: Int64) -> PopopxSystemChatRef? {
+        let directSilenced = chats.first {
+            $0.chatInfo.chatType == .direct && $0.chatInfo.apiId == id
+        }?.chatInfo.chatSettings?.enableNtfs == MsgFilter.none
+        let groupSilenced = chats.first {
+            $0.chatInfo.chatType == .group && $0.chatInfo.apiId == id
+        }?.chatInfo.chatSettings?.enableNtfs == MsgFilter.none
+        guard directSilenced != groupSilenced else { return nil }
+        return directSilenced ? .contact(id) : .group(id)
     }
 
     func increaseGroupReportsCounter(_ chatId: ChatId) {

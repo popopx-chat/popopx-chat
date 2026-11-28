@@ -397,12 +397,13 @@ struct PopopxContactsView: View {
     /// The unified definition of contacts + encrypted groups (the main list of Contacts).
     /// Service accounts are excluded: they live in their own page (`PopopxServiceAccountsPage`).
     private var contactChats: [Chat] {
-        // System config chat IDs for the current user, to be hidden from UI.
-        let systemConfigIds = chatModel.currentUser.map { PopopxServerConfigStore.systemConfigChatIds(for: $0.userId) } ?? []
+        // System config chats for the current user, to be hidden from UI — matched by kind and id.
+        let systemConfigRefs = chatModel.systemConfigChatRefs()
         return chatModel.chats.filter { chat in
             guard !chat.chatInfo.chatDeleted, !chat.chatInfo.contactCard else { return false }
             // Hide system config chats from the contacts list.
-            guard !systemConfigIds.contains(chat.chatInfo.apiId) else { return false }
+            if let ref = PopopxSystemChatRef(chatType: chat.chatInfo.chatType, apiId: chat.chatInfo.apiId),
+               systemConfigRefs.contains(ref) { return false }
             switch chat.chatInfo {
             case let .direct(contact):
                 // Exclude service accounts from the ordinary contacts list
@@ -422,22 +423,24 @@ struct PopopxContactsView: View {
 
     /// Channels: the test shares the one `isPopopxChannel` with the channel page below, so the two places cannot say different things.
     private var channelChats: [Chat] {
-        // System config chat IDs for the current user, to be hidden from UI.
-        let systemConfigIds = chatModel.currentUser.map { PopopxServerConfigStore.systemConfigChatIds(for: $0.userId) } ?? []
+        // System config chats for the current user, to be hidden from UI — matched by kind and id.
+        let systemConfigRefs = chatModel.systemConfigChatRefs()
         return chatModel.chats.filter { chat in
-            guard !systemConfigIds.contains(chat.chatInfo.apiId) else { return false }
+            if let ref = PopopxSystemChatRef(chatType: chat.chatInfo.chatType, apiId: chat.chatInfo.apiId),
+               systemConfigRefs.contains(ref) { return false }
             return isPopopxChannel(chat)
         }
     }
 
     /// Service accounts: direct contacts that completed the eco session handshake.
     private var serviceAccountChats: [Chat] {
-        // System config chat IDs for the current user, to be hidden from UI.
-        let systemConfigIds = chatModel.currentUser.map { PopopxServerConfigStore.systemConfigChatIds(for: $0.userId) } ?? []
+        // System config chats for the current user, to be hidden from UI — matched by kind and id.
+        let systemConfigRefs = chatModel.systemConfigChatRefs()
         return chatModel.chats.filter { chat in
             guard !chat.chatInfo.chatDeleted, !chat.chatInfo.contactCard else { return false }
             // Hide system config chats from the service accounts list.
-            guard !systemConfigIds.contains(chat.chatInfo.apiId) else { return false }
+            if let ref = PopopxSystemChatRef(chatType: chat.chatInfo.chatType, apiId: chat.chatInfo.apiId),
+               systemConfigRefs.contains(ref) { return false }
             guard case let .direct(contact) = chat.chatInfo else { return false }
             return contact.active && !contact.isContactCard && PopopxEcoSessionStore.hasSession(for: contact.contactId)
         }
@@ -1270,10 +1273,11 @@ private func isPopopxChannel(_ chat: Chat) -> Bool {
 
     /// The order follows `chatModel.chats` itself, the same definition as the Messages tab (`ChatsListView.swift:418` does not start a second sort either).
     private var channels: [Chat] {
-        // System config chat IDs for the current user, to be hidden from UI.
-        let systemConfigIds = chatModel.currentUser.map { PopopxServerConfigStore.systemConfigChatIds(for: $0.userId) } ?? []
+        // System config chats for the current user, to be hidden from UI — matched by kind and id.
+        let systemConfigRefs = chatModel.systemConfigChatRefs()
         return chatModel.chats.filter { chat in
-            guard !systemConfigIds.contains(chat.chatInfo.apiId) else { return false }
+            if let ref = PopopxSystemChatRef(chatType: chat.chatInfo.chatType, apiId: chat.chatInfo.apiId),
+               systemConfigRefs.contains(ref) { return false }
             return isPopopxChannel(chat)
         }
     }

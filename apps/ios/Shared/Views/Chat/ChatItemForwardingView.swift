@@ -26,10 +26,14 @@ struct ChatItemForwardingView: View {
     @State private var searchText: String = ""
     @State private var alert: SomeAlert?
     private var chatsToForwardTo: [Chat] {
-        // System config chat IDs for the current user, to be hidden from forward/share selectors.
-        let systemConfigIds = chatModel.currentUser.map { PopopxServerConfigStore.systemConfigChatIds(for: $0.userId) } ?? []
+        // System config chats for the current user, to be hidden from forward/share selectors —
+        // matched by kind and id, because contact and group ids are independent sequences.
+        let systemConfigRefs = chatModel.systemConfigChatRefs()
         return filterChatsToForwardTo(chats: ChatModel.shared.chats, includeLocal: includeLocal)
-            .filter { !systemConfigIds.contains($0.chatInfo.apiId) }
+            .filter { chat in
+                guard let ref = PopopxSystemChatRef(chatType: chat.chatInfo.chatType, apiId: chat.chatInfo.apiId) else { return true }
+                return !systemConfigRefs.contains(ref)
+            }
     }
 
     var body: some View {

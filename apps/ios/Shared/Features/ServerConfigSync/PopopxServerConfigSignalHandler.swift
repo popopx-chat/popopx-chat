@@ -894,9 +894,10 @@ final class PopopxServerConfigSignalHandler {
     private func silenceOfficialChat(type: ChatType, id: Int64) async {
         do {
             try await apiSetChatSettings(type: type, id: id, chatSettings: ChatSettings(enableNtfs: .none, sendRcpts: nil, favorite: false))
-            // Persist the chat ID so UI layers can filter it out.
-            if let userId = ChatModel.shared.currentUser?.userId {
-                PopopxServerConfigStore.addSystemConfigChatId(id, for: userId)
+            // Persist the typed ref so UI layers can filter it out.
+            if let userId = ChatModel.shared.currentUser?.userId,
+               let ref = PopopxSystemChatRef(chatType: type, apiId: id) {
+                PopopxServerConfigStore.addSystemConfigChatRef(ref, for: userId)
             }
         } catch {
             log.error("server config: an official chat could not be silenced: \(error.localizedDescription)")
