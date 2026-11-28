@@ -3500,7 +3500,7 @@ popopxChatImage = ImageData "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAA
 adminContactProfile :: Profile
 adminContactProfile =
   Profile
-    { displayName = "Ask SimpleX Team",
+    { displayName = "POPOPX Support",
       fullName = "",
       shortDescr = Just "Send questions about POPOPX Chat app and your suggestions",
       description = Nothing,

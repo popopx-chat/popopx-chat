@@ -356,6 +356,9 @@
 		E5C0BBE92F82B45500EA7527 /* POPOPXAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5C0BBE72F82B45500EA7527 /* POPOPXAssets.xcassets */; };
 		E5C0BBEB2F82B45500EA7527 /* SharedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5C0BBEA2F82B45500EA7527 /* SharedAssets.xcassets */; };
 		E5C0BBEC2F82B45500EA7527 /* SharedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5C0BBEA2F82B45500EA7527 /* SharedAssets.xcassets */; };
+		A1B2C3D4E5F6000100000002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000100000001 /* PrivacyInfo.xcprivacy */; };
+		A1B2C3D4E5F6000100000003 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000100000001 /* PrivacyInfo.xcprivacy */; };
+		A1B2C3D4E5F6000100000004 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000100000001 /* PrivacyInfo.xcprivacy */; };
 		E5DBF1932F88169800E1D7FD /* ConnectBannerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DBF1922F88169800E1D7FD /* ConnectBannerCard.swift */; };
 		E5DCF8DB2C56FAC1007928CC /* POPOPXChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CE2BA682845308900EC33A6 /* POPOPXChat.framework */; };
 		E5DCF9712C590272007928CC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E5DCF96F2C590272007928CC /* Localizable.strings */; };
@@ -489,6 +492,7 @@
 		5C3F1D552842B68D00EC8A82 /* IntegrityErrorItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrityErrorItemView.swift; sourceTree = "<group>"; };
 		5C3F1D57284363C400EC8A82 /* PrivacySettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettings.swift; sourceTree = "<group>"; };
 		5C422A7C27A9A6FA0097A1E1 /* POPOPX (iOS).entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "POPOPX (iOS).entitlements"; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000100000005 /* POPOPX (iOS) Release.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "POPOPX (iOS) Release.entitlements"; sourceTree = "<group>"; };
 		5C4B3B09285FB130003915F2 /* DatabaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseView.swift; sourceTree = "<group>"; };
 		5C5346A727B59A6A004DF848 /* ChatHelp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHelp.swift; sourceTree = "<group>"; };
 		5C55A91E283AD0E400C4E99E /* CallManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
@@ -844,6 +848,7 @@
 		E5AEC0C32F9C000100270665 /* POPOPX Snapshots.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "POPOPX Snapshots.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E5C0BBE72F82B45500EA7527 /* POPOPXAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = POPOPXAssets.xcassets; sourceTree = "<group>"; };
 		E5C0BBEA2F82B45500EA7527 /* SharedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SharedAssets.xcassets; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000100000001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		E5C0BBFD2F82BBC000EA7527 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		E5C0BBFE2F82BBC900EA7527 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		E5DBF1922F88169800E1D7FD /* ConnectBannerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectBannerCard.swift; sourceTree = "<group>"; };
@@ -1121,6 +1126,8 @@
 				5CC2C0FD2809BF11000C35E3 /* POPOPX--iOS--InfoPlist.strings */,
 				5CC2C0FA2809BF11000C35E3 /* Localizable.strings */,
 				5C422A7C27A9A6FA0097A1E1 /* POPOPX (iOS).entitlements */,
+				A1B2C3D4E5F6000100000001 /* PrivacyInfo.xcprivacy */,
+				A1B2C3D4E5F6000100000005 /* POPOPX (iOS) Release.entitlements */,
 				5C764E5C279C70B7000C6508 /* Libraries */,
 				5CA059C2279559F40002BEB4 /* Shared */,
 				5CDCAD462818589900503DA2 /* POPOPX NSE */,
@@ -1978,6 +1985,7 @@
 				8B2E25BA30AEF54F00D91FDC /* PopopxStoreKit.storekit in Resources */,
 				E5C0BBE82F82B45500EA7527 /* POPOPXAssets.xcassets in Resources */,
 				E5C0BBEB2F82B45500EA7527 /* SharedAssets.xcassets in Resources */,
+				A1B2C3D4E5F6000100000002 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1994,6 +2002,7 @@
 			files = (
 				5CB0BA882826CB3A00B3292C /* InfoPlist.strings in Resources */,
 				E5DCF9842C5902CE007928CC /* Localizable.strings in Resources */,
+				A1B2C3D4E5F6000100000003 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2012,6 +2021,7 @@
 				E5C0BBE92F82B45500EA7527 /* POPOPXAssets.xcassets in Resources */,
 				E5C0BBEC2F82B45500EA7527 /* SharedAssets.xcassets in Resources */,
 				E5DCF9982C5906FF007928CC /* InfoPlist.strings in Resources */,
+				A1B2C3D4E5F6000100000004 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2801,7 +2811,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_TIDY_BUGPRONE_REDUNDANT_BRANCH_CONDITION = YES;
 				CLANG_TIDY_MISC_REDUNDANT_EXPRESSION = YES;
-				CODE_SIGN_ENTITLEMENTS = "POPOPX (iOS).entitlements";
+				CODE_SIGN_ENTITLEMENTS = "POPOPX (iOS) Release.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 100;
 				DEAD_CODE_STRIPPING = YES;
@@ -2893,7 +2903,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "POPOPX NSE/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "POPOPX NSE";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 SimpleX Chat. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 POPOPX";
 				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2902,7 +2912,7 @@
 				);
 				LLVM_LTO = YES;
 				MARKETING_VERSION = 1.2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.popopxchat.popopx.SimpleX-NSE";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.popopxchat.popopx.notification-service";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
@@ -2929,7 +2939,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "POPOPX NSE/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "POPOPX NSE";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 SimpleX Chat. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 POPOPX";
 				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2938,7 +2948,7 @@
 				);
 				LLVM_LTO = YES;
 				MARKETING_VERSION = 1.2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.popopxchat.popopx.SimpleX-NSE";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.popopxchat.popopx.notification-service";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
@@ -2969,7 +2979,7 @@
 				ENABLE_MODULE_VERIFIER = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 SimpleX Chat. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 POPOPX";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -3024,7 +3034,7 @@
 				ENABLE_MODULE_VERIFIER = YES;
 				EXPORTED_SYMBOLS_FILE = "$(PROJECT_DIR)/POPOPXChat/exported_symbols.txt";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 SimpleX Chat. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 POPOPX";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -3074,7 +3084,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "POPOPX SE/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "POPOPX SE";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 SimpleX Chat. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 POPOPX";
 				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3083,7 +3093,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.popopxchat.popopx.SimpleX-SE";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.popopxchat.popopx.share";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -3107,7 +3117,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "POPOPX SE/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "POPOPX SE";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 SimpleX Chat. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 POPOPX";
 				IPHONEOS_DEPLOYMENT_TARGET = "$(RECOMMENDED_IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3116,7 +3126,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.popopxchat.popopx.SimpleX-SE";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.popopxchat.popopx.share";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

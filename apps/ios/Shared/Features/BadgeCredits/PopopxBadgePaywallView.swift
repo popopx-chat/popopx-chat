@@ -529,6 +529,12 @@ struct PopopxBadgePaywallView: View {
                 }
             }
             HStack(spacing: PopopxMetrics.spaceL) {
+                Link(Copy.privacyPolicy, destination: URL(string: "https://popopx.chat/privacy")!)
+                Link(Copy.termsOfUse, destination: URL(string: "https://popopx.chat/terms")!)
+            }
+            .font(PopopxType.caption)
+            .foregroundStyle(PopopxPalette.labelSecondary)
+            HStack(spacing: PopopxMetrics.spaceL) {
                 Button(PopopxCommerceCopy.paywallRestore) {
                     Task { await restore() }
                 }
@@ -654,6 +660,8 @@ private extension PopopxBadgePaywallView {
     enum Copy {
         static let working = NSLocalizedString("Working…", comment: "")
         static let close = NSLocalizedString("Close", comment: "")
+        static let privacyPolicy = NSLocalizedString("Privacy Policy", comment: "")
+        static let termsOfUse = NSLocalizedString("Terms of Use", comment: "")
         static let benefitsTitle = NSLocalizedString("After you light it up", comment: "")
         static let benefitBadge = NSLocalizedString("The top bar shows this badge: it appears only while the badge is active and is withdrawn when it expires.", comment: "")
         static let benefitStatusPanel = NSLocalizedString("Badge details is a local node status panel: tier, expiry, reconciliation summary, local counts. Read-only, never uploaded.", comment: "")

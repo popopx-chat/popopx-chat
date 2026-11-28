@@ -70,6 +70,7 @@ struct ChatView: View {
     @State var floatingButtonModel: FloatingButtonModel
     @Binding var scrollToItemId: ChatItem.ID?
     @State private var showChatInfoSheet: Bool = false
+    @State private var showReportGroupSheet = false
     @State private var showAddMembersSheet: Bool = false
     @State private var composeState = ComposeState()
     @State private var selectedRange = NSRange()
@@ -353,6 +354,13 @@ struct ChatView: View {
                     .presentationDetents([.fraction(0.8)])
             } else {
                 ChatItemForwardingView(chatItems: forwardedChatItems, fromChatInfo: chat.chatInfo, composeState: $composeState)
+            }
+        }
+        .sheet(isPresented: $showReportGroupSheet) {
+            if case let .group(groupInfo, _) = chat.chatInfo {
+                PopopxReportSheet(target: .group(groupInfo)) {
+                    Task { await leaveGroup(groupInfo.apiId) }
+                }
             }
         }
         .appSheet(
@@ -652,6 +660,12 @@ struct ChatView: View {
                         }
                         searchButton()
                         ToggleNtfsButton(chat: chat)
+                        Divider()
+                        Button(role: .destructive) {
+                            showReportGroupSheet = true
+                        } label: {
+                            Label(NSLocalizedString("Report group", comment: "chat menu"), systemImage: "flag")
+                        }
                     } label: {
                         Image(systemName: "ellipsis")
                     }

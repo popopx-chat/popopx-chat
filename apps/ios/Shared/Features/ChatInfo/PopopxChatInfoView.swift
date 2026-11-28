@@ -645,6 +645,26 @@ struct PopopxChatInfoView: View {
     private var dangerCard: some View {
         PopopxSectionCard(Copy.groupDanger, footnote: Copy.dangerFootnote) {
             PopopxChatInfoRow(
+                title: Copy.report,
+                note: Copy.reportNote,
+                systemImage: "flag",
+                tint: .danger,
+                action: {
+                    sheet = SomeSheet(
+                        content: { AnyView(
+                            PopopxReportSheet(target: .contact(contact)) {
+                                blockReportedContact()
+                            }
+                        ) },
+                        id: "reportContact",
+                        fraction: 0.8
+                    )
+                }
+            )
+
+            PopopxChatInfoDivider()
+
+            PopopxChatInfoRow(
                 title: Copy.clearHistory,
                 note: Copy.clearHistoryNote,
                 systemImage: "gobackward",
@@ -676,6 +696,13 @@ struct PopopxChatInfoView: View {
     }
 
     // MARK: Behaviour
+
+    private func blockReportedContact() {
+        Task {
+            _ = await deleteContactChat(chat, chatDeleteMode: .full(notify: false))
+            await MainActor.run { dismiss() }
+        }
+    }
 
     private func loadContactInfo() {
         if let currentUser = chatModel.currentUser {
@@ -1230,6 +1257,8 @@ private enum Copy {
     static let clearConfirmButton = NSLocalizedString("Clear", comment: "")
     static let deleteContact = NSLocalizedString("Delete contact", comment: "")
     static let deleteContactNote = NSLocalizedString("The next step asks whether to delete only the chat or the contact as well.", comment: "")
+    static let report = NSLocalizedString("Report conversation", comment: "")
+    static let reportNote = NSLocalizedString("Sends a report to POPOPX support and blocks this contact.", comment: "")
 
     // Preferences left unsaved when leaving this page
     static let savePrefsTitle = NSLocalizedString("Save preferences?", comment: "")
@@ -1251,6 +1280,258 @@ private enum Copy {
     static let fixConnectionMessage = NSLocalizedString("The encryption for this connection needs to be re-negotiated.", comment: "")
     static let fix = NSLocalizedString("Fix", comment: "")
     static let renegotiationInProgress = NSLocalizedString("The encryption is being re-negotiated, please try again later.", comment: "")
+}
+
+// MARK: - App Store 1.2 report & block
+
+/// The conversation a report is about; also feeds the operator-facing message body.
+enum PopopxReportTarget {
+    case contact(Contact)
+    case group(GroupInfo)
+
+    var kind: String {
+        switch self {
+        case .contact: return "Direct conversation"
+        case .group: return "Group"
+        }
+    }
+
+    var name: String {
+        switch self {
+        case let .contact(contact): return contact.displayName
+        case let .group(group): return group.displayName
+        }
+    }
+
+    var chatId: Int64 {
+        switch self {
+        case let .contact(contact): return contact.contactId
+        case let .group(group): return group.groupId
+        }
+    }
+}
+
+enum PopopxReport {
+    /// Same address as `popopxTeamURL` without the `?c=` certificate parameter: a contact card
+    /// created from the preset link must resolve even if the parameter is re-encoded.
+    private static var supportLinkPrefix: String {
+        let link = popopxTeamURL.absoluteString
+        return String(link.split(separator: "?").first ?? Substring(link))
+    }
+
+    static func supportContact() -> Contact? {
+        ChatModel.shared.chats
+            .compactMap { chat -> Contact? in
+                guard case let .direct(contact) = chat.chatInfo,
+                      let link = contact.profile.contactLink,
+                      link.hasPrefix(supportLinkPrefix)
+                else { return nil }
+                return contact
+            }
+            .first
+    }
+
+    /// Hands the report to the preset "POPOPX Support" contact, connecting to it first when needed.
+    @MainActor
+    static func deliver(_ text: String) async -> Bool {
+        guard let support = supportContact() else { return false }
+        var target = support
+        if !target.sndReady {
+            guard let connected = await apiConnectContactViaAddress(incognito: false, contactId: support.contactId) else {
+                return false
+            }
+            target = connected
+        }
+        guard target.sndReady else { return false }
+        let sent = await apiSendMessages(
+            type: .direct,
+            id: target.contactId,
+            scope: nil,
+            composedMessages: [ComposedMessage(msgContent: .text(text))]
+        )
+        return sent != nil
+    }
+
+    static func message(for target: PopopxReportTarget, reason: ReportReason, details: String) -> String {
+        let trimmed = details.trimmingCharacters(in: .whitespacesAndNewlines)
+        return """
+        POPOPX support report
+        Type: \(target.kind)
+        Name: \(target.name)
+        Chat ID: \(target.chatId)
+        Reason: \(wireReason(reason))
+        Details: \(trimmed.isEmpty ? "None" : trimmed)
+        App: POPOPX \(appVersion ?? "unknown") (\(appBuild ?? "unknown"))
+        Time: \(ISO8601DateFormatter().string(from: Date()))
+        """
+    }
+
+    /// Reasons reach the operator in fixed English, independent of the device language.
+    static func wireReason(_ reason: ReportReason) -> String {
+        switch reason {
+        case .spam: return "Spam"
+        case .illegal: return "Inappropriate content"
+        case .community: return "Community guidelines violation"
+        case .profile: return "Inappropriate profile"
+        case .other: return "Other"
+        case let .unknown(type): return type
+        }
+    }
+
+    static func mailtoURL(_ text: String) -> URL? {
+        var components = URLComponents()
+        components.scheme = "mailto"
+        components.path = "chat@popopx.chat"
+        components.queryItems = [
+            URLQueryItem(name: "subject", value: "POPOPX report"),
+            URLQueryItem(name: "body", value: text),
+        ]
+        return components.url
+    }
+}
+
+private enum CopyReport {
+    static let title = NSLocalizedString("Report conversation", comment: "")
+    static let cancel = NSLocalizedString("Cancel", comment: "")
+    static let reasonTitle = NSLocalizedString("Why are you reporting this conversation?", comment: "")
+    static let footnote = NSLocalizedString("The report reaches POPOPX support together with the chat name, its ID and the app version. Your messages are not included.", comment: "")
+    static let detailsPrompt = NSLocalizedString("Add details (optional)", comment: "")
+    static let submit = NSLocalizedString("Report and block", comment: "")
+    static let sending = NSLocalizedString("Sending report…", comment: "")
+    static let blockNote = NSLocalizedString("The conversation is blocked right after the report: a contact is deleted, a group is left.", comment: "")
+    static let fallbackTitle = NSLocalizedString("Report not sent", comment: "")
+    static let fallbackMessage = NSLocalizedString("The in-app support chat is unavailable. Send the same report by email, or block this conversation without a report.", comment: "")
+    static let fallbackEmail = NSLocalizedString("Send by email", comment: "")
+    static let fallbackBlock = NSLocalizedString("Block without reporting", comment: "")
+}
+
+@MainActor
+struct PopopxReportSheet: View {
+    let target: PopopxReportTarget
+    let onReported: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var reason: ReportReason = .spam
+    @State private var details = ""
+    @State private var isSubmitting = false
+    @State private var showFallback = false
+
+    private var reportText: String {
+        PopopxReport.message(for: target, reason: reason, details: details)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
+                    reasonCard
+                    submitCard
+                }
+                .padding(PopopxMetrics.spaceL)
+            }
+            .background(PopopxPalette.base)
+            .navigationTitle(Text(CopyReport.title))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(CopyReport.cancel) { dismiss() }
+                        .font(PopopxType.emphasis)
+                        .foregroundStyle(PopopxPalette.brand)
+                }
+            }
+        }
+        .interactiveDismissDisabled(isSubmitting)
+        .alert(Text(CopyReport.fallbackTitle), isPresented: $showFallback) {
+            Button(CopyReport.fallbackEmail) {
+                if let url = PopopxReport.mailtoURL(reportText) {
+                    UIApplication.shared.open(url)
+                }
+                finish()
+            }
+            Button(CopyReport.fallbackBlock, role: .destructive) { finish() }
+            Button(CopyReport.cancel, role: .cancel) {}
+        } message: {
+            Text(CopyReport.fallbackMessage)
+        }
+    }
+
+    private var reasonCard: some View {
+        PopopxSectionCard(CopyReport.reasonTitle, footnote: CopyReport.footnote) {
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(ReportReason.supportedReasons.enumerated()), id: \.element) { index, item in
+                    if index > 0 {
+                        PopopxChatInfoDivider()
+                    }
+                    Button {
+                        reason = item
+                    } label: {
+                        HStack(spacing: PopopxMetrics.spaceS) {
+                            Text(item.text)
+                                .font(PopopxType.body)
+                                .foregroundStyle(PopopxPalette.label)
+                            Spacer(minLength: PopopxMetrics.spaceS)
+                            Image(systemName: reason == item ? "largecircle.fill.circle" : "circle")
+                                .font(PopopxType.body)
+                                .foregroundStyle(reason == item ? PopopxPalette.brand : PopopxPalette.labelHint)
+                        }
+                        .padding(.vertical, PopopxMetrics.spaceS)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                PopopxChatInfoDivider()
+
+                TextField(CopyReport.detailsPrompt, text: $details, axis: .vertical)
+                    .font(PopopxType.body)
+                    .lineLimit(2...5)
+                    .padding(.vertical, PopopxMetrics.spaceS)
+            }
+        }
+    }
+
+    private var submitCard: some View {
+        PopopxSectionCard(footnote: CopyReport.blockNote) {
+            Button {
+                submit()
+            } label: {
+                HStack(spacing: PopopxMetrics.spaceXS) {
+                    if isSubmitting {
+                        ProgressView().tint(PopopxPalette.onDanger)
+                    }
+                    Text(isSubmitting ? CopyReport.sending : CopyReport.submit)
+                        .font(PopopxType.emphasis)
+                }
+                .foregroundStyle(PopopxPalette.onDanger)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, PopopxMetrics.spaceS)
+                .background(PopopxPalette.dangerFill, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+            }
+            .buttonStyle(.plain)
+            .disabled(isSubmitting)
+        }
+    }
+
+    private func submit() {
+        guard !isSubmitting else { return }
+        isSubmitting = true
+        Task {
+            let delivered = await PopopxReport.deliver(reportText)
+            await MainActor.run {
+                isSubmitting = false
+                if delivered {
+                    finish()
+                } else {
+                    showFallback = true
+                }
+            }
+        }
+    }
+
+    private func finish() {
+        dismiss()
+        onReported()
+    }
 }
 
 // MARK: - Previews

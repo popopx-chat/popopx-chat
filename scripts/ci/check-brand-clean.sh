@@ -62,7 +62,7 @@ grep -viE '^\./[^:]+:[0-9]+:\s*(--|//|#|\*)' | \
 grep -vE '"SimpleX Messaging Protocol"|"SimpleX Chat Ltd"|"SimpleX network"|"SimpleX approach"|"SimpleX Platform"' | \
 grep -v 'SimpleX Messaging Protocol\|SimpleX Chat Ltd\|SimpleX network\|SimpleX approach\|SimpleX Platform' | \
 grep -v 'contentModerationPostLink\|simplex-network-large-groups' | \
-grep -v 'Ask SimpleX Team\|SimpleX news' | \
+grep -v 'SimpleX news' | \
 grep -vE '"/simplex"|highlight "/simplex"|ConnectSimplex' | \
 grep -vE '"SimpleX Chat"|"SimpleX"' | \
 grep -vE '^\./README\.md:' | \
@@ -123,7 +123,7 @@ grep -vE '^\./apps/multiplatform/common/src/desktopTest/kotlin/chat/popopx/app/S
 grep -vE '^\./apps/multiplatform/product/.*\.md:' | \
 grep -vE '^\./apps/ios/Shared/Model/AppAPITypes\.swift:.*case simplex|\.simplex:|operatorTag: \.simplex' | \
 grep -vE '^\./apps/multiplatform/common/src/commonMain/kotlin/chat/popopx/common/model/PopopxAPI\.kt:.*SIMPLEX|simplex\.im' | \
-grep -vE '^\./apps/ios/POPOPX\.xcodeproj/project\.pbxproj:[0-9]+:.*(INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © [0-9]{4} SimpleX Chat|PRODUCT_BUNDLE_IDENTIFIER = "com\.popopxchat\.popopx\.SimpleX-(NSE|SE)"|repositoryURL = "https://github\.com/simplex-chat/)' \
+grep -vE '^\./apps/ios/POPOPX\.xcodeproj/project\.pbxproj:[0-9]+:.*repositoryURL = "https://github\.com/simplex-chat/' \
 > "$violations_file"; } || pipeline_rc=$?
 
 if [ "$pipeline_rc" -gt 1 ]; then
