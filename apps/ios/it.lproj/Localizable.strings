@@ -10300,3 +10300,69 @@ alert title */
 "The attachment could not be unpacked on this device." = "L’allegato non è stato decompresso su questo dispositivo.";
 /* POPOPX local media compression */
 "Saved %@ on this device" = "%@ risparmiati su questo dispositivo";
+
+/* agent task card */
+"Agent task" = "Attività dell'agente";
+
+/* agent task card */
+"Zero retention" = "Nessuna conservazione";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "Nessuna conservazione · cancellata automaticamente al completamento";
+
+/* agent task card */
+"Permissions requested" = "Autorizzazioni richieste";
+
+/* agent task card */
+"Deny" = "Rifiuta";
+
+/* agent task card */
+"Approval sent" = "Approvazione inviata";
+
+/* agent task card */
+"Denial sent" = "Rifiuto inviato";
+
+/* agent task card */
+"Choice sent" = "Scelta inviata";
+
+/* agent task card */
+"Sending your answer…" = "Invio della tua risposta…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "Impossibile inviare la risposta. Riprova.";
+
+/* agent task card */
+"Choose one option" = "Scegli un'opzione";
+
+/* agent task card */
+"Result" = "Risultato";
+
+/* agent task card */
+"Progress %lld%%" = "Avanzamento %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "%1$lld di %2$lld passaggi completati";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld attività in attesa di approvazione";
+
+/* agent task card */
+"Agent is working · %lld%%" = "L'agente sta lavorando · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "L'agente sta lavorando";
+
+/* active agent bar */
+"Active agent tasks" = "Attività agente attive";
+
+/* agent task status */
+"Running…" = "In esecuzione…";
+
+/* agent task status */
+"Awaiting approval" = "In attesa di approvazione";
+
+/* agent task status */
+"Failed" = "Non riuscita";
+
+/* agent task status */
+"Cancelled" = "Annullata";

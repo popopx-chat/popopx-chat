@@ -6772,3 +6772,72 @@ server test failure */
 "The attachment could not be unpacked on this device." = "Přílohu se na tomto zařízení nepodařilo rozbalit.";
 /* POPOPX local media compression */
 "Saved %@ on this device" = "Ušetřeno %@ v tomto zařízení";
+
+/* agent task card */
+"Agent task" = "Úloha agenta";
+
+/* agent task card */
+"Zero retention" = "Bez uchovávání";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "Bez uchovávání · po dokončení se automaticky smaže";
+
+/* agent task card */
+"Permissions requested" = "Požadovaná oprávnění";
+
+/* agent task card */
+"Deny" = "Zamítnout";
+
+/* agent task card */
+"Approval sent" = "Schválení odesláno";
+
+/* agent task card */
+"Denial sent" = "Zamítnutí odesláno";
+
+/* agent task card */
+"Choice sent" = "Volba odeslána";
+
+/* agent task card */
+"Sending your answer…" = "Odesílání odpovědi…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "Odpověď se nepodařilo odeslat. Zkuste to znovu.";
+
+/* agent task card */
+"Choose one option" = "Vyberte jednu možnost";
+
+/* agent task card */
+"Result" = "Výsledek";
+
+/* agent task card */
+"Progress %lld%%" = "Průběh %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "Hotovo %1$lld z %2$lld kroků";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld úloh čeká na schválení";
+
+/* agent task card */
+"Agent is working · %lld%%" = "Agent pracuje · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "Agent pracuje";
+
+/* active agent bar */
+"Active agent tasks" = "Aktivní úlohy agenta";
+
+/* agent task status */
+"Running…" = "Probíhá…";
+
+/* agent task status */
+"Awaiting approval" = "Čeká na schválení";
+
+/* agent task status */
+"Completed" = "Dokončeno";
+
+/* agent task status */
+"Failed" = "Selhalo";
+
+/* agent task status */
+"Cancelled" = "Zrušeno";

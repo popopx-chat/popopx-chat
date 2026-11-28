@@ -57,6 +57,15 @@ struct ChatPreviewView: View {
                     .padding(.bottom, 4)
                     .padding(.horizontal, 8)
 
+                    if let pillTask = PopopxAgentTaskScan.pillTask(in: chat) {
+                        HStack(spacing: PopopxMetrics.space2XS) {
+                            PopopxAgentStatusPill(task: pillTask, showsRetention: true)
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.bottom, 4)
+                    }
+
                     ZStack(alignment: .topTrailing) {
                         let chat = activeContentPreview?.chat ?? chat
                         let ci = activeContentPreview?.ci ?? chat.chatItems.last
@@ -317,6 +326,11 @@ struct ChatPreviewView: View {
             return (Text(String.localizedStringWithFormat(
                 NSLocalizedString("Mac has version %@ available", comment: "chat list preview"), notice.version
             )), false)
+        }
+        // The task card's own title is what the conversation is about; the wire line itself must not
+        // become the preview, the same way an update card never shows its marker.
+        if let agentTask = PopopxAgentTaskWire.parseVisibleCard(in: cItem.content.msgContent?.text ?? "") {
+            return (Text(agentTask.title), false)
         }
         let (itemText, itemFormattedText) = chatItemPreviewText(cItem)
         let r = messageText(itemText, itemFormattedText, markdownBlocks: itemFormattedText == nil ? nil : cItem.markdownBlocks, sender: cItem.meta.showGroupAsSender ? nil : cItem.memberDisplayName, preview: true, mentions: cItem.mentions, userMemberId: chat.chatInfo.groupInfo?.membership.memberId, showSecrets: nil, backgroundColor: UIColor(theme.colors.background), prefix: prefix())

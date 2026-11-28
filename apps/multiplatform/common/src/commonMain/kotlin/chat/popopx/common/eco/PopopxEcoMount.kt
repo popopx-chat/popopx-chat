@@ -1,5 +1,6 @@
 package chat.popopx.common.eco
 
+import chat.popopx.common.agent.PopopxAgentReceiptWire
 import chat.popopx.common.cfgsec.PopopxServerConfigSignalHandler
 import chat.popopx.common.cfgsec.PopopxServerConfigWire
 import chat.popopx.common.discover.PopopxNodeFeedWire
@@ -99,7 +100,8 @@ fun popopxEcoObserveIncoming(chatType: ChatType, chatId: Long, itemId: Long, mem
  * like a valid one, since it is deleted on arrival either way.
  */
 private val popopxEcoSuppression: PopopxRenderSuppression = popopxSysSignalSuppression {
-  PopopxEcoMarker.isControlText(it) || PopopxEcoUplink.isUplinkText(it) || PopopxServerConfigWire.isControlText(it)
+  PopopxEcoMarker.isControlText(it) || PopopxEcoUplink.isUplinkText(it) || PopopxServerConfigWire.isControlText(it) ||
+    PopopxAgentReceiptWire.isReceiptText(it)
 }
 
 /**

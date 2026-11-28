@@ -10288,3 +10288,69 @@ alert title */
 "The attachment could not be unpacked on this device." = "A csatolmányt nem sikerült kicsomagolni ezen a készüléken.";
 /* POPOPX local media compression */
 "Saved %@ on this device" = "%@ megspórolva ezen a készüléken";
+
+/* agent task card */
+"Agent task" = "Ügynökfeladat";
+
+/* agent task card */
+"Zero retention" = "Megőrzés nélkül";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "Megőrzés nélkül · a befejezés után automatikusan törlődik";
+
+/* agent task card */
+"Permissions requested" = "Kért engedélyek";
+
+/* agent task card */
+"Deny" = "Elutasítás";
+
+/* agent task card */
+"Approval sent" = "Jóváhagyás elküldve";
+
+/* agent task card */
+"Denial sent" = "Elutasítás elküldve";
+
+/* agent task card */
+"Choice sent" = "Választás elküldve";
+
+/* agent task card */
+"Sending your answer…" = "Válasz küldése…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "A választ nem sikerült elküldeni. Próbáld újra.";
+
+/* agent task card */
+"Choose one option" = "Válassz egy lehetőséget";
+
+/* agent task card */
+"Result" = "Eredmény";
+
+/* agent task card */
+"Progress %lld%%" = "Folyamat %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "%1$lld / %2$lld lépés kész";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld feladat vár jóváhagyásra";
+
+/* agent task card */
+"Agent is working · %lld%%" = "Az ügynök dolgozik · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "Az ügynök dolgozik";
+
+/* active agent bar */
+"Active agent tasks" = "Aktív ügynökfeladatok";
+
+/* agent task status */
+"Running…" = "Fut…";
+
+/* agent task status */
+"Awaiting approval" = "Jóváhagyásra vár";
+
+/* agent task status */
+"Failed" = "Sikertelen";
+
+/* agent task status */
+"Cancelled" = "Megszakítva";

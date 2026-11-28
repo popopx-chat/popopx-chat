@@ -6318,3 +6318,72 @@ server test failure */
 "The attachment could not be unpacked on this device." = "ไม่สามารถแตกไฟล์แนบบนเครื่องนี้";
 /* POPOPX local media compression */
 "Saved %@ on this device" = "ประหยัดไปแล้ว %@ บนเครื่องนี้";
+
+/* agent task card */
+"Agent task" = "งานของเอเจนต์";
+
+/* agent task card */
+"Zero retention" = "ไม่เก็บรักษา";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "ไม่เก็บรักษา · ลบอัตโนมัติเมื่อเสร็จสิ้น";
+
+/* agent task card */
+"Permissions requested" = "สิทธิ์ที่ขอ";
+
+/* agent task card */
+"Deny" = "ปฏิเสธ";
+
+/* agent task card */
+"Approval sent" = "ส่งการอนุมัติแล้ว";
+
+/* agent task card */
+"Denial sent" = "ส่งการปฏิเสธแล้ว";
+
+/* agent task card */
+"Choice sent" = "ส่งตัวเลือกแล้ว";
+
+/* agent task card */
+"Sending your answer…" = "กำลังส่งคำตอบ…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "ส่งคำตอบไม่ได้ ลองอีกครั้ง";
+
+/* agent task card */
+"Choose one option" = "เลือกหนึ่งตัวเลือก";
+
+/* agent task card */
+"Result" = "ผลลัพธ์";
+
+/* agent task card */
+"Progress %lld%%" = "ความคืบหน้า %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "เสร็จแล้ว %1$lld จาก %2$lld ขั้นตอน";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld งานรอการอนุมัติ";
+
+/* agent task card */
+"Agent is working · %lld%%" = "เอเจนต์กำลังทำงาน · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "เอเจนต์กำลังทำงาน";
+
+/* active agent bar */
+"Active agent tasks" = "งานของเอเจนต์ที่ใช้งานอยู่";
+
+/* agent task status */
+"Running…" = "กำลังทำงาน…";
+
+/* agent task status */
+"Awaiting approval" = "รอการอนุมัติ";
+
+/* agent task status */
+"Completed" = "เสร็จสิ้น";
+
+/* agent task status */
+"Failed" = "ล้มเหลว";
+
+/* agent task status */
+"Cancelled" = "ยกเลิกแล้ว";

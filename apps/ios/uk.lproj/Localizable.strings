@@ -9413,3 +9413,69 @@ alert title */
 "The attachment could not be unpacked on this device." = "Не вдалося розпакувати це вкладення на цьому пристрої.";
 /* POPOPX local media compression */
 "Saved %@ on this device" = "Збережено %@ на цьому пристрої";
+
+/* agent task card */
+"Agent task" = "Завдання агента";
+
+/* agent task card */
+"Zero retention" = "Без збереження";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "Без збереження · автоматично стирається після завершення";
+
+/* agent task card */
+"Permissions requested" = "Запитані дозволи";
+
+/* agent task card */
+"Deny" = "Відхилити";
+
+/* agent task card */
+"Approval sent" = "Схвалення надіслано";
+
+/* agent task card */
+"Denial sent" = "Відмову надіслано";
+
+/* agent task card */
+"Choice sent" = "Вибір надіслано";
+
+/* agent task card */
+"Sending your answer…" = "Надсилання відповіді…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "Не вдалося надіслати відповідь. Спробуйте ще раз.";
+
+/* agent task card */
+"Choose one option" = "Виберіть один варіант";
+
+/* agent task card */
+"Result" = "Результат";
+
+/* agent task card */
+"Progress %lld%%" = "Прогрес %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "Виконано %1$lld з %2$lld кроків";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld завдань очікують схвалення";
+
+/* agent task card */
+"Agent is working · %lld%%" = "Агент працює · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "Агент працює";
+
+/* active agent bar */
+"Active agent tasks" = "Активні завдання агента";
+
+/* agent task status */
+"Running…" = "Виконується…";
+
+/* agent task status */
+"Awaiting approval" = "Очікує схвалення";
+
+/* agent task status */
+"Failed" = "Помилка";
+
+/* agent task status */
+"Cancelled" = "Скасовано";

@@ -19,10 +19,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import chat.popopx.common.eco.PopopxEcoMarker
+import chat.popopx.common.agent.PopopxAgentTaskWire
 import chat.popopx.common.model.*
 import chat.popopx.common.platform.*
 import chat.popopx.common.ui.theme.*
 import chat.popopx.common.signal.PopopxSignalTarget
+import chat.popopx.common.views.agent.PopopxAgentTaskCardView
 import chat.popopx.common.views.chat.*
 import chat.popopx.common.views.commerce.PopopxCommerceCard
 import chat.popopx.common.views.commerce.PopopxCommerceCardContext
@@ -545,6 +547,14 @@ fun CIMarkdownText(
   val updateCard = if (appPlatform.isAndroid && !ci.chatDir.sent && chatInfo is ChatInfo.Direct)
     remember(text) { PopopxNodeUpdateWire.parseVisibleCard(text) } else null
 
+  // The agent task card, mounted in the same place as the two cards above: it must outrank the plain-text
+  // branch (its `detail` may carry a URL the live app would linkify), and it is Direct only — the approval
+  // buttons mint a receipt and send it to the chat's contact, and a group row has no single contact to
+  // answer. Unlike the node update card it renders the sender's own copy too (read-only): seeing the card
+  // one sent is what makes "the same card, one step on" legible (PopopxMessageBubble.swift:1103-1109).
+  val agentCard = if (appPlatform.isAndroid && chatInfo is ChatInfo.Direct)
+    remember(text) { PopopxAgentTaskWire.parseVisibleCard(text) } else null
+
   if (commerceFirst) {
     PopopxCommerceCard(
       commerce!!,
@@ -569,6 +579,8 @@ fun CIMarkdownText(
     PopopxEcoCardView(ecoCard, chatInfo.apiId)
   } else if (updateCard != null) {
     PopopxNodeUpdateCardView(updateCard, (chatInfo as? ChatInfo.Direct)?.apiId)
+  } else if (agentCard != null) {
+    PopopxAgentTaskCardView(agentCard, incoming = !ci.chatDir.sent, contactId = (chatInfo as? ChatInfo.Direct)?.apiId)
   } else {
   Box(
     Modifier

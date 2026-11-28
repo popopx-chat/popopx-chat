@@ -4828,3 +4828,69 @@
 "🔒 [Channel subscription] %1$lld Compute Credits / %2$lld days" = "🔒 [اشتراك القناة] %1$lld من أرصدة الحوسبة / %2$lld يومًا";
 "🧧 [Compute Credits packet] %1$lld · split equally into %2$lld shares" = "🧧 [ظرف أرصدة الحوسبة] %1$lld · يُقسَّم بالتساوي إلى %2$lld حصة";
 "🧧 [Compute Credits packet] %lld" = "🧧 [ظرف أرصدة الحوسبة] %lld";
+
+/* agent task card */
+"Agent task" = "مهمة وكيل";
+
+/* agent task card */
+"Zero retention" = "بدون احتفاظ";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "بدون احتفاظ · يُمحى تلقائيًا بعد الإكمال";
+
+/* agent task card */
+"Permissions requested" = "الأذونات المطلوبة";
+
+/* agent task card */
+"Deny" = "رفض";
+
+/* agent task card */
+"Approval sent" = "تم إرسال الموافقة";
+
+/* agent task card */
+"Denial sent" = "تم إرسال الرفض";
+
+/* agent task card */
+"Choice sent" = "تم إرسال الاختيار";
+
+/* agent task card */
+"Sending your answer…" = "جارٍ إرسال إجابتك…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "تعذّر إرسال إجابتك. حاول مرة أخرى.";
+
+/* agent task card */
+"Choose one option" = "اختر خيارًا واحدًا";
+
+/* agent task card */
+"Result" = "النتيجة";
+
+/* agent task card */
+"Progress %lld%%" = "التقدم %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "تم إنجاز %1$lld من %2$lld خطوات";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld مهام بانتظار الموافقة";
+
+/* agent task card */
+"Agent is working · %lld%%" = "الوكيل يعمل · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "الوكيل يعمل";
+
+/* active agent bar */
+"Active agent tasks" = "مهام الوكيل النشطة";
+
+/* agent task status */
+"Running…" = "قيد التشغيل…";
+
+/* agent task status */
+"Awaiting approval" = "بانتظار الموافقة";
+
+/* agent task status */
+"Failed" = "فشل";
+
+/* agent task status */
+"Cancelled" = "ملغى";

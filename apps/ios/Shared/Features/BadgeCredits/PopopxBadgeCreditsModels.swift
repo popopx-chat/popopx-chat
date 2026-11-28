@@ -20,6 +20,7 @@
 import Foundation
 import CryptoKit
 import Security
+import PopopxMeshKit
 
 // MARK: - Limits and calibrated values
 
@@ -1198,9 +1199,13 @@ enum PopopxSysMarker {
     /// never show. `PopopxServerConfigWire.isControlText` judges the same prefix-and-no-whitespace shape as the
     /// others but without their two limits, and judges it **without** consulting the signature: an unsigned,
     /// malformed, empty or over-long frame is hidden exactly like a valid one, since it is deleted on arrival.
+    ///
+    /// The fifth term is a signed agent receipt (`::POPOPX_AGENT_RCPT::v1::…`). It is the answer this device
+    /// sends to an agent, so it must never come back as a bubble looking like something the user typed; the
+    /// whole-string prefix test lives in `PopopxAgentReceiptWire.isReceiptText`.
     static func isSignalText(_ text: String) -> Bool {
         parse(wholeText: text) != nil || PopopxEcoMarker.isControlText(text) || PopopxEcoUplink.isUplinkText(text)
-            || PopopxServerConfigWire.isControlText(text)
+            || PopopxServerConfigWire.isControlText(text) || PopopxAgentReceiptWire.isReceiptText(text)
     }
 }
 
@@ -1458,6 +1463,12 @@ enum PopopxCommerceKeychainSlot: String, CaseIterable, Sendable {
     /// machine that is no longer with the user.
     case discoverFeed = "popopx.commerce.discover-feed"
     case discoverUpdateDecisions = "popopx.commerce.discover-update-decisions"
+    /// The Ed25519 seed this device signs agent receipts with, and the one answer per task id that
+    /// keeps an approval card from being tapped twice. Cases of this enum for the same reason as
+    /// the three above: `removeAll()` is the emergency wipe, and a signing identity plus a trail of
+    /// what the user approved is exactly what must not survive it.
+    case agentReceiptKey = "popopx.commerce.agent-receipt-key"
+    case agentReceipts = "popopx.commerce.agent-receipts"
 }
 
 /// Keychain reads and writes.

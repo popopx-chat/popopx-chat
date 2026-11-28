@@ -27,7 +27,10 @@ import androidx.compose.ui.unit.*
 import chat.popopx.common.eco.popopxEcoSuppressesText
 import chat.popopx.common.eco.popopxNodeArtifact
 import chat.popopx.common.discover.PopopxNodeUpdateWire
+import chat.popopx.common.agent.PopopxAgentTaskWire
 import chat.popopx.common.ui.theme.*
+import chat.popopx.common.views.agent.PopopxAgentStatusPill
+import chat.popopx.common.views.agent.PopopxAgentTaskScan
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.model.*
 import chat.popopx.common.model.ChatController.appPrefs
@@ -248,6 +251,13 @@ fun ChatPreviewView(
         Text(generalGetString(MR.strings.node_feed_chat_preview), color = previewColor)
         return
       }
+      // An agent card's own title is what the conversation is about; the wire line itself must not
+      // become the preview, the same way an update card never shows its marker.
+      val agentTask = (ci.content.msgContent as? MsgContent.MCText)?.text?.let { PopopxAgentTaskWire.parseVisibleCard(it) }
+      if (agentTask != null) {
+        Text(agentTask.title, color = previewColor)
+        return
+      }
     }
     if (chatModelDraftChatId == chat.id && chatModelDraft != null) {
       val sp20 = with(LocalDensity.current) { 20.sp.toDp() }
@@ -440,6 +450,15 @@ fun ChatPreviewView(
           Spacer(Modifier.width(8.sp.toDp()))
           val ts = getTimestampText(chat.chatItems.lastOrNull()?.meta?.itemTs ?: chat.chatInfo.chatTs)
           ChatListTimestampView(ts)
+        }
+        // The agent status capsule sits between the name row and the preview, the same slot the golden
+        // image gives it. Keyed on the last item's identity: a task state change always arrives as a new
+        // message, so the scan reruns exactly when it can matter and not on every scrolled frame.
+        val pillTask = remember(chat.id, chat.chatItems.lastOrNull()?.id) { PopopxAgentTaskScan.pillTask(chat) }
+        if (pillTask != null) {
+          Row(Modifier.padding(top = 2.sp.toDp())) {
+            PopopxAgentStatusPill(pillTask, showsRetention = true)
+          }
         }
         Row(Modifier.heightIn(min = 46.sp.toDp()).fillMaxWidth()) {
           Row(Modifier.padding(top = 3.sp.toDp()).weight(1f)) {

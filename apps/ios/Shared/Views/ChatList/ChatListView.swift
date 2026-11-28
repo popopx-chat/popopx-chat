@@ -10,6 +10,7 @@
 
 import SwiftUI
 import POPOPXChat
+import PopopxMeshKit
 
 enum UserPickerSheet: Identifiable {
     case address
@@ -195,6 +196,9 @@ struct ChatListView: View {
     @AppStorage(DEFAULT_SUPPORTER_BANNER_TAPPED) private var supporterBannerTapped = false
     @AppStorage(DEFAULT_TOOLBAR_MATERIAL) private var toolbarMaterial = ToolbarMaterial.defaultMaterial
     @State private var showBadgesSheet = false
+    /// Expanded/collapsed is a per-session UI preference, not a setting: a bar that vanished when the
+    /// user relaunched mid-task would read as "the task died".
+    @State private var agentBarExpanded = false
     
     // Spec: spec/client/chat-list.md#body
     var body: some View {
@@ -473,6 +477,13 @@ struct ChatListView: View {
         }
     }
 
+    /// Every chat whose newest agent task is still running or awaiting approval. Derived per render
+    /// from the chats the model already holds; no additional state, so a task that completes while the
+    /// list is on screen drops the bar on the next publish instead of lingering.
+    private var activeAgentTasks: [PopopxAgentChatTask] {
+        PopopxAgentTaskScan.activeTasks(in: chatModel.chats)
+    }
+
     private var chatListContent: some View {
         let cs = filteredChats()
         return ZStack {
@@ -493,6 +504,19 @@ struct ChatListView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.top, oneHandUI ? 8 : 0)
                         .id("searchBar")
+                    }
+                    // The active agent bar sits above every promo slot: it reports work in flight, not
+                    // an offer, so it is not subject to the one-banner-slot arbitration below.
+                    if !activeAgentTasks.isEmpty {
+                        PopopxActiveAgentBar(
+                            tasks: activeAgentTasks,
+                            expanded: $agentBarExpanded,
+                            onOpen: { chat in chatModel.chatId = chat.chatInfo.id }
+                        )
+                        .padding(.vertical, 3)
+                        .scaleEffect(x: 1, y: oneHandUI ? -1 : 1, anchor: .center)
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                     }
                     if !oneHandUICardShown {
                         OneHandUICard()
@@ -1291,5 +1315,159 @@ struct ChatListView_Previews: PreviewProvider {
             ChatListView(activeUserPickerSheet: $userPickerSheet)
                 .environmentObject(ChatModel())
         }
+    }
+}
+
+// MARK: - Active agent tasks
+
+/// One chat with a live agent task, as the messages home needs it.
+struct PopopxAgentChatTask: Identifiable {
+    let chat: Chat
+    let task: PopopxAgentTask
+
+    var id: String { chat.chatInfo.id }
+}
+
+/// Derives task state from the chats the model already holds — read-only, no extra state. Both the
+/// active-tasks bar and the row pill read through here, so the two places that answer "is this chat
+/// busy" cannot disagree about which message counts.
+enum PopopxAgentTaskScan {
+    /// The newest task card in a chat. Cards are appended in order, so the first hit scanning
+    /// backwards is the current state of that task (a later card for the same task id supersedes
+    /// an earlier one by construction).
+    static func latestTask(in chat: Chat) -> PopopxAgentTask? {
+        for item in chat.chatItems.reversed() {
+            guard let text = item.content.msgContent?.text, text.contains(PopopxAgentTaskWire.marker) else { continue }
+            if let task = PopopxAgentTaskWire.parseVisibleCard(in: text) {
+                return task
+            }
+        }
+        return nil
+    }
+
+    /// What the chat row's status capsule shows: running, awaiting approval, or — for the one field
+    /// the brief names with a green state — a just-completed task. A failed or cancelled task is not
+    /// "alive", so it gets no capsule.
+    static func pillTask(in chat: Chat) -> PopopxAgentTask? {
+        guard let task = latestTask(in: chat) else { return nil }
+        switch task.status {
+        case .running, .awaitingApproval, .completed: return task
+        case .failed, .cancelled: return nil
+        }
+    }
+
+    /// Chats with work in flight, in list order, for the bar above the conversations.
+    static func activeTasks(in chats: [Chat]) -> [PopopxAgentChatTask] {
+        chats.compactMap { chat in
+            guard let task = latestTask(in: chat), task.isActive else { return nil }
+            return PopopxAgentChatTask(chat: chat, task: task)
+        }
+    }
+}
+
+/// The collapsible bar above the conversation list. Collapsed it states the most urgent fact —
+/// how many tasks wait on the user, or how far the running one has got; expanded it lists every chat
+/// with work in flight and each row opens that conversation, where the full card offers its buttons.
+/// Hidden entirely when nothing is active: `ChatListView` only inserts it when the list is non-empty.
+struct PopopxActiveAgentBar: View {
+    let tasks: [PopopxAgentChatTask]
+    @Binding var expanded: Bool
+    let onOpen: (Chat) -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Button {
+                withAnimation(PopopxMotion.animation(PopopxSpring.snappy, reduceMotion: reduceMotion)) {
+                    expanded.toggle()
+                }
+            } label: {
+                HStack(spacing: PopopxMetrics.spaceXS) {
+                    Image(systemName: "sparkles")
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.brand)
+                        .accessibilityHidden(true)
+                    Text(verbatim: summary)
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.label)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                    Spacer(minLength: PopopxMetrics.spaceXS)
+                    Image(systemName: expanded ? "chevron.up" : "chevron.down")
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.labelSecondary)
+                        .accessibilityHidden(true)
+                }
+                .padding(.horizontal, PopopxMetrics.spaceM)
+                .frame(minHeight: PopopxMetrics.minHitTarget)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PopopxPressButtonStyle(feedback: .light))
+            .accessibilityLabel(Text(verbatim: summary))
+            .accessibilityHint(Text(verbatim: PopopxAgentCopy.barAccessibilityTitle))
+
+            if expanded {
+                VStack(spacing: 0) {
+                    ForEach(tasks) { entry in
+                        Divider()
+                            .overlay(PopopxPalette.separator)
+                        row(entry)
+                    }
+                }
+            }
+        }
+        .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusCard))
+        // Same 0.5pt hairline as the cards; the bar is a card, not a banner.
+        .overlay(
+            RoundedRectangle(cornerRadius: PopopxMetrics.radiusCard)
+                .strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
+        )
+        .popopxCardElevation(colorScheme: colorScheme)
+    }
+
+    private func row(_ entry: PopopxAgentChatTask) -> some View {
+        Button {
+            onOpen(entry.chat)
+        } label: {
+            HStack(spacing: PopopxMetrics.spaceXS) {
+                VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+                    Text(verbatim: entry.chat.chatInfo.chatViewName)
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.label)
+                        .lineLimit(1)
+                    Text(verbatim: entry.task.title)
+                        .font(PopopxType.microTag)
+                        .foregroundStyle(PopopxPalette.labelSecondary)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: PopopxMetrics.spaceXS)
+                PopopxAgentStatusPill(task: entry.task)
+                Image(systemName: "chevron.right")
+                    .font(PopopxType.microTag)
+                    .foregroundStyle(PopopxPalette.labelHint)
+                    .accessibilityHidden(true)
+            }
+            .padding(.horizontal, PopopxMetrics.spaceM)
+            .padding(.vertical, PopopxMetrics.spaceXS)
+            .frame(minHeight: PopopxMetrics.minHitTarget)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PopopxPressButtonStyle(feedback: .light))
+        .accessibilityLabel(Text(verbatim: "\(entry.chat.chatInfo.chatViewName)，\(PopopxAgentCopy.status(entry.task.status))，\(entry.task.title)"))
+    }
+
+    /// One line, most urgent fact first: approvals outrank a percentage, because a task waiting on
+    /// the user is the only one that cannot finish without them.
+    private var summary: String {
+        let awaiting = tasks.filter { $0.task.status == .awaitingApproval }.count
+        if awaiting > 0 {
+            return String(format: PopopxAgentCopy.awaitingCountFormat, awaiting)
+        }
+        if let percent = tasks.compactMap(\.task.percent).first {
+            return String(format: PopopxAgentCopy.workingPercentFormat, percent)
+        }
+        return PopopxAgentCopy.working
     }
 }

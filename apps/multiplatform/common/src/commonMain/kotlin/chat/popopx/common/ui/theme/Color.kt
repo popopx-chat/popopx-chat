@@ -46,6 +46,11 @@ val PopopxOnMesh: Color @Composable get() = if (isInDarkTheme()) Color(0xFF00211
 val PopopxMeshInk: Color @Composable get() = if (isInDarkTheme()) Color(0xFF00D2B8) else Color(0xFF00705F)
 val PopopxSuccessInk: Color @Composable get() = if (isInDarkTheme()) Color(0xFF30D158) else Color(0xFF1E7A34)
 
+// An agent task waiting on the user: amber ink on a warm parchment wash. The same two figures the iOS
+// palette carries (PopopxTheme.swift warningInk/warningFill), so the approval pill reads identically.
+val PopopxWarningInk: Color @Composable get() = if (isInDarkTheme()) Color(0xFFFFD60A) else Color(0xFFB25E09)
+val PopopxWarningFill: Color @Composable get() = if (isInDarkTheme()) Color(0xFF3A2F14) else Color(0xFFFBEBD2)
+
 // The brand fill and the two inks a filled badge needs. The navy is the one the tab bar and the QR
 // codes already carry (views/tabs/PopopxMainTabView.kt, views/newchat/QRCode.kt), lifted on dark so
 // the same hue stays legible on an OLED surface.

@@ -7478,3 +7478,69 @@ server test failure */
 "The attachment could not be unpacked on this device." = "Прикаченият файл не можа да бъде разпакван на това устройство.";
 /* POPOPX local media compression */
 "Saved %@ on this device" = "Спестени %@ на това устройство";
+
+/* agent task card */
+"Agent task" = "Задача на агент";
+
+/* agent task card */
+"Zero retention" = "Без запазване";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "Без запазване · изтрива се автоматично след завършване";
+
+/* agent task card */
+"Permissions requested" = "Искани разрешения";
+
+/* agent task card */
+"Deny" = "Откажи";
+
+/* agent task card */
+"Approval sent" = "Одобрението е изпратено";
+
+/* agent task card */
+"Denial sent" = "Отказът е изпратен";
+
+/* agent task card */
+"Choice sent" = "Изборът е изпратен";
+
+/* agent task card */
+"Sending your answer…" = "Изпращане на отговора…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "Отговорът ви не можа да бъде изпратен. Опитайте отново.";
+
+/* agent task card */
+"Choose one option" = "Изберете една опция";
+
+/* agent task card */
+"Result" = "Резултат";
+
+/* agent task card */
+"Progress %lld%%" = "Напредък %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "%1$lld от %2$lld стъпки готови";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld задачи чакат одобрение";
+
+/* agent task card */
+"Agent is working · %lld%%" = "Агентът работи · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "Агентът работи";
+
+/* active agent bar */
+"Active agent tasks" = "Активни задачи на агента";
+
+/* agent task status */
+"Running…" = "Изпълнява се…";
+
+/* agent task status */
+"Awaiting approval" = "Чака одобрение";
+
+/* agent task status */
+"Failed" = "Неуспешно";
+
+/* agent task status */
+"Cancelled" = "Отказано";

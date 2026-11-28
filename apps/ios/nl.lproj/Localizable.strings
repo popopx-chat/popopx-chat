@@ -9168,3 +9168,69 @@ server test failure */
 "The attachment could not be unpacked on this device." = "De bijlage kon niet op dit apparaat worden uitgepakt.";
 /* POPOPX local media compression */
 "Saved %@ on this device" = "%@ bespaard op dit apparaat";
+
+/* agent task card */
+"Agent task" = "Agenttaak";
+
+/* agent task card */
+"Zero retention" = "Geen bewaring";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "Geen bewaring · wordt na voltooiing automatisch gewist";
+
+/* agent task card */
+"Permissions requested" = "Aangevraagde machtigingen";
+
+/* agent task card */
+"Deny" = "Weigeren";
+
+/* agent task card */
+"Approval sent" = "Goedkeuring verzonden";
+
+/* agent task card */
+"Denial sent" = "Weigering verzonden";
+
+/* agent task card */
+"Choice sent" = "Keuze verzonden";
+
+/* agent task card */
+"Sending your answer…" = "Je antwoord wordt verzonden…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "Je antwoord kon niet worden verzonden. Probeer het opnieuw.";
+
+/* agent task card */
+"Choose one option" = "Kies één optie";
+
+/* agent task card */
+"Result" = "Resultaat";
+
+/* agent task card */
+"Progress %lld%%" = "Voortgang %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "%1$lld van %2$lld stappen voltooid";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld taken wachten op goedkeuring";
+
+/* agent task card */
+"Agent is working · %lld%%" = "Agent is bezig · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "Agent is bezig";
+
+/* active agent bar */
+"Active agent tasks" = "Actieve agenttaken";
+
+/* agent task status */
+"Running…" = "Bezig…";
+
+/* agent task status */
+"Awaiting approval" = "Wacht op goedkeuring";
+
+/* agent task status */
+"Failed" = "Mislukt";
+
+/* agent task status */
+"Cancelled" = "Geannuleerd";

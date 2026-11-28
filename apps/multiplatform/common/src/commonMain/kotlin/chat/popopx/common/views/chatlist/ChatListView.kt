@@ -39,6 +39,8 @@ import chat.popopx.common.model.ChatController.appPrefs
 import chat.popopx.common.model.ChatController.stopRemoteHostAndReloadHosts
 import chat.popopx.common.ui.theme.*
 import SectionItemView
+import chat.popopx.common.views.agent.PopopxActiveAgentBar
+import chat.popopx.common.views.agent.PopopxAgentTaskScan
 import chat.popopx.common.views.helpers.*
 import chat.popopx.common.platform.*
 import chat.popopx.common.views.call.Call
@@ -1243,6 +1245,19 @@ private fun BoxScope.ChatList(searchText: MutableState<TextFieldValue>, listStat
             },
             onDismiss = ::showSupportPOPOPXDismissAlert
           )
+        }
+      }
+    }
+    // The active agent bar, in the slot the golden image gives it: above the conversations, below the
+    // banners. Only chats with work in flight produce a row; with none the item is not inserted at all,
+    // which is the whole of "hidden entirely when no tasks are active". The builder lambda runs only
+    // when the list is rebuilt, so the scan needs no memoisation. Tapping a row opens that
+    // conversation, where the card holds the buttons.
+    val activeAgentTasks = PopopxAgentTaskScan.activeTasks(chats)
+    if (activeAgentTasks.isNotEmpty()) {
+      item(key = "popopxActiveAgentBar") {
+        Box(Modifier.padding(horizontal = 16.dp, vertical = 3.dp)) {
+          PopopxActiveAgentBar(activeAgentTasks) { chat -> chatModel.chatId.value = chat.id }
         }
       }
     }

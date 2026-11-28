@@ -6681,3 +6681,69 @@ server test failure */
 "The attachment could not be unpacked on this device." = "このデバイスでは添付ファイルを展開できませんでした。";
 /* POPOPX local media compression */
 "Saved %@ on this device" = "このデバイスで %@ 節約しました";
+
+/* agent task card */
+"Agent task" = "エージェントタスク";
+
+/* agent task card */
+"Zero retention" = "ゼロ保持";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "ゼロ保持 · 完了後に自動で消去されます";
+
+/* agent task card */
+"Permissions requested" = "要求された権限";
+
+/* agent task card */
+"Deny" = "拒否";
+
+/* agent task card */
+"Approval sent" = "承認を送信しました";
+
+/* agent task card */
+"Denial sent" = "拒否を送信しました";
+
+/* agent task card */
+"Choice sent" = "選択を送信しました";
+
+/* agent task card */
+"Sending your answer…" = "回答を送信中…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "回答を送信できませんでした。もう一度お試しください。";
+
+/* agent task card */
+"Choose one option" = "オプションを1つ選択";
+
+/* agent task card */
+"Result" = "結果";
+
+/* agent task card */
+"Progress %lld%%" = "進行状況 %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "%2$lld ステップ中 %1$lld 完了";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld 件のタスクが承認待ちです";
+
+/* agent task card */
+"Agent is working · %lld%%" = "エージェントが作業中 · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "エージェントが作業中";
+
+/* active agent bar */
+"Active agent tasks" = "アクティブなエージェントタスク";
+
+/* agent task status */
+"Running…" = "実行中…";
+
+/* agent task status */
+"Awaiting approval" = "承認待ち";
+
+/* agent task status */
+"Failed" = "失敗";
+
+/* agent task status */
+"Cancelled" = "キャンセル済み";

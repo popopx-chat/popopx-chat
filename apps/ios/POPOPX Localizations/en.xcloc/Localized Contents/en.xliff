@@ -20467,6 +20467,126 @@ last received msg: %2$@</target>
         <target>🧧 [Compute Credits packet] %lld</target>
         <note>outgoing red packet line</note>
       </trans-unit>
+      <trans-unit id="Agent task" xml:space="preserve">
+        <source>Agent task</source>
+        <target>Agent task</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Zero retention" xml:space="preserve">
+        <source>Zero retention</source>
+        <target>Zero retention</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Zero retention · erased automatically after completion" xml:space="preserve">
+        <source>Zero retention · erased automatically after completion</source>
+        <target>Zero retention · erased automatically after completion</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Permissions requested" xml:space="preserve">
+        <source>Permissions requested</source>
+        <target>Permissions requested</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Approve" xml:space="preserve">
+        <source>Approve</source>
+        <target>Approve</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Deny" xml:space="preserve">
+        <source>Deny</source>
+        <target>Deny</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Approval sent" xml:space="preserve">
+        <source>Approval sent</source>
+        <target>Approval sent</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Denial sent" xml:space="preserve">
+        <source>Denial sent</source>
+        <target>Denial sent</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Choice sent" xml:space="preserve">
+        <source>Choice sent</source>
+        <target>Choice sent</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Sending your answer…" xml:space="preserve">
+        <source>Sending your answer…</source>
+        <target>Sending your answer…</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Your answer could not be sent. Try again." xml:space="preserve">
+        <source>Your answer could not be sent. Try again.</source>
+        <target>Your answer could not be sent. Try again.</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Choose one option" xml:space="preserve">
+        <source>Choose one option</source>
+        <target>Choose one option</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Result" xml:space="preserve">
+        <source>Result</source>
+        <target>Result</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Progress %lld%%" xml:space="preserve">
+        <source>Progress %lld%%</source>
+        <target>Progress %lld%%</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="%1$lld of %2$lld steps done" xml:space="preserve">
+        <source>%1$lld of %2$lld steps done</source>
+        <target>%1$lld of %2$lld steps done</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="%lld tasks awaiting approval" xml:space="preserve">
+        <source>%lld tasks awaiting approval</source>
+        <target>%lld tasks awaiting approval</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Agent is working · %lld%%" xml:space="preserve">
+        <source>Agent is working · %lld%%</source>
+        <target>Agent is working · %lld%%</target>
+        <note>agent task card</note>
+      </trans-unit>
+      <trans-unit id="Agent is working" xml:space="preserve">
+        <source>Agent is working</source>
+        <target>Agent is working</target>
+        <note>active agent bar</note>
+      </trans-unit>
+      <trans-unit id="Active agent tasks" xml:space="preserve">
+        <source>Active agent tasks</source>
+        <target>Active agent tasks</target>
+        <note>active agent bar</note>
+      </trans-unit>
+      <trans-unit id="Running…" xml:space="preserve">
+        <source>Running…</source>
+        <target>Running…</target>
+        <note>agent task status</note>
+      </trans-unit>
+      <trans-unit id="Awaiting approval" xml:space="preserve">
+        <source>Awaiting approval</source>
+        <target>Awaiting approval</target>
+        <note>agent task status</note>
+      </trans-unit>
+      <trans-unit id="Completed" xml:space="preserve">
+        <source>Completed</source>
+        <target>Completed</target>
+        <note>agent task status</note>
+      </trans-unit>
+      <trans-unit id="Failed" xml:space="preserve">
+        <source>Failed</source>
+        <target>Failed</target>
+        <note>agent task status</note>
+      </trans-unit>
+      <trans-unit id="Cancelled" xml:space="preserve">
+        <source>Cancelled</source>
+        <target>Cancelled</target>
+        <note>agent task status</note>
+      </trans-unit>
     </body>
   </file>
   <file original="en.lproj/POPOPX--iOS--InfoPlist.strings" source-language="en" target-language="en" datatype="plaintext">

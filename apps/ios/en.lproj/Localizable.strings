@@ -24,3 +24,75 @@
 
 /* No comment provided by engineer. */
 "No group!" = "Group not found!";
+
+/* agent task card */
+"Agent task" = "Agent task";
+
+/* agent task card */
+"Zero retention" = "Zero retention";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "Zero retention · erased automatically after completion";
+
+/* agent task card */
+"Permissions requested" = "Permissions requested";
+
+/* agent task card */
+"Approve" = "Approve";
+
+/* agent task card */
+"Deny" = "Deny";
+
+/* agent task card */
+"Approval sent" = "Approval sent";
+
+/* agent task card */
+"Denial sent" = "Denial sent";
+
+/* agent task card */
+"Choice sent" = "Choice sent";
+
+/* agent task card */
+"Sending your answer…" = "Sending your answer…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "Your answer could not be sent. Try again.";
+
+/* agent task card */
+"Choose one option" = "Choose one option";
+
+/* agent task card */
+"Result" = "Result";
+
+/* agent task card */
+"Progress %lld%%" = "Progress %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "%1$lld of %2$lld steps done";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld tasks awaiting approval";
+
+/* agent task card */
+"Agent is working · %lld%%" = "Agent is working · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "Agent is working";
+
+/* active agent bar */
+"Active agent tasks" = "Active agent tasks";
+
+/* agent task status */
+"Running…" = "Running…";
+
+/* agent task status */
+"Awaiting approval" = "Awaiting approval";
+
+/* agent task status */
+"Completed" = "Completed";
+
+/* agent task status */
+"Failed" = "Failed";
+
+/* agent task status */
+"Cancelled" = "Cancelled";

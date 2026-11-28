@@ -360,6 +360,21 @@ class PopopxSilentSignalingRouter(
     )
 
   /**
+   * One `popopx.agent.receipt.v1` envelope minted by the agent card. The card signs the canonical
+   * six-key body itself and hands the finished wire line here, because rebuilding the envelope in the
+   * router would put the signature's own bytes out of reach of the verifier; delivery is the router's
+   * only job. Same non-live, no-TTL shape as every other control frame, and the row is hidden by the
+   * `popopxEcoSuppressesText` union rather than deleted.
+   */
+  suspend fun sendAgentReceipt(text: String, contactId: Long): Boolean =
+    transport.send(
+      contactId,
+      isGroup = false,
+      text,
+      live = PopopxSignalLimits.SIGNAL_IS_NEVER_LIVE,
+    )
+
+  /**
    * The bond-time pairing probe.
    *
    * DIVERGENCE, ported as measured rather than as documented (task item 6): the requirement names

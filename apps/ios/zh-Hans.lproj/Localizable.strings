@@ -10219,3 +10219,69 @@ alert title */
 "A feed arrived under a signing key other than the one this phone stored for your Mac, so it was not shown. Re-pair the Mac to accept the new key." = "收到一份使用其他签名密钥的内容，与本机为你的 Mac 记录的密钥不一致，因此未予显示。请重新配对这台 Mac 以接受新密钥。";
 "Mac discover content updated" = "Mac 发现内容已更新";
 "Mac has version %@ available" = "你的 Mac 有 %@ 版本可更新";
+
+/* agent task card */
+"Agent task" = "智能体任务";
+
+/* agent task card */
+"Zero retention" = "零留存";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "零留存 · 完成后自动擦除";
+
+/* agent task card */
+"Permissions requested" = "请求的权限";
+
+/* agent task card */
+"Deny" = "拒绝";
+
+/* agent task card */
+"Approval sent" = "已发送批准";
+
+/* agent task card */
+"Denial sent" = "已发送拒绝";
+
+/* agent task card */
+"Choice sent" = "已发送选择";
+
+/* agent task card */
+"Sending your answer…" = "正在发送你的答复…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "你的答复无法发送，请重试。";
+
+/* agent task card */
+"Choose one option" = "请选择一个选项";
+
+/* agent task card */
+"Result" = "结果";
+
+/* agent task card */
+"Progress %lld%%" = "进度 %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "已完成 %1$lld / %2$lld 步";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld 个任务待批准";
+
+/* agent task card */
+"Agent is working · %lld%%" = "智能体正在工作 · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "智能体正在工作";
+
+/* active agent bar */
+"Active agent tasks" = "活跃的智能体任务";
+
+/* agent task status */
+"Running…" = "运行中…";
+
+/* agent task status */
+"Awaiting approval" = "等待批准";
+
+/* agent task status */
+"Failed" = "失败";
+
+/* agent task status */
+"Cancelled" = "已取消";

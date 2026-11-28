@@ -4828,3 +4828,69 @@
 "🔒 [Channel subscription] %1$lld Compute Credits / %2$lld days" = "🔒 [채널 구독] 컴퓨트 크레딧 %1$lld / %2$lld일";
 "🧧 [Compute Credits packet] %1$lld · split equally into %2$lld shares" = "🧧 [컴퓨트 크레딧 봉투] %1$lld · %2$lld명에게 똑같이 나눔";
 "🧧 [Compute Credits packet] %lld" = "🧧 [컴퓨트 크레딧 봉투] %lld";
+
+/* agent task card */
+"Agent task" = "에이전트 작업";
+
+/* agent task card */
+"Zero retention" = "무보존";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "무보존 · 완료 후 자동으로 삭제됨";
+
+/* agent task card */
+"Permissions requested" = "요청된 권한";
+
+/* agent task card */
+"Deny" = "거부";
+
+/* agent task card */
+"Approval sent" = "승인이 전송되었습니다";
+
+/* agent task card */
+"Denial sent" = "거부가 전송되었습니다";
+
+/* agent task card */
+"Choice sent" = "선택이 전송되었습니다";
+
+/* agent task card */
+"Sending your answer…" = "답변을 보내는 중…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "답변을 보낼 수 없습니다. 다시 시도하세요.";
+
+/* agent task card */
+"Choose one option" = "옵션 하나를 선택하세요";
+
+/* agent task card */
+"Result" = "결과";
+
+/* agent task card */
+"Progress %lld%%" = "진행률 %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "%1$lld/%2$lld 단계 완료";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "승인 대기 중인 작업 %lld개";
+
+/* agent task card */
+"Agent is working · %lld%%" = "에이전트가 작업 중 · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "에이전트가 작업 중";
+
+/* active agent bar */
+"Active agent tasks" = "활성 에이전트 작업";
+
+/* agent task status */
+"Running…" = "실행 중…";
+
+/* agent task status */
+"Awaiting approval" = "승인 대기 중";
+
+/* agent task status */
+"Failed" = "실패함";
+
+/* agent task status */
+"Cancelled" = "취소됨";

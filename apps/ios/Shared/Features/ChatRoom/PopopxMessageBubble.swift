@@ -213,6 +213,11 @@ enum PopopxBubbleBody: Hashable {
     /// the receipt is minted node-side (`UpdateCenter.swift:219-228`), so this device can only return it.
     /// Direct chats only: a card posted in a group would put an outsider's string into the node channel.
     case nodeUpdate(PopopxNodeUpdateWire.Notice)
+    /// An agent task card (`::POPOPX_AGENT::v1`): progress, an approval request, a choice or a result.
+    /// Same family as `.nodeUpdate`: the tier carries the parsed manifest and the card holds only the
+    /// decision journal, so `Hashable` survives an in-place update of the same task id. Direct chats
+    /// only — the approval buttons mint a receipt addressed to the chat's contact.
+    case agentTask(PopopxAgentTask)
 
     /// The body sentence VoiceOver should say. `.event` is routed by `PopopxMessageBubble.body` to `eventLine`,
     /// and gets no bubble fill — the predicate is written only in that one routing place.
@@ -240,6 +245,8 @@ enum PopopxBubbleBody: Hashable {
         // Same rule as the two above: the sentence the row says out loud is built from wording that lives
         // on the card, and only the version is added here, because that is the one fact a user decides on.
         case let .nodeUpdate(notice): "\(PopopxNodeUpdateCopy.spokenPrefix)，\(notice.version)"
+        // Wording lives on the card (`PopopxAgentCopy`), same rule as the two families above.
+        case let .agentTask(task): PopopxAgentCopy.spoken(task: task, recorded: nil)
         }
     }
 }
@@ -363,7 +370,7 @@ struct PopopxMessageBubble: View {
         }
         .frame(maxWidth: item.maxWidth, alignment: item.side.alignment)
         switch item.content {
-        case .location, .secure, .profile, .commerce, .serviceCard, .nodeUpdate:
+        case .location, .secure, .profile, .commerce, .serviceCard, .nodeUpdate, .agentTask:
             // Each of these cards contains at least one real button (open the map / tap to view / open the card / open and redeem / answer an update).
             // `.combine` would merge the subtree's tap action
             // into the whole row, and VoiceOver could never open them again, so this is changed to `.contain`: the container stays, and the children
@@ -491,6 +498,11 @@ struct PopopxMessageBubble: View {
             // No `contactId` is threaded in, unlike the service card above: `answerUpdate` sends on the
             // bonded node's own contact (`nodeContactId`), so a row cannot decide where a command goes.
             PopopxNodeUpdateCard(notice: notice)
+        case let .agentTask(task):
+            // Unlike the node card, the receipt here is addressed to the conversation's own contact,
+            // so the row's `contactId` is exactly what the card needs; a group row leaves it 0 and the
+            // card renders read-only rather than guessing a destination.
+            PopopxAgentTaskCard(task: task, incoming: item.side == .received, contactId: item.contactId ?? 0)
         }
     }
 
@@ -1088,6 +1100,13 @@ enum PopopxBubbleMount {
             if let notice = PopopxNodeUpdateWire.parseVisibleCard(in: mc.text) {
                 return .nodeUpdate(notice)
             }
+            // The seventh family: an agent task card. Same reason to outrank the three guards below —
+            // its JSON line may carry a URL in `detail` that the live app would linkify. Mounted only
+            // here, which `body(of:)` restricts to direct chats: the approval buttons mint a receipt
+            // and send it to the chat's contact, and a group row has no single contact to answer.
+            if let task = PopopxAgentTaskWire.parseVisibleCard(in: mc.text) {
+                return .agentTask(task)
+            }
             // Rows with rich text/mentions/markdown go to the live app: the bubble only draws plain `Text`, so links and @ would no longer be tappable.
             guard ci.formattedText == nil, ci.mentions == nil, ci.markdownBlocks == nil else { return nil }
             // Quoted reply bars and attachments are both outside the 6 tiers of `PopopxBubbleBody`.
@@ -1119,7 +1138,7 @@ enum PopopxBubbleMount {
         let tucked: Bool
         switch content {
         case .withdrawn, .unavailable, .event: tucked = false
-        case .text, .media, .location, .secure, .profile, .commerce, .serviceCard, .nodeUpdate: tucked = tailVisible
+        case .text, .media, .location, .secure, .profile, .commerce, .serviceCard, .nodeUpdate, .agentTask: tucked = tailVisible
         }
         // The secure slot has to be able to answer "which row to delete after it closes". Both ids are read off live-app objects verbatim only, never built, never guessed:
         // `chat.chatInfo.id` = `ChatInfo.id` (generated per case at ChatTypes.swift:2104-2112), `ci.id` = the message id.

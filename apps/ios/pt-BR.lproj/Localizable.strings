@@ -4828,3 +4828,69 @@
 "🔒 [Channel subscription] %1$lld Compute Credits / %2$lld days" = "🔒 [Assinatura do canal] %1$lld Créditos de Computação / %2$lld dias";
 "🧧 [Compute Credits packet] %1$lld · split equally into %2$lld shares" = "🧧 [Envelope vermelho de Créditos de Computação] %1$lld · dividido igualmente em %2$lld partes";
 "🧧 [Compute Credits packet] %lld" = "🧧 [Envelope vermelho de Créditos de Computação] %lld";
+
+/* agent task card */
+"Agent task" = "Tarefa do agente";
+
+/* agent task card */
+"Zero retention" = "Sem retenção";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "Sem retenção · apagada automaticamente após a conclusão";
+
+/* agent task card */
+"Permissions requested" = "Permissões solicitadas";
+
+/* agent task card */
+"Deny" = "Recusar";
+
+/* agent task card */
+"Approval sent" = "Aprovação enviada";
+
+/* agent task card */
+"Denial sent" = "Recusa enviada";
+
+/* agent task card */
+"Choice sent" = "Escolha enviada";
+
+/* agent task card */
+"Sending your answer…" = "Enviando sua resposta…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "Não foi possível enviar sua resposta. Tente novamente.";
+
+/* agent task card */
+"Choose one option" = "Escolha uma opção";
+
+/* agent task card */
+"Result" = "Resultado";
+
+/* agent task card */
+"Progress %lld%%" = "Progresso %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "%1$lld de %2$lld etapas concluídas";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld tarefas aguardando aprovação";
+
+/* agent task card */
+"Agent is working · %lld%%" = "O agente está trabalhando · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "O agente está trabalhando";
+
+/* active agent bar */
+"Active agent tasks" = "Tarefas de agente ativas";
+
+/* agent task status */
+"Running…" = "Em execução…";
+
+/* agent task status */
+"Awaiting approval" = "Aguardando aprovação";
+
+/* agent task status */
+"Failed" = "Falhou";
+
+/* agent task status */
+"Cancelled" = "Cancelada";

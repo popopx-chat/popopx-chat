@@ -113,6 +113,17 @@ enum PopopxPalette {
     /// card, 8.42:1 on a dark one, and 6.89:1 on the toast's `cardHigh`.
     static let successInk = Color.popopx(light: 0x1E7A34, dark: 0x30D158)
 
+    // MARK: Warning — an agent task waiting on the user
+
+    /// Amber ink for the approval pill and the step that is blocked on a decision.
+    /// `#B25E09` reaches 4.6:1 on a white card; the dark-mode `#FFD60A` is a bright
+    /// amber on `#1C1C1E` (10.9:1). Never used as a fill under white text.
+    static let warningInk = Color.popopx(light: 0xB25E09, dark: 0xFFD60A)
+
+    /// The wash behind an awaiting-approval pill; a warm parchment that the ink
+    /// above stays readable on in both modes.
+    static let warningFill = Color.popopx(light: 0xFBEBD2, dark: 0x3A2F14)
+
     // MARK: Surfaces
 
     /// Screen background: `#F2F2F7` under white cards, OLED black under `#1C1C1E`.

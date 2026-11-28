@@ -9403,3 +9403,69 @@ alert title */
 "The attachment could not be unpacked on this device." = "Ek bu cihazda açılamadı.";
 /* POPOPX local media compression */
 "Saved %@ on this device" = "Bu cihazda %@ tasarruf edildi";
+
+/* agent task card */
+"Agent task" = "Aracı görevi";
+
+/* agent task card */
+"Zero retention" = "Sıfır saklama";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "Sıfır saklama · tamamlandıktan sonra otomatik silinir";
+
+/* agent task card */
+"Permissions requested" = "İstenen izinler";
+
+/* agent task card */
+"Deny" = "Reddet";
+
+/* agent task card */
+"Approval sent" = "Onay gönderildi";
+
+/* agent task card */
+"Denial sent" = "Ret gönderildi";
+
+/* agent task card */
+"Choice sent" = "Seçim gönderildi";
+
+/* agent task card */
+"Sending your answer…" = "Yanıtınız gönderiliyor…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "Yanıtınız gönderilemedi. Tekrar deneyin.";
+
+/* agent task card */
+"Choose one option" = "Bir seçenek seçin";
+
+/* agent task card */
+"Result" = "Sonuç";
+
+/* agent task card */
+"Progress %lld%%" = "İlerleme %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "%1$lld / %2$lld adım tamamlandı";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld görev onay bekliyor";
+
+/* agent task card */
+"Agent is working · %lld%%" = "Aracı çalışıyor · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "Aracı çalışıyor";
+
+/* active agent bar */
+"Active agent tasks" = "Etkin aracı görevleri";
+
+/* agent task status */
+"Running…" = "Çalışıyor…";
+
+/* agent task status */
+"Awaiting approval" = "Onay bekliyor";
+
+/* agent task status */
+"Failed" = "Başarısız";
+
+/* agent task status */
+"Cancelled" = "İptal edildi";

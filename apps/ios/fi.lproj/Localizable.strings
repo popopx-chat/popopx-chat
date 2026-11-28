@@ -6402,3 +6402,72 @@ server test failure */
 "The attachment could not be unpacked on this device." = "Liitteen purkaminen ei onnistunut tällä laitteella.";
 /* POPOPX local media compression */
 "Saved %@ on this device" = "Säästö tällä laitteella: %@";
+
+/* agent task card */
+"Agent task" = "Agentin tehtävä";
+
+/* agent task card */
+"Zero retention" = "Ei säilytystä";
+
+/* agent task card */
+"Zero retention · erased automatically after completion" = "Ei säilytystä · poistetaan automaattisesti valmistuttua";
+
+/* agent task card */
+"Permissions requested" = "Pyydetyt käyttöoikeudet";
+
+/* agent task card */
+"Deny" = "Hylkää";
+
+/* agent task card */
+"Approval sent" = "Hyväksyntä lähetetty";
+
+/* agent task card */
+"Denial sent" = "Hylkäys lähetetty";
+
+/* agent task card */
+"Choice sent" = "Valinta lähetetty";
+
+/* agent task card */
+"Sending your answer…" = "Lähetetään vastaustasi…";
+
+/* agent task card */
+"Your answer could not be sent. Try again." = "Vastaustasi ei voitu lähettää. Yritä uudelleen.";
+
+/* agent task card */
+"Choose one option" = "Valitse yksi vaihtoehto";
+
+/* agent task card */
+"Result" = "Tulos";
+
+/* agent task card */
+"Progress %lld%%" = "Edistyminen %lld%%";
+
+/* agent task card */
+"%1$lld of %2$lld steps done" = "%1$lld / %2$lld vaihetta valmiina";
+
+/* agent task card */
+"%lld tasks awaiting approval" = "%lld tehtävää odottaa hyväksyntää";
+
+/* agent task card */
+"Agent is working · %lld%%" = "Agentti työskentelee · %lld%%";
+
+/* active agent bar */
+"Agent is working" = "Agentti työskentelee";
+
+/* active agent bar */
+"Active agent tasks" = "Agentin aktiiviset tehtävät";
+
+/* agent task status */
+"Running…" = "Käynnissä…";
+
+/* agent task status */
+"Awaiting approval" = "Odottaa hyväksyntää";
+
+/* agent task status */
+"Completed" = "Valmis";
+
+/* agent task status */
+"Failed" = "Epäonnistui";
+
+/* agent task status */
+"Cancelled" = "Peruutettu";

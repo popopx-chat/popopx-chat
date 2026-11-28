@@ -911,3 +911,619 @@ enum PopopxNodeUpdateCopy {
         return pieces.joined(separator: "，")
     }
 }
+
+// MARK: - Agent task card
+
+/// One `popopx.agent.task.v1` card, mounted by `PopopxBubbleBody.agentTask`. Same family and same
+/// idiom as the two cards above: a manifest carried by a message, buttons that send a signed receipt,
+/// and a state line that says what the last tap did.
+///
+/// The four kinds share one frame on purpose — an agent may move a task from progress to approval to
+/// result under the same task id, and the user should recognise "the same card, one step on" rather
+/// than meet four unrelated widgets.
+///
+/// Three rules, following the node update card:
+/// - **It may not invent a receipt.** The bytes are minted here by `PopopxAgentReceiptSigner` over the
+///   canonical six-key body; the card hands them to `PopopxSilentSignalingRouter` verbatim.
+/// - **It may not be answered twice.** The decision is journalled *after* a successful send and read
+///   back on every appearance, so a card re-read from history shows the same spent state.
+/// - **It may not answer for the wrong chat.** The reply goes to the contact of the conversation the
+///   card sits in (`item.contactId`); with no contact (a card in a group) it renders read-only.
+struct PopopxAgentTaskCard: View {
+    let task: PopopxAgentTask
+    /// Received cards offer buttons; a card this device sent is history and never answers itself.
+    let incoming: Bool
+    let contactId: Int64
+
+    @State private var recorded: String?
+    @State private var sending = false
+    @State private var sendFailed = false
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PopopxMetrics.spaceS) {
+            header
+            if task.retentionZero {
+                retentionLine
+            }
+            if let detail = task.detail, !detail.isEmpty {
+                Text(verbatim: detail)
+                    .font(PopopxType.secondary)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if task.kind == .approval, !task.permissions.isEmpty {
+                permissionsBlock
+            }
+            if let percent = task.percent {
+                progressBlock(percent)
+            }
+            if !task.steps.isEmpty {
+                stepsBlock
+            }
+            if task.kind == .choice, !task.choices.isEmpty {
+                choicesBlock
+            }
+            if let result = task.result, !result.isEmpty {
+                resultBlock(result)
+            }
+            statusLine
+            actionButtons
+        }
+        .padding(PopopxMetrics.spaceM)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusCard))
+        // The one hairline stroke this card family uses, at the design system's 0.5pt (§2.1).
+        .overlay(
+            RoundedRectangle(cornerRadius: PopopxMetrics.radiusCard)
+                .strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
+        )
+        .popopxCardElevation(colorScheme: colorScheme)
+        .popopxAnimation(PopopxSpring.fluid, value: task, reduceMotion: reduceMotion)
+        .accessibilityElement(children: .contain)
+        .onAppear { recorded = PopopxAgentReceiptJournal.record(forTaskId: task.taskId) }
+    }
+
+    // MARK: Header
+
+    private var header: some View {
+        HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceS) {
+            Image(systemName: symbolName)
+                .font(PopopxType.emphasis)
+                .foregroundStyle(headerTint.ink)
+                .frame(width: PopopxMetrics.spaceXL, height: PopopxMetrics.spaceXL)
+                .background(headerTint.fill, in: .rect(cornerRadius: PopopxMetrics.radiusChip))
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+                Text(verbatim: task.agent ?? PopopxAgentCopy.spokenPrefix)
+                    .font(PopopxType.microTag)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                Text(verbatim: task.title)
+                    .font(PopopxType.emphasis)
+                    .foregroundStyle(PopopxPalette.label)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: PopopxMetrics.spaceS)
+            if let percent = task.percent {
+                Text(verbatim: "\(percent)%")
+                    .font(PopopxType.metric)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: PopopxAgentCopy.spoken(task: task, recorded: recorded)))
+    }
+
+    private var headerTint: PopopxIconTint {
+        switch task.status {
+        case .running: .brand
+        case .awaitingApproval: .brand
+        case .completed: .success
+        case .failed: .danger
+        case .cancelled: .neutral
+        }
+    }
+
+    private var symbolName: String {
+        switch task.kind {
+        case .progress: "gearshape.2"
+        case .approval: "hand.raised"
+        case .choice: "list.bullet.circle"
+        case .result: "checkmark.seal"
+        }
+    }
+
+    // MARK: Blocks
+
+    private var retentionLine: some View {
+        HStack(spacing: PopopxMetrics.space2XS) {
+            Image(systemName: "lock.fill")
+                .font(PopopxType.caption)
+            Text(verbatim: PopopxAgentCopy.zeroRetentionLine)
+                .font(PopopxType.caption)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(PopopxPalette.meshInk)
+        .padding(.horizontal, PopopxMetrics.spaceXS)
+        .padding(.vertical, PopopxMetrics.space2XS)
+        .background(PopopxPalette.mesh.opacity(0.12), in: .rect(cornerRadius: PopopxMetrics.radiusChip))
+        .accessibilityElement(children: .combine)
+    }
+
+    private var permissionsBlock: some View {
+        VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+            Text(verbatim: PopopxAgentCopy.permissionsRequested)
+                .font(PopopxType.microTag)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+            ForEach(task.permissions, id: \.self) { permission in
+                HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceXS) {
+                    Image(systemName: "lock.shield")
+                        .font(PopopxType.caption)
+                        .foregroundStyle(PopopxPalette.brand)
+                        .accessibilityHidden(true)
+                    Text(verbatim: permission)
+                        .font(PopopxType.secondary)
+                        .foregroundStyle(PopopxPalette.label)
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .padding(PopopxMetrics.spaceS)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PopopxPalette.base, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+    }
+
+    private func progressBlock(_ percent: Int) -> some View {
+        VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+            GeometryReader { proxy in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(PopopxPalette.separator)
+                    Capsule()
+                        .fill(PopopxPalette.brand)
+                        .frame(width: proxy.size.width * CGFloat(max(0, min(100, percent))) / 100)
+                }
+            }
+            .frame(height: 6)
+            .accessibilityHidden(true)
+            Text(verbatim: String(format: PopopxAgentCopy.progressFormat, percent))
+                .font(PopopxType.metricSmall)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+        }
+    }
+
+    private var stepsBlock: some View {
+        let done = task.steps.filter { $0.state == .done }.count
+        return VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+            ForEach(Array(task.steps.enumerated()), id: \.offset) { _, step in
+                HStack(alignment: .firstTextBaseline, spacing: PopopxMetrics.spaceXS) {
+                    Image(systemName: stepSymbol(step.state))
+                        .font(PopopxType.caption)
+                        .foregroundStyle(stepInk(step.state))
+                        .accessibilityHidden(true)
+                    Text(verbatim: step.label)
+                        .font(PopopxType.secondary)
+                        .foregroundStyle(step.state == .pending ? PopopxPalette.labelSecondary : PopopxPalette.label)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Text(verbatim: String(format: PopopxAgentCopy.stepsFormat, done, task.steps.count))
+                .font(PopopxType.metricSmall)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+        }
+    }
+
+    private func stepSymbol(_ state: PopopxAgentTask.Step.State) -> String {
+        switch state {
+        case .pending: "circle"
+        case .active: "circle.inset.filled"
+        case .done: "checkmark.circle.fill"
+        case .failed: "xmark.circle.fill"
+        }
+    }
+
+    private func stepInk(_ state: PopopxAgentTask.Step.State) -> Color {
+        switch state {
+        case .pending: PopopxPalette.labelHint
+        case .active: PopopxPalette.brand
+        case .done: PopopxPalette.successInk
+        case .failed: PopopxPalette.dangerInk
+        }
+    }
+
+    private var choicesBlock: some View {
+        VStack(alignment: .leading, spacing: PopopxMetrics.spaceXS) {
+            Text(verbatim: PopopxAgentCopy.chooseOne)
+                .font(PopopxType.microTag)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+            ForEach(task.choices) { choice in
+                choiceButton(choice)
+            }
+        }
+    }
+
+    private func choiceButton(_ choice: PopopxAgentTask.Choice) -> some View {
+        let spent = recorded != nil || !task.isActive || !offersActions
+        return Button {
+            answer(.choose, choiceId: choice.id)
+        } label: {
+            Text(verbatim: choice.label)
+                .font(PopopxType.emphasis)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+                .padding(.horizontal, PopopxMetrics.spaceM)
+                .padding(.vertical, PopopxMetrics.spaceS)
+                .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget)
+                .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+                .overlay(
+                    RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
+                        .strokeBorder(PopopxPalette.brand.opacity(spent ? 0.3 : 0.8), lineWidth: PopopxMetrics.divider)
+                )
+                .foregroundStyle(PopopxPalette.brand)
+                .contentShape(RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl))
+        }
+        .buttonStyle(PopopxPressButtonStyle(feedback: .light))
+        .disabled(spent || sending)
+        .opacity(spent ? 0.55 : 1)
+        .accessibilityLabel(Text(verbatim: choice.label))
+    }
+
+    private func resultBlock(_ result: String) -> some View {
+        VStack(alignment: .leading, spacing: PopopxMetrics.space2XS) {
+            Text(verbatim: PopopxAgentCopy.resultTitle)
+                .font(PopopxType.microTag)
+                .foregroundStyle(PopopxPalette.labelSecondary)
+            Text(verbatim: result)
+                .font(PopopxType.secondary)
+                .foregroundStyle(PopopxPalette.label)
+                .textSelection(.enabled)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(PopopxMetrics.spaceS)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PopopxPalette.base, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+    }
+
+    // MARK: State
+
+    /// One place decides what the card may offer, so the line below the blocks and the buttons
+    /// cannot disagree about whether this task is still answerable.
+    private var offersActions: Bool {
+        incoming && contactId > 0 && task.isActive && recorded == nil
+    }
+
+    @ViewBuilder private var statusLine: some View {
+        let state = statusText
+        if let state {
+            HStack(spacing: PopopxMetrics.space2XS) {
+                Image(systemName: statusSymbol)
+                    .font(PopopxType.caption)
+                Text(verbatim: state)
+                    .font(PopopxType.caption)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .foregroundStyle(statusInk)
+            .accessibilityHidden(true)
+        }
+    }
+
+    private var statusText: String? {
+        if sending { return PopopxAgentCopy.sendingAnswer }
+        if sendFailed { return PopopxAgentCopy.sendFailed }
+        if let recorded { return PopopxAgentCopy.recordLine(recorded) }
+        switch task.status {
+        case .awaitingApproval, .running: return nil
+        case .completed: return PopopxAgentCopy.status(.completed)
+        case .failed: return PopopxAgentCopy.status(.failed)
+        case .cancelled: return PopopxAgentCopy.status(.cancelled)
+        }
+    }
+
+    private var statusSymbol: String {
+        if sending { return "arrow.up.circle" }
+        if sendFailed { return "exclamationmark.triangle" }
+        if recorded != nil { return "checkmark.circle.fill" }
+        switch task.status {
+        case .completed: return "checkmark.circle.fill"
+        case .failed: return "exclamationmark.circle"
+        default: return "info.circle"
+        }
+    }
+
+    private var statusInk: Color {
+        if sendFailed { return PopopxPalette.dangerInk }
+        if recorded != nil || task.status == .completed { return PopopxPalette.successInk }
+        if task.status == .failed { return PopopxPalette.dangerInk }
+        return PopopxPalette.labelSecondary
+    }
+
+    @ViewBuilder private var actionButtons: some View {
+        if task.kind == .approval, offersActions {
+            HStack(spacing: PopopxMetrics.spaceXS) {
+                actionButton(PopopxAgentCopy.approve, filled: true) { answer(.approve) }
+                actionButton(PopopxAgentCopy.deny, filled: false) { answer(.deny) }
+            }
+            .disabled(sending)
+        }
+    }
+
+    private func actionButton(_ title: String, filled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(verbatim: title)
+                .font(PopopxType.emphasis)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .padding(.horizontal, PopopxMetrics.spaceM)
+                .padding(.vertical, PopopxMetrics.spaceS)
+                .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget)
+                .background(filled ? PopopxPalette.brand : PopopxPalette.card,
+                            in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+                .overlay {
+                    if !filled {
+                        RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
+                            .strokeBorder(PopopxPalette.labelHint, lineWidth: PopopxMetrics.divider)
+                    }
+                }
+                .foregroundStyle(filled ? PopopxPalette.onBrand : PopopxPalette.label)
+                .contentShape(RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl))
+        }
+        .buttonStyle(PopopxPressButtonStyle(feedback: filled ? .medium : .light))
+        .accessibilityLabel(Text(verbatim: title))
+    }
+
+    // MARK: Actions
+
+    private func answer(_ decision: PopopxAgentReceiptWire.Decision, choiceId: String = "") {
+        guard offersActions, !sending else { return }
+        sending = true
+        sendFailed = false
+        Task { @MainActor in
+            let delivered = await PopopxAgentReceiptResponder.send(
+                taskId: task.taskId, decision: decision, choiceId: choiceId, toContactId: contactId
+            )
+            sending = false
+            if delivered {
+                let line = PopopxAgentReceiptJournal.line(decision: decision, choiceId: choiceId)
+                PopopxAgentReceiptJournal.record(line, forTaskId: task.taskId)
+                recorded = line
+            } else {
+                sendFailed = true
+            }
+        }
+    }
+}
+
+/// Wording for the agent card and the messages-home pills, kept beside the view so the sentence
+/// VoiceOver says and the labels on screen come from one table (`PopopxBubbleBody.spokenText`
+/// forwards here for the same reason the node update copy does).
+enum PopopxAgentCopy {
+    static var spokenPrefix: String { NSLocalizedString("Agent task", comment: "agent task card") }
+    static var zeroRetention: String { NSLocalizedString("Zero retention", comment: "agent task card") }
+    static var zeroRetentionLine: String {
+        NSLocalizedString("Zero retention · erased automatically after completion", comment: "agent task card")
+    }
+    static var permissionsRequested: String { NSLocalizedString("Permissions requested", comment: "agent task card") }
+    static var approve: String { NSLocalizedString("Approve", comment: "agent task card") }
+    static var deny: String { NSLocalizedString("Deny", comment: "agent task card") }
+    static var approvalSent: String { NSLocalizedString("Approval sent", comment: "agent task card") }
+    static var denialSent: String { NSLocalizedString("Denial sent", comment: "agent task card") }
+    static var choiceSent: String { NSLocalizedString("Choice sent", comment: "agent task card") }
+    static var sendingAnswer: String { NSLocalizedString("Sending your answer…", comment: "agent task card") }
+    static var sendFailed: String { NSLocalizedString("Your answer could not be sent. Try again.", comment: "agent task card") }
+    static var chooseOne: String { NSLocalizedString("Choose one option", comment: "agent task card") }
+    static var resultTitle: String { NSLocalizedString("Result", comment: "agent task card") }
+    static var progressFormat: String { NSLocalizedString("Progress %lld%%", comment: "agent task card") }
+    static var stepsFormat: String { NSLocalizedString("%1$lld of %2$lld steps done", comment: "agent task card") }
+    static var awaitingCountFormat: String { NSLocalizedString("%lld tasks awaiting approval", comment: "active agent bar") }
+    static var workingPercentFormat: String { NSLocalizedString("Agent is working · %lld%%", comment: "active agent bar") }
+    static var working: String { NSLocalizedString("Agent is working", comment: "active agent bar") }
+    static var barAccessibilityTitle: String { NSLocalizedString("Active agent tasks", comment: "active agent bar") }
+
+    static func status(_ status: PopopxAgentTask.Status) -> String {
+        switch status {
+        case .running: NSLocalizedString("Running…", comment: "agent task status")
+        case .awaitingApproval: NSLocalizedString("Awaiting approval", comment: "agent task status")
+        case .completed: NSLocalizedString("Completed", comment: "agent task status")
+        case .failed: NSLocalizedString("Failed", comment: "agent task status")
+        case .cancelled: NSLocalizedString("Cancelled", comment: "agent task status")
+        }
+    }
+
+    /// The line a spent card shows, from the record written after a successful send.
+    static func recordLine(_ record: String) -> String {
+        if record == "approve" { return approvalSent }
+        if record == "deny" { return denialSent }
+        return choiceSent
+    }
+
+    static func spoken(task: PopopxAgentTask, recorded: String?) -> String {
+        var pieces = [spokenPrefix, task.title, status(task.status)]
+        if let percent = task.percent {
+            pieces.append(String(format: progressFormat, percent))
+        }
+        if task.retentionZero {
+            pieces.append(zeroRetention)
+        }
+        if let recorded {
+            pieces.append(recordLine(recorded))
+        }
+        return pieces.joined(separator: "，")
+    }
+}
+
+/// Mints one `popopx.agent.receipt.v1` envelope for a tap on an agent card.
+///
+/// The signing seed lives in the commerce keychain beside the other device-only secrets, so the
+/// emergency wipe removes it together with the journal. If the seed cannot be persisted this
+/// returns nil rather than signing with a throwaway key: the receipt's own public key is what a
+/// verifier checks, and a key that changes every launch would turn "approved" into "unknown signer"
+/// with no visible symptom here.
+enum PopopxAgentReceiptSigner {
+    static func make(
+        taskId: String,
+        decision: PopopxAgentReceiptWire.Decision,
+        choiceId: String = ""
+    ) -> PopopxAgentReceiptWire.Receipt? {
+        guard let seed = seed(), let at = timestamp() else { return nil }
+        return PopopxAgentReceiptWire.make(taskId: taskId, decision: decision, choiceId: choiceId, at: at, seed: seed)
+    }
+
+    private static func seed() -> Data? {
+        if let stored = PopopxCommerceKeychain.read(.agentReceiptKey), stored.count == 32 {
+            return stored
+        }
+        var bytes = Data(count: 32)
+        let status = bytes.withUnsafeMutableBytes { buffer -> OSStatus in
+            guard let base = buffer.baseAddress else { return errSecAllocate }
+            return SecRandomCopyBytes(kSecRandomDefault, 32, base)
+        }
+        guard status == errSecSuccess else { return nil }
+        guard PopopxCommerceKeychain.write(bytes, .agentReceiptKey) else { return nil }
+        return bytes
+    }
+
+    /// ISO 8601 UTC, second precision (`2026-11-28T10:00:00Z`) — the shape the wire documents.
+    private static func timestamp() -> String? {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        return formatter.string(from: Date())
+    }
+}
+
+/// The one answer per task id, persisted so a card re-read from history shows the same spent state.
+/// Values are `approve`, `deny`, or `choose:<id>`; the map is bounded so a long-lived chat cannot
+/// grow it without limit (the oldest entries fall off first, which only makes an ancient card
+/// answerable again in the UI — the agent side refuses a second receipt for the same task anyway).
+enum PopopxAgentReceiptJournal {
+    static func record(forTaskId id: String) -> String? { map()[id] }
+
+    static func record(_ line: String, forTaskId id: String) {
+        var all = map()
+        all[id] = line
+        if all.count > 200 {
+            all = Dictionary(uniqueKeysWithValues: all.suffix(200))
+        }
+        _ = PopopxCommerceKeychain.encode(all, .agentReceipts)
+    }
+
+    static func line(decision: PopopxAgentReceiptWire.Decision, choiceId: String) -> String {
+        switch decision {
+        case .approve: "approve"
+        case .deny: "deny"
+        case .choose: "choose:\(choiceId)"
+        }
+    }
+
+    private static func map() -> [String: String] {
+        PopopxCommerceKeychain.decode([String: String].self, .agentReceipts) ?? [:]
+    }
+}
+
+/// The status capsule the messages home shows for a chat with an agent task: amber `Awaiting approval`,
+/// a brand capsule with a breathing dot for `Running…`, green `Completed` — plus the `Zero retention`
+/// micro badge beside it when the task claims it. One component for the chat row, the preview and the
+/// active-tasks bar, so those three places cannot disagree about what state a task is in.
+struct PopopxAgentStatusPill: View {
+    let task: PopopxAgentTask
+    var showsRetention = false
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var breathing = false
+
+    var body: some View {
+        HStack(spacing: PopopxMetrics.space2XS) {
+            pill
+            if showsRetention, task.retentionZero {
+                retentionBadge
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text(verbatim: accessibilityText))
+    }
+
+    private var pill: some View {
+        HStack(spacing: PopopxMetrics.space2XS) {
+            if task.status == .running {
+                Circle()
+                    .fill(PopopxPalette.brand)
+                    .frame(width: 6, height: 6)
+                    .opacity(breathing ? 0.35 : 1)
+                    .scaleEffect(breathing ? 0.75 : 1)
+                    .animation(
+                        reduceMotion ? nil : .easeInOut(duration: 1.1).repeatForever(autoreverses: true),
+                        value: breathing
+                    )
+                    .onAppear { breathing = true }
+                    .accessibilityHidden(true)
+            }
+            Text(verbatim: PopopxAgentCopy.status(task.status))
+                .font(PopopxType.microTag)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, PopopxMetrics.spaceXS)
+        .padding(.vertical, 2)
+        .background(pillFill, in: .capsule)
+        .foregroundStyle(pillInk)
+    }
+
+    private var retentionBadge: some View {
+        HStack(spacing: 2) {
+            Image(systemName: "lock.fill")
+                .font(.system(size: 9, weight: .semibold))
+            Text(verbatim: PopopxAgentCopy.zeroRetention)
+                .font(PopopxType.microTag)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, PopopxMetrics.spaceXS)
+        .padding(.vertical, 2)
+        .background(PopopxPalette.separator, in: .capsule)
+        .foregroundStyle(PopopxPalette.labelSecondary)
+    }
+
+    private var pillFill: Color {
+        switch task.status {
+        case .awaitingApproval: PopopxPalette.warningFill
+        case .running: PopopxPalette.brand.opacity(0.12)
+        case .completed: PopopxPalette.success.opacity(0.14)
+        case .failed: PopopxPalette.danger.opacity(0.12)
+        case .cancelled: PopopxPalette.separator
+        }
+    }
+
+    private var pillInk: Color {
+        switch task.status {
+        case .awaitingApproval: PopopxPalette.warningInk
+        case .running: PopopxPalette.brand
+        case .completed: PopopxPalette.successInk
+        case .failed: PopopxPalette.dangerInk
+        case .cancelled: PopopxPalette.labelSecondary
+        }
+    }
+
+    private var accessibilityText: String {
+        var pieces = [PopopxAgentCopy.status(task.status)]
+        if showsRetention, task.retentionZero { pieces.append(PopopxAgentCopy.zeroRetention) }
+        return pieces.joined(separator: "，")
+    }
+}
+
+/// Signs and sends one answer through the single outbound gate.
+@MainActor
+enum PopopxAgentReceiptResponder {
+    static func send(
+        taskId: String,
+        decision: PopopxAgentReceiptWire.Decision,
+        choiceId: String,
+        toContactId: Int64
+    ) async -> Bool {
+        guard let receipt = PopopxAgentReceiptSigner.make(
+            taskId: taskId, decision: decision, choiceId: choiceId
+        ) else { return false }
+        return await PopopxSilentSignalingRouter.shared.sendAgentReceipt(
+            PopopxAgentReceiptWire.wireText(for: receipt), toContactId: toContactId
+        )
+    }
+}

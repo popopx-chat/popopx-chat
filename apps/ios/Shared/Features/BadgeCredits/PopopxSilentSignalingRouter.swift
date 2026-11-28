@@ -666,6 +666,15 @@ final class PopopxSilentSignalingRouter {
         return delivered
     }
 
+    /// Sends one signed agent receipt (`::POPOPX_AGENT_RCPT::v1::…`). Same gate as every other control
+    /// signal: `send(text:to:)` is the one place that builds an `apiSendMessages` call. The text is the
+    /// envelope this device minted in `PopopxAgentReceiptSigner`; it is never rebuilt here.
+    func sendAgentReceipt(_ text: String, toContactId contactId: Int64) async -> Bool {
+        let delivered = await send(text: text, to: .contact(contactId))
+        if !delivered { log.info("signaling: agent receipt not delivered") }
+        return delivered
+    }
+
     // MARK: Send / receive primitives
 
     /// One SMP text message. The call shape follows `ProfileAutoSender.sendViaSMP`
