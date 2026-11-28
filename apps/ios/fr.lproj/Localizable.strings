@@ -10382,3 +10382,17 @@ alert title */
 
 /* discover setup guide */
 "Pair now" = "Appairer maintenant";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "Mon code QR";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "Réseau et options avancées";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "Relais, appels et diagnostics.";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "Masque les discussions dans le sélecteur d'applications et les captures d'écran.";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "Supprime les codes de suivi des liens que vous envoyez.";

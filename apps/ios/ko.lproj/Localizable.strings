@@ -4933,3 +4933,17 @@
 
 /* discover setup guide */
 "Pair now" = "지금 페어링";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "내 QR 코드";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "네트워크 및 고급 설정";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "릴레이, 통화 및 진단.";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "앱 전환기와 스크린샷에서 채팅을 숨깁니다.";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "보내는 링크에서 추적 코드를 제거합니다.";

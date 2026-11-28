@@ -10393,3 +10393,17 @@ alert title */
 
 /* discover setup guide */
 "Pair now" = "Párosítás most";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "Saját QR-kódom";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "Hálózat és speciális beállítások";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "Átjátszók, hívások és diagnosztika.";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "Elrejti a csevegéseket az alkalmazásváltóban és a képernyőképeken.";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "Eltávolítja a követőkódokat az elküldött hivatkozásokból.";

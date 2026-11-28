@@ -2741,4 +2741,8 @@
   <string name="agent_task_status_completed">完了</string>
   <string name="agent_task_status_failed">失敗</string>
   <string name="agent_task_status_cancelled">キャンセル済み</string>
+  <string name="my_qr_code">マイQRコード</string>
+  <string name="network_and_advanced">ネットワークと詳細設定</string>
+  <string name="me_protect_note">アプリ切替画面とスクリーンショットでチャットを隠します。</string>
+  <string name="me_sanitize_note">送信するリンクから追跡コードを削除します。</string>
 </resources>

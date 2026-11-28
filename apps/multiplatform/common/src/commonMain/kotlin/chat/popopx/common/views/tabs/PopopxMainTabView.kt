@@ -1,10 +1,14 @@
 package chat.popopx.common.views.tabs
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -14,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -44,9 +49,12 @@ import chat.popopx.common.views.cabin.PopopxCabinView
 import chat.popopx.common.views.chatlist.unreadCountStr
 import chat.popopx.common.views.contacts.ContactListNavLinkView
 import chat.popopx.common.views.helpers.AnimatedViewState
+import chat.popopx.common.views.helpers.AppBarHeight
 import chat.popopx.common.views.helpers.LocalAppBarHandler
+import chat.popopx.common.views.helpers.fontSizeSqrtMultiplier
 import chat.popopx.common.views.helpers.rememberAppBarHandler
 import chat.popopx.common.views.helpers.withBGApi
+import chat.popopx.common.views.usersettings.showPopopxMyAddress
 import chat.popopx.common.views.me.PopopxMeView
 import chat.popopx.res.*
 import dev.icerock.moko.resources.ImageResource
@@ -150,32 +158,80 @@ private fun WithAppBar(content: @Composable () -> Unit) {
 @Composable
 private fun PopopxContactsTabView() {
   val chats = remember { derivedStateOf { chatModel.chats.value.filter(::popopxContactChat) } }
-  if (chats.value.isEmpty()) {
-    Column(
-      Modifier.fillMaxSize().padding(horizontal = DEFAULT_PADDING),
-      verticalArrangement = Arrangement.Center,
-      horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-      Text(stringResource(MR.strings.contacts_tab_empty), style = MaterialTheme.typography.h3, textAlign = TextAlign.Center)
-      Spacer(Modifier.height(8.dp))
-      Text(
-        stringResource(MR.strings.contacts_tab_empty_note),
-        style = MaterialTheme.typography.body2,
-        color = MaterialTheme.colors.secondary,
-        textAlign = TextAlign.Center
-      )
-    }
-  } else {
-    LazyColumn(Modifier.fillMaxSize()) {
-      itemsIndexed(chats.value, key = { _, chat -> chat.remoteHostId to chat.id }) { index, chat ->
-        val nextChatSelected = remember(chat.id, chats.value) {
-          derivedStateOf {
-            chatModel.chatId.value != null && chats.value.getOrNull(index + 1)?.id == chatModel.chatId.value
-          }
-        }
-        ContactListNavLinkView(chat, nextChatSelected, showDeletedChatIcon = true)
+  Column(Modifier.fillMaxSize().background(PopopxCanvas)) {
+    PopopxContactsHeader()
+    if (chats.value.isEmpty()) {
+      Column(
+        Modifier.fillMaxSize().padding(horizontal = DEFAULT_PADDING),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+      ) {
+        Text(stringResource(MR.strings.contacts_tab_empty), style = MaterialTheme.typography.h3, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(8.dp))
+        Text(
+          stringResource(MR.strings.contacts_tab_empty_note),
+          style = MaterialTheme.typography.body2,
+          color = MaterialTheme.colors.secondary,
+          textAlign = TextAlign.Center
+        )
       }
-      item { Spacer(Modifier.height(DEFAULT_PADDING)) }
+    } else {
+      LazyColumn(Modifier.fillMaxSize()) {
+        itemsIndexed(chats.value, key = { _, chat -> chat.remoteHostId to chat.id }) { index, chat ->
+          val nextChatSelected = remember(chat.id, chats.value) {
+            derivedStateOf {
+              chatModel.chatId.value != null && chats.value.getOrNull(index + 1)?.id == chatModel.chatId.value
+            }
+          }
+          ContactListNavLinkView(chat, nextChatSelected, showDeletedChatIcon = true)
+        }
+        item { Spacer(Modifier.height(DEFAULT_PADDING)) }
+      }
+    }
+  }
+}
+
+/**
+ * The Contacts page's top bar. Android's tab shell draws no per-page bar, so the title row is
+ * drawn here — the same `AppBarHeight * fontSizeSqrtMultiplier` band as `PopopxMessagesHeader`.
+ * The trailing QR button is the task-1 shortcut: it opens the exact same permanent address page
+ * as the Me tab row (`showPopopxMyAddress` wraps `UserAddressView`), 44dp hit target, and the
+ * `Row` mirrors under RTL with no extra work.
+ */
+@Composable
+private fun PopopxContactsHeader() {
+  Row(
+    Modifier
+      .fillMaxWidth()
+      .background(PopopxCanvas)
+      .statusBarsPadding()
+      .padding(horizontal = PopopxSpace.m)
+      .height(AppBarHeight * fontSizeSqrtMultiplier),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Text(
+      stringResource(MR.strings.main_tab_contacts),
+      style = PopopxTypeScale.title2,
+      modifier = Modifier.weight(1f),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis
+    )
+    Box(
+      Modifier
+        .size(PopopxSize.control)
+        .clip(CircleShape)
+        .clickable(
+          interactionSource = remember { MutableInteractionSource() },
+          indication = LocalIndication.current
+        ) { showPopopxMyAddress(chatModel) },
+      contentAlignment = Alignment.Center
+    ) {
+      Icon(
+        painterResource(MR.images.ic_qr_code),
+        stringResource(MR.strings.my_qr_code),
+        Modifier.size(PopopxSize.iconL),
+        tint = MaterialTheme.colors.onBackground
+      )
     }
   }
 }

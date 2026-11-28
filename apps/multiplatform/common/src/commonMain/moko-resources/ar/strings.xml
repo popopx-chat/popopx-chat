@@ -3480,8 +3480,8 @@
     <string name="me_vouchers_available">%d متاحة</string>
     <string name="me_help_row">المساعدة وحول</string>
     <string name="me_privacy_settings">إعدادات الخصوصية والأمان</string>
-    <string name="me_protect_note">تُحجب لقطات الشاشة ولا يعرض مبدّل التطبيقات أي محتوى دردشة ما دام هذا مفعّلًا.</string>
-    <string name="me_sanitize_note">تُزال حقول التتبع من الروابط أثناء كتابة الرسالة، فلا يحمل ما يستلمه الطرف الآخر أي أثر لمصدرك.</string>
+    <string name="me_protect_note">يخفي الدردشات في مبدّل التطبيقات ولقطات الشاشة.</string>
+    <string name="me_sanitize_note">يزيل رموز التتبع من الروابط التي ترسلها.</string>
     <string name="me_anti_theft">قفل مكافحة السرقة</string>
     <string name="me_turned_on">مفعّل</string>
     <string name="me_turned_off">متوقف</string>
@@ -3644,4 +3644,6 @@
   <string name="agent_task_status_completed">مكتمل</string>
   <string name="agent_task_status_failed">فشل</string>
   <string name="agent_task_status_cancelled">ملغى</string>
+  <string name="my_qr_code">رمز QR الخاص بي</string>
+  <string name="network_and_advanced">الشبكة والإعدادات المتقدمة</string>
 </resources>

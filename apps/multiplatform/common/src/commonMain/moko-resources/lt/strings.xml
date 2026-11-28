@@ -1712,4 +1712,8 @@
   <string name="agent_task_status_completed">Baigta</string>
   <string name="agent_task_status_failed">Nepavyko</string>
   <string name="agent_task_status_cancelled">Atšaukta</string>
+  <string name="my_qr_code">Mano QR kodas</string>
+  <string name="network_and_advanced">Tinklas ir išplėstiniai nustatymai</string>
+  <string name="me_protect_note">Paslepia pokalbius programų perjungiklyje ir ekrano kopijose.</string>
+  <string name="me_sanitize_note">Pašalina sekimo kodus iš siunčiamų nuorodų.</string>
 </resources>

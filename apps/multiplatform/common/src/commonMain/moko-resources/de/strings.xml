@@ -3150,4 +3150,8 @@
   <string name="agent_task_status_completed">Abgeschlossen</string>
   <string name="agent_task_status_failed">Fehlgeschlagen</string>
   <string name="agent_task_status_cancelled">Abgebrochen</string>
+  <string name="my_qr_code">Mein QR-Code</string>
+  <string name="network_and_advanced">Netzwerk und Erweitert</string>
+  <string name="me_protect_note">Verbirgt Chats im App-Umschalter und in Screenshots.</string>
+  <string name="me_sanitize_note">Entfernt Tracking-Codes aus gesendeten Links.</string>
 </resources>

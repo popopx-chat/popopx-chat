@@ -2874,4 +2874,8 @@
   <string name="agent_task_status_completed">Selesai</string>
   <string name="agent_task_status_failed">Gagal</string>
   <string name="agent_task_status_cancelled">Dibatalkan</string>
+  <string name="my_qr_code">Kode QR saya</string>
+  <string name="network_and_advanced">Jaringan dan lanjutan</string>
+  <string name="me_protect_note">Menyembunyikan chat di pengalih aplikasi dan tangkapan layar.</string>
+  <string name="me_sanitize_note">Menghapus kode pelacak dari tautan yang Anda kirim.</string>
 </resources>

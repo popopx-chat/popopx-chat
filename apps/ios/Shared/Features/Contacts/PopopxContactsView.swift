@@ -130,6 +130,7 @@ struct PopopxContactsView: View {
     @State private var toast = PopopxToastModel()
     @State private var searchText = ""
     @State private var showsIdentitySheet = false
+    @State private var showsMyAddressQR = false
     @State private var grouping: PopopxIdentityGrouping = .all
 
     @MainActor init() {
@@ -173,6 +174,13 @@ struct PopopxContactsView: View {
                         Label(Copy.indexMenuLabel, systemImage: "list.number")
                     }
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showsMyAddressQR = true
+                    } label: {
+                        Label(PopopxTelemetryCopy.myQRCode, systemImage: "qrcode")
+                    }
+                }
             }
             .navigationDestination(for: PopopxContactsRoute.self) { route in
                 switch route {
@@ -192,6 +200,9 @@ struct PopopxContactsView: View {
                         .modifier(ThemedBackground(grouped: true))
                         .navigationBarTitleDisplayMode(.inline)
                 }
+            }
+            .sheet(isPresented: $showsMyAddressQR) {
+                PopopxMyAddressQRSheet()
             }
             .sheet(isPresented: $showsIdentitySheet) {
                 PopopxIdentitySheet(

@@ -538,6 +538,16 @@ private enum PopopxMeshPlazaRoute: Hashable {
 struct PopopxMeshPlazaRootView: View {
     @ObservedObject private var meshRuntime: PopopxMeshRuntime
 
+    /// Needed only by the back swipe: which screen edge is "leading" flips with the layout direction.
+    @Environment(\.layoutDirection) private var layoutDirection
+    /// The measured width of this tab's root screen, so the RTL edge test does not consult a hard-coded screen width.
+    @State private var plazaWidth: CGFloat = 0
+
+    /// The edge strip a back swipe has to start in, and how far it must travel inward. 28pt is inside the
+    /// ~20pt system back-gesture zone plus a finger margin; 72pt keeps an accidental nudge from leaving the tab.
+    private static let backEdgeStrip: CGFloat = 28
+    private static let backSwipeDistance: CGFloat = 72
+
     /// The binding of `MainTabView`'s selected tab, given by the host at the mount point (that tab in `MainTabView.swift`).
     /// After the top bar went full-screen immersive there is no cross-cutting navigation beneath this tab at all, and the only exit is the top-left back key — what it has to write
     /// is exactly this copy. Going through `@Binding` instead of inventing a new `@Observable` routing object injected into the environment: `MainTabView`'s
@@ -590,6 +600,25 @@ struct PopopxMeshPlazaRootView: View {
         )
     }
 
+    /// The back swipe described at its mounting site: leading-edge start, inward travel of at least
+    /// `backSwipeDistance`, horizontal dominance. It acts only on end, so a drag that is actually a
+    /// vertical scroll (or a tap masquerading as a short drag) performs nothing.
+    private var cabinBackSwipe: some Gesture {
+        DragGesture(minimumDistance: 20, coordinateSpace: .local)
+            .onEnded { value in
+                guard plazaWidth > 0 else { return }
+                let leadingIsLeft = layoutDirection != .rightToLeft
+                let startsAtLeadingEdge = leadingIsLeft
+                    ? value.startLocation.x <= Self.backEdgeStrip
+                    : value.startLocation.x >= plazaWidth - Self.backEdgeStrip
+                let inward = leadingIsLeft ? value.translation.width : -value.translation.width
+                let mostlyHorizontal = abs(value.translation.width) > abs(value.translation.height) * 1.5
+                guard startsAtLeadingEdge, mostlyHorizontal, inward >= Self.backSwipeDistance else { return }
+                PopopxHaptics.impact(.light)
+                tabSelection = .chats
+            }
+    }
+
     var body: some View {
         NavigationStack(path: $rootPath) {
             MeshPlazaView(
@@ -615,6 +644,20 @@ struct PopopxMeshPlazaRootView: View {
             // `.toolbar(.visible, for: .tabBar)` (`MeshPlazaView.swift:519-534`), precisely so as not to override
             // this sentence of the host's. The visibility overload itself exists from iOS 16 onwards and the app's floor is 17.0, so no gate is needed.
             .toolbar(.hidden, for: .tabBar)
+            // The width the back swipe needs for its RTL edge test; a measurement only, never hit-testable.
+            .background {
+                GeometryReader { proxy in
+                    Color.clear
+                        .onAppear { plazaWidth = proxy.size.width }
+                        .onChange(of: proxy.size.width) { _, width in plazaWidth = width }
+                }
+            }
+            // The full-screen tab has no system back button to inherit the native edge-swipe from (the root
+            // screen is the stack's bottom, and the exit is the top-left capsule). This gesture gives back
+            // exactly that system behaviour: drag from the leading edge inward. Leading means left in LTR and
+            // right in RTL (the native mirror), and the destination + haptic are the back capsule's own.
+            // `simultaneousGesture` keeps the plaza's scrolling and taps untouched.
+            .simultaneousGesture(cabinBackSwipe)
             .toolbar {
                 // Three segments: left = Discover (nearby offline groups) + back to "Chat", middle = the old Cabin panel (the nearby-node radar and the offline
                 // group chats are both on that screen), right = the offline mesh settings centre. Toolbar items still belong only to the content layer that declares them, and the drawer

@@ -7583,3 +7583,17 @@ server test failure */
 
 /* discover setup guide */
 "Pair now" = "Сдвояване сега";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "Моят QR код";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "Мрежа и разширени настройки";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "Релета, обаждания и диагностика.";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "Скрива чатовете в превключвателя на приложения и в снимките на екрана.";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "Премахва кодове за проследяване от изпращаните от вас връзки.";

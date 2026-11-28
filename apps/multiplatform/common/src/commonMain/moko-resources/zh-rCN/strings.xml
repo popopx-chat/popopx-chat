@@ -3048,4 +3048,8 @@
   <string name="agent_task_status_completed">已完成</string>
   <string name="agent_task_status_failed">失败</string>
   <string name="agent_task_status_cancelled">已取消</string>
+  <string name="my_qr_code">我的二维码</string>
+  <string name="network_and_advanced">网络与高级设置</string>
+  <string name="me_protect_note">在应用切换器和截屏中隐藏聊天。</string>
+  <string name="me_sanitize_note">移除你发送链接中的跟踪代码。</string>
 </resources>

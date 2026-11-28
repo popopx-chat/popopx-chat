@@ -2576,4 +2576,8 @@
   <string name="agent_task_status_completed">Voltooid</string>
   <string name="agent_task_status_failed">Mislukt</string>
   <string name="agent_task_status_cancelled">Geannuleerd</string>
+  <string name="my_qr_code">Mijn QR-code</string>
+  <string name="network_and_advanced">Netwerk en geavanceerd</string>
+  <string name="me_protect_note">Verbergt chats in de app-wisselaar en schermafbeeldingen.</string>
+  <string name="me_sanitize_note">Verwijdert trackingcodes uit links die je verstuurt.</string>
 </resources>

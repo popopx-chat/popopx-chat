@@ -2667,4 +2667,8 @@
   <string name="agent_task_status_completed">تکمیل‌شده</string>
   <string name="agent_task_status_failed">ناموفق</string>
   <string name="agent_task_status_cancelled">لغوشده</string>
+  <string name="my_qr_code">کد QR من</string>
+  <string name="network_and_advanced">شبکه و تنظیمات پیشرفته</string>
+  <string name="me_protect_note">گفتگوها را در تعویض‌گر برنامه و تصاویر صفحه پنهان می‌کند.</string>
+  <string name="me_sanitize_note">کدهای ردیابی را از پیوندهایی که می‌فرستید حذف می‌کند.</string>
 </resources>

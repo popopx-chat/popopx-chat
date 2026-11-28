@@ -38,6 +38,17 @@ import chat.popopx.res.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * One shared entry point for "My QR Code": the Me tab row, the Messages "+" menu and the
+ * Contacts toolbar all open the exact same permanent address page through this helper.
+ */
+fun showPopopxMyAddress(chatModel: ChatModel) {
+  val user = chatModel.currentUser.value ?: return
+  ModalManager.start.showCustomModal { close ->
+    UserAddressView(chatModel, shareViaProfile = user.addressShared, close = close)
+  }
+}
+
 @Composable
 fun UserAddressView(
   chatModel: ChatModel,

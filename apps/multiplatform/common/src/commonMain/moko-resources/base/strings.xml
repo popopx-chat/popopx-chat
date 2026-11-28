@@ -3807,8 +3807,8 @@
   <string name="me_vouchers_available">%d available</string>
   <string name="me_help_row">Help and about</string>
   <string name="me_privacy_settings">Privacy and security settings</string>
-  <string name="me_protect_note">Screenshots are blocked and the app switcher shows no chat content while this is on.</string>
-  <string name="me_sanitize_note">Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source.</string>
+  <string name="me_protect_note">Hides chats in the app switcher and screenshots.</string>
+  <string name="me_sanitize_note">Removes tracking codes from links you send.</string>
   <string name="me_anti_theft">Anti-theft lock</string>
   <string name="me_turned_on">Turned on</string>
   <string name="me_turned_off">Turned off</string>
@@ -3974,4 +3974,6 @@
   <string name="agent_task_status_completed">Completed</string>
   <string name="agent_task_status_failed">Failed</string>
   <string name="agent_task_status_cancelled">Cancelled</string>
+  <string name="my_qr_code">My QR Code</string>
+  <string name="network_and_advanced">Network and advanced</string>
 </resources>

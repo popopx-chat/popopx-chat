@@ -3070,4 +3070,8 @@
   <string name="agent_task_status_completed">Befejezve</string>
   <string name="agent_task_status_failed">Sikertelen</string>
   <string name="agent_task_status_cancelled">Megszakítva</string>
+  <string name="my_qr_code">Saját QR-kódom</string>
+  <string name="network_and_advanced">Hálózat és speciális beállítások</string>
+  <string name="me_protect_note">Elrejti a csevegéseket az alkalmazásváltóban és a képernyőképeken.</string>
+  <string name="me_sanitize_note">Eltávolítja a követőkódokat az elküldött hivatkozásokból.</string>
 </resources>

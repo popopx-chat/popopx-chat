@@ -67,6 +67,7 @@ struct PopopxMeView: View {
     @State private var toast = PopopxToastModel()
     /// The switch for the "Home card QR" sheet. The entry is the QR micro-badge at the right end of the card header (ruling 4: it no longer occupies a row of its own).
     @State private var showsProfileQR = false
+    @State private var showsMyAddressQR = false
     /// The three panels of the compute-credits ecosystem. Badge **details** and **upgrade** now also have a row on this page (WeChat-style grouping requires assets
     /// to be reachable directly), but it carries no criterion of its own — see structural decision 5 above and `routeBadge()` below.
     @State private var showsCreditsStore = false
@@ -143,6 +144,9 @@ struct PopopxMeView: View {
         }
         // The second entry of the compute-credits ecosystem. The detents likewise belong to the caller (the convention above): the purchase page's sheet must hold a seven-tier price table,
         // and giving it `.medium` would make it scroll inside its own table; the redemption code is the shortest, so the middle tier is enough.
+        .sheet(isPresented: $showsMyAddressQR) {
+            PopopxMyAddressQRSheet()
+        }
         .sheet(isPresented: $showsCreditsStore) {
             PopopxCreditsStoreView()
                 .presentationDetents([.large])
@@ -359,6 +363,13 @@ struct PopopxMeView: View {
             PopopxMeRowLink(Copy.myProfile, systemImage: "person.text.rectangle", tint: .brand) {
                 PopopxProfileHost()
             }
+            PopopxMeDivider()
+            // The same permanent `/i/v1/` address page the "+" menu and the Contacts toolbar open, through the shared
+            // `PopopxMyAddressQRSheet`, so all three shortcuts land on one identical screen.
+            PopopxPickerRow(Copy.myAddress, systemImage: "qrcode", tint: .brand) {
+                showsMyAddressQR = true
+            }
+            .accessibilityIdentifier("popopx.me.myAddress")
             PopopxMeDivider()
             giftVaultRow
         }
@@ -1159,6 +1170,8 @@ private enum Copy {
 
     // Section 2 · encrypted profile page and card wallet
     static let myProfile = key("My profile")
+    /// Reuses the address page's own sentence so the Me row, the Settings page and the address screen all read the same.
+    static let myAddress = key("Your POPOPX address")
     static let personalProfile = key("My encrypted profile page")
     static let personalProfileQR = key("Profile card code")
     static let profileConfigured = key("Configured")
@@ -1192,9 +1205,11 @@ private enum Copy {
     /// are the very same switch, so the wording must share one Key and this page no longer coins a sentence of its own.
     static let protectScreenRow = key("Protect app screen")
     static let sanitizeLinksRow = key("Remove link tracking")
-    /// The two captions are the two sentences the settings page originally carried; this round they became Keys and 16 translations were filled in (the Chinese values are reused verbatim).
-    static let protectScreenNote = key("While the app is in the background its whole interface is replaced by a placeholder, so the app switcher and screenshots show no chat content.")
-    static let sanitizeLinksNote = key("Tracking fields are stripped from links while you compose a message, so what the other side receives carries no trace of your source.")
+    /// UX streamline round: the two original long captions were shortened to one plain line each on
+    /// this home page, so the security card no longer pushes the page past two screens. The detail
+    /// pages keep their own fuller wording; these keys are used by this page alone.
+    static let protectScreenNote = key("Hides chats in the app switcher and screenshots.")
+    static let sanitizeLinksNote = key("Removes tracking codes from links you send.")
     static let antiTheft = key("Anti-theft lock")
     static let antiTheftOn = key("Turned on")
     static let antiTheftOff = key("Turned off")

@@ -2435,4 +2435,8 @@
   <string name="agent_task_status_completed">Завършено</string>
   <string name="agent_task_status_failed">Неуспешно</string>
   <string name="agent_task_status_cancelled">Отказано</string>
+  <string name="my_qr_code">Моят QR код</string>
+  <string name="network_and_advanced">Мрежа и разширени настройки</string>
+  <string name="me_protect_note">Скрива чатовете в превключвателя на приложения и в снимките на екрана.</string>
+  <string name="me_sanitize_note">Премахва кодове за проследяване от изпращаните от вас връзки.</string>
 </resources>

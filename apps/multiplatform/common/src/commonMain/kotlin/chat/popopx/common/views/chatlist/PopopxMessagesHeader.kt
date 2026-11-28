@@ -77,6 +77,7 @@ internal fun PopopxMessagesHeader(
   onStartGroupChat: () -> Unit,
   onCreateChannel: () -> Unit,
   onScan: () -> Unit,
+  onMyQR: () -> Unit,
   onMintLink: () -> Unit,
 ) {
   Row(
@@ -102,6 +103,7 @@ internal fun PopopxMessagesHeader(
         onStartGroupChat = onStartGroupChat,
         onCreateChannel = onCreateChannel,
         onScan = onScan,
+        onMyQR = onMyQR,
         onMintLink = onMintLink,
       )
     }
@@ -181,9 +183,9 @@ internal fun PopopxIdentityCapsule(name: String?, onClick: () -> Unit) {
 }
 
 /**
- * `PopopxPlusMenu` (:430-495): a plain 44dp plus (label ink, no filled chip) opening the same five
- * entries — add friends, group, public channel, scan, separator, one-time link. The host passes the
- * destinations, so the entry stays a control rather than a second navigation tree.
+ * `PopopxPlusMenu` (:430-495): a plain 44dp plus (label ink, no filled chip) opening the same six
+ * entries — add friends, group, public channel, scan, my QR code, separator, one-time link. The host
+ * passes the destinations, so the entry stays a control rather than a second navigation tree.
  */
 @Composable
 private fun PopopxPlusMenu(
@@ -191,6 +193,7 @@ private fun PopopxPlusMenu(
   onStartGroupChat: () -> Unit,
   onCreateChannel: () -> Unit,
   onScan: () -> Unit,
+  onMyQR: () -> Unit,
   onMintLink: () -> Unit,
 ) {
   var expanded by remember { mutableStateOf(false) }
@@ -232,6 +235,10 @@ private fun PopopxPlusMenu(
       PopopxPlusMenuItem(MR.images.ic_qr_code_scanner, stringResource(MR.strings.scan_QR_code)) {
         expanded = false
         onScan()
+      }
+      PopopxPlusMenuItem(MR.images.ic_qr_code, stringResource(MR.strings.my_qr_code)) {
+        expanded = false
+        onMyQR()
       }
       Divider(Modifier.padding(vertical = 4.dp), color = PopopxSeparator)
       PopopxPlusMenuItem(MR.images.ic_link, stringResource(MR.strings.create_1_time_link)) {

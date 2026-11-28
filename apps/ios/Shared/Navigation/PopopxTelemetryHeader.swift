@@ -432,6 +432,7 @@ struct PopopxPlusMenu: View {
     var onStartGroupChat: (() -> Void)? = nil
     var onCreateChannel: (() -> Void)? = nil
     var onScan: (() -> Void)? = nil
+    var onMyQR: (() -> Void)? = nil
 
     @State private var invite: PopopxMintedInvite?
     @State private var showsInvite = false
@@ -448,6 +449,8 @@ struct PopopxPlusMenu: View {
                 .disabled(onCreateChannel == nil)
             Button(PopopxTelemetryCopy.scan, systemImage: "qrcode.viewfinder") { onScan?() }
                 .disabled(onScan == nil)
+            Button(PopopxTelemetryCopy.myQRCode, systemImage: "qrcode") { onMyQR?() }
+                .disabled(onMyQR == nil)
             Divider()
             Button {
                 Task { await mint() }
@@ -568,6 +571,7 @@ struct PopopxTelemetryHeader: View {
     var onStartGroupChat: (() -> Void)? = nil
     var onCreateChannel: (() -> Void)? = nil
     var onScan: (() -> Void)? = nil
+    var onMyQR: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: PopopxMetrics.space2XS) {
@@ -599,7 +603,7 @@ struct PopopxTelemetryHeader: View {
             PopopxDualStatusCapsule(network: signal, radio: radioState)
                 .layoutPriority(2)
             Spacer(minLength: PopopxMetrics.space2XS)
-            PopopxPlusMenu(onAddFriend: onAddFriend, onStartGroupChat: onStartGroupChat, onCreateChannel: onCreateChannel, onScan: onScan)
+            PopopxPlusMenu(onAddFriend: onAddFriend, onStartGroupChat: onStartGroupChat, onCreateChannel: onCreateChannel, onScan: onScan, onMyQR: onMyQR)
                 .fixedSize()
                 .layoutPriority(2)
                 .accessibilityIdentifier("popopx.header.plus")
@@ -671,6 +675,7 @@ enum PopopxTelemetryCopy {
     /// (already translated as "Create public channel" in `zh-Hans`); this page only moves it from the old menu into the "+".
     static let createChannel = key("Create public channel")
     static let scan = key("Scan")
+    static let myQRCode = key("My QR Code")
     static let minting = key("Generating…")
     static let mintLink = key("Create a one-time connection link")
     static let oneTimeLink = key("One-time connection link")

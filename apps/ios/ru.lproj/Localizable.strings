@@ -10303,3 +10303,17 @@ alert title */
 
 /* discover setup guide */
 "Pair now" = "Сопрячь сейчас";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "Мой QR-код";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "Сеть и дополнительные настройки";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "Ретрансляторы, звонки и диагностика.";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "Скрывает чаты в переключателе приложений и на скриншотах.";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "Удаляет коды отслеживания из отправляемых вами ссылок.";

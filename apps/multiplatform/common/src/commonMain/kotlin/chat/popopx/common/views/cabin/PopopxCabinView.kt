@@ -10,6 +10,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -30,6 +37,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import chat.popopx.common.mesh.PopopxBluetoothState
 import chat.popopx.common.mesh.PopopxMeshBody
@@ -372,7 +380,49 @@ fun PopopxCabinView(onBack: () -> Unit) {
   }
 
   AppBarTitle(stringResource(MR.strings.cabin_title))
-  ColumnWithScrollBar(Modifier.fillMaxSize()) {
+  // The edge-swipe back (task 3). This tab's root screen is the bottom of its stack and its only
+  // exit is the top-left capsule, so the system's back gesture has nothing to inherit from; this
+  // hand-rolled one reproduces it: start inside the leading strip, drag inward horizontally.
+  // Leading = left in LTR and right in RTL, the native mirror, and the action + haptic are the
+  // capsule's own (`onBack` writes the tab selection). `detectHorizontalDragGestures` claims only
+  // horizontal-dominant drags, so the page's vertical scrolling is untouched.
+  val layoutDirection = LocalLayoutDirection.current
+  val haptics = LocalHapticFeedback.current
+  val density = LocalDensity.current
+  val edgeStripPx = with(density) { CABIN_BACK_EDGE_STRIP.toPx() }
+  val backDistancePx = with(density) { CABIN_BACK_SWIPE_DISTANCE.toPx() }
+  var measuredWidthPx by remember { mutableStateOf(0f) }
+  ColumnWithScrollBar(
+    Modifier
+      .fillMaxSize()
+      .onSizeChanged { measuredWidthPx = it.width.toFloat() }
+      .pointerInput(layoutDirection, edgeStripPx, backDistancePx, measuredWidthPx) {
+        var startX = 0f
+        var totalDx = 0f
+        detectHorizontalDragGestures(
+          onDragStart = { offset ->
+            startX = offset.x
+            totalDx = 0f
+          },
+          onDragEnd = {
+            val leadingIsLeft = layoutDirection != LayoutDirection.Rtl
+            val startsAtLeadingEdge =
+              if (leadingIsLeft) startX <= edgeStripPx
+              else measuredWidthPx > 0f && startX >= measuredWidthPx - edgeStripPx
+            val inward = if (leadingIsLeft) totalDx else -totalDx
+            if (startsAtLeadingEdge && inward >= backDistancePx) {
+              haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+              onBack()
+            }
+          },
+          onDragCancel = { totalDx = 0f },
+          onHorizontalDrag = { change, dragAmount ->
+            change.consume()
+            totalDx += dragAmount
+          }
+        )
+      }
+  ) {
     Column(
       Modifier
         .padding(horizontal = CABIN_GUTTER)
@@ -944,3 +994,7 @@ internal const val CABIN_MAX_DRAFT_CHARACTERS: Int = 512
 
 private val CABIN_GUTTER = 16.dp
 private val CABIN_SECTION_GAP = 24.dp
+
+/** The back-swipe strip each edge must be started in, and the inward travel that commits the back — the iOS values at `PopopxCabinView.swift` (`backEdgeStrip` / `backSwipeDistance`), 1:1. */
+private val CABIN_BACK_EDGE_STRIP = 28.dp
+private val CABIN_BACK_SWIPE_DISTANCE = 72.dp

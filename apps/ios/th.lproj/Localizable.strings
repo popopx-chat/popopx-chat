@@ -6426,3 +6426,17 @@ server test failure */
 
 /* discover setup guide */
 "Pair now" = "จับคู่เลย";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "คิวอาร์โค้ดของฉัน";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "เครือข่ายและขั้นสูง";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "รีเลย์ การโทร และการวินิจฉัย";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "ซ่อนแชทในตัวสลับแอปและภาพหน้าจอ";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "ลบรหัสติดตามออกจากลิงก์ที่คุณส่ง";

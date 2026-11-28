@@ -48,7 +48,7 @@ import chat.popopx.common.views.usersettings.HelpAndSupportView
 import chat.popopx.common.views.usersettings.PopopxDuressSettingsSection
 import chat.popopx.common.views.usersettings.PrivacySettingsView
 import chat.popopx.common.views.usersettings.SettingsView
-import chat.popopx.common.views.usersettings.UserAddressView
+import chat.popopx.common.views.usersettings.showPopopxMyAddress
 import chat.popopx.common.views.usersettings.UserProfileView
 import chat.popopx.common.views.usersettings.UserProfilesView
 import chat.popopx.common.views.usersettings.doWithAuth
@@ -435,19 +435,12 @@ private fun MeSpaceCard(startModalCount: Int) {
       }
     )
     PopopxDivider()
-    val user = remember { chatModel.currentUser }.value
     PopopxPickerRow(
       label = stringResource(MR.strings.your_popopx_contact_address),
       value = null,
       icon = MR.images.ic_qr_code,
       tint = PopopxBrand,
-      onClick = {
-        if (user != null) {
-          ModalManager.start.showCustomModal { close ->
-            UserAddressView(chatModel, shareViaProfile = user.addressShared, close = close)
-          }
-        }
-      }
+      onClick = { showPopopxMyAddress(chatModel) }
     )
     PopopxDivider()
     PopopxPickerRow(

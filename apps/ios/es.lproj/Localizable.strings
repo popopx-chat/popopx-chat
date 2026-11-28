@@ -10323,3 +10323,17 @@ alert title */
 
 /* discover setup guide */
 "Pair now" = "Emparejar ahora";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "Mi código QR";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "Red y opciones avanzadas";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "Retransmisores, llamadas y diagnóstico.";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "Oculta los chats en el selector de apps y en las capturas de pantalla.";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "Elimina los códigos de seguimiento de los enlaces que envías.";

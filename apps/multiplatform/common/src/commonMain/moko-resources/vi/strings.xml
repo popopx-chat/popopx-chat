@@ -2680,4 +2680,8 @@
   <string name="agent_task_status_completed">Đã hoàn thành</string>
   <string name="agent_task_status_failed">Thất bại</string>
   <string name="agent_task_status_cancelled">Đã hủy</string>
+  <string name="my_qr_code">Mã QR của tôi</string>
+  <string name="network_and_advanced">Mạng và nâng cao</string>
+  <string name="me_protect_note">Ẩn trò chuyện trong trình chuyển ứng dụng và ảnh chụp màn hình.</string>
+  <string name="me_sanitize_note">Xóa mã theo dõi khỏi liên kết bạn gửi.</string>
 </resources>

@@ -3480,8 +3480,8 @@
     <string name="me_vouchers_available">%d개 사용 가능</string>
     <string name="me_help_row">도움말 및 정보</string>
     <string name="me_privacy_settings">개인정보 및 보안 설정</string>
-    <string name="me_protect_note">이 기능이 켜져 있는 동안에는 스크린샷이 차단되고 앱 전환기에 채팅 내용이 보이지 않아요.</string>
-    <string name="me_sanitize_note">메시지를 쓰는 동안 링크에서 추적 필드를 제거하므로 상대가 받는 내용에는 출처의 흔적이 남지 않아요.</string>
+    <string name="me_protect_note">앱 전환기와 스크린샷에서 채팅을 숨깁니다.</string>
+    <string name="me_sanitize_note">보내는 링크에서 추적 코드를 제거합니다.</string>
     <string name="me_anti_theft">도난 방지 잠금</string>
     <string name="me_turned_on">켜짐</string>
     <string name="me_turned_off">꺼짐</string>
@@ -3644,4 +3644,6 @@
   <string name="agent_task_status_completed">완료됨</string>
   <string name="agent_task_status_failed">실패함</string>
   <string name="agent_task_status_cancelled">취소됨</string>
+  <string name="my_qr_code">내 QR 코드</string>
+  <string name="network_and_advanced">네트워크 및 고급 설정</string>
 </resources>

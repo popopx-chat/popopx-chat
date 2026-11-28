@@ -3066,4 +3066,8 @@
   <string name="agent_task_status_completed">Terminée</string>
   <string name="agent_task_status_failed">Échouée</string>
   <string name="agent_task_status_cancelled">Annulée</string>
+  <string name="my_qr_code">Mon code QR</string>
+  <string name="network_and_advanced">Réseau et options avancées</string>
+  <string name="me_protect_note">Masque les discussions dans le sélecteur d'applications et les captures d'écran.</string>
+  <string name="me_sanitize_note">Supprime les codes de suivi des liens que vous envoyez.</string>
 </resources>

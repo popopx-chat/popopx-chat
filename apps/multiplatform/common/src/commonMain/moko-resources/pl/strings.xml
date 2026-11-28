@@ -2697,4 +2697,8 @@
   <string name="agent_task_status_completed">Ukończone</string>
   <string name="agent_task_status_failed">Niepowodzenie</string>
   <string name="agent_task_status_cancelled">Anulowane</string>
+  <string name="my_qr_code">Mój kod QR</string>
+  <string name="network_and_advanced">Sieć i ustawienia zaawansowane</string>
+  <string name="me_protect_note">Ukrywa czaty w przełączniku aplikacji i na zrzutach ekranu.</string>
+  <string name="me_sanitize_note">Usuwa kody śledzące z wysyłanych linków.</string>
 </resources>

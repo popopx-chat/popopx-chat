@@ -3027,4 +3027,8 @@
   <string name="agent_task_status_completed">Completada</string>
   <string name="agent_task_status_failed">Fallida</string>
   <string name="agent_task_status_cancelled">Cancelada</string>
+  <string name="my_qr_code">Mi código QR</string>
+  <string name="network_and_advanced">Red y opciones avanzadas</string>
+  <string name="me_protect_note">Oculta los chats en el selector de apps y en las capturas de pantalla.</string>
+  <string name="me_sanitize_note">Elimina los códigos de seguimiento de los enlaces que envías.</string>
 </resources>

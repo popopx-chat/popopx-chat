@@ -2673,4 +2673,8 @@
   <string name="agent_task_status_completed">Completada</string>
   <string name="agent_task_status_failed">Fallida</string>
   <string name="agent_task_status_cancelled">Cancel·lada</string>
+  <string name="my_qr_code">El meu codi QR</string>
+  <string name="network_and_advanced">Xarxa i opcions avançades</string>
+  <string name="me_protect_note">Amaga els xats al commutador d'aplicacions i a les captures de pantalla.</string>
+  <string name="me_sanitize_note">Elimina els codis de seguiment dels enllaços que envies.</string>
 </resources>

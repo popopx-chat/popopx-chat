@@ -135,3 +135,17 @@
 
 /* discover setup guide */
 "Pair now" = "Pair now";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "My QR Code";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "Network and advanced";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "Relays, calls and diagnostics.";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "Hides chats in the app switcher and screenshots.";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "Removes tracking codes from links you send.";

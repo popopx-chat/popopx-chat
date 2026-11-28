@@ -1452,4 +1452,8 @@
   <string name="agent_task_status_completed">Valmis</string>
   <string name="agent_task_status_failed">Epäonnistui</string>
   <string name="agent_task_status_cancelled">Peruutettu</string>
+  <string name="my_qr_code">Oma QR-koodini</string>
+  <string name="network_and_advanced">Verkko ja lisäasetukset</string>
+  <string name="me_protect_note">Piilottaa keskustelut sovellusvaihtajassa ja kuvakaappauksissa.</string>
+  <string name="me_sanitize_note">Poistaa seurantakoodit lähettämistäsi linkeistä.</string>
 </resources>

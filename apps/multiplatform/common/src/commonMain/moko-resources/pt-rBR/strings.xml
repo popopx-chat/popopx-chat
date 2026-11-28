@@ -3480,8 +3480,8 @@
     <string name="me_vouchers_available">%d disponíveis</string>
     <string name="me_help_row">Ajuda e sobre</string>
     <string name="me_privacy_settings">Configurações de privacidade e segurança</string>
-    <string name="me_protect_note">Capturas de tela são bloqueadas e o seletor de apps não mostra conteúdo de chat enquanto isto está ativado.</string>
-    <string name="me_sanitize_note">Campos de rastreamento são removidos dos links enquanto você compõe a mensagem, então o que o outro lado recebe não carrega nenhum vestígio da sua origem.</string>
+    <string name="me_protect_note">Oculta as conversas no seletor de apps e nas capturas de tela.</string>
+    <string name="me_sanitize_note">Remove códigos de rastreamento dos links que você envia.</string>
     <string name="me_anti_theft">Bloqueio antirroubo</string>
     <string name="me_turned_on">Ligado</string>
     <string name="me_turned_off">Desligado</string>
@@ -3644,4 +3644,6 @@
   <string name="agent_task_status_completed">Concluída</string>
   <string name="agent_task_status_failed">Falhou</string>
   <string name="agent_task_status_cancelled">Cancelada</string>
+  <string name="my_qr_code">Meu código QR</string>
+  <string name="network_and_advanced">Rede e avançado</string>
 </resources>

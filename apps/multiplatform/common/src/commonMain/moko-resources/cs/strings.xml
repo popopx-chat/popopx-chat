@@ -2691,4 +2691,8 @@
   <string name="agent_task_status_completed">Dokončeno</string>
   <string name="agent_task_status_failed">Selhalo</string>
   <string name="agent_task_status_cancelled">Zrušeno</string>
+  <string name="my_qr_code">Můj QR kód</string>
+  <string name="network_and_advanced">Síť a pokročilá nastavení</string>
+  <string name="me_protect_note">Skryje chaty v přepínači aplikací a na snímcích obrazovky.</string>
+  <string name="me_sanitize_note">Odstraňuje sledovací kódy z odesílaných odkazů.</string>
 </resources>

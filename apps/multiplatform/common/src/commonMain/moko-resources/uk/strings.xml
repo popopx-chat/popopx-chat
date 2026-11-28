@@ -2821,4 +2821,8 @@
   <string name="agent_task_status_completed">Завершено</string>
   <string name="agent_task_status_failed">Помилка</string>
   <string name="agent_task_status_cancelled">Скасовано</string>
+  <string name="my_qr_code">Мій QR-код</string>
+  <string name="network_and_advanced">Мережа та додатково</string>
+  <string name="me_protect_note">Приховує чати в перемикачі програм і на знімках екрана.</string>
+  <string name="me_sanitize_note">Видаляє коди відстеження з посилань, які ви надсилаєте.</string>
 </resources>

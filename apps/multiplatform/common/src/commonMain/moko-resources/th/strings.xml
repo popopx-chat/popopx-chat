@@ -1284,4 +1284,8 @@
   <string name="agent_task_status_completed">เสร็จสิ้น</string>
   <string name="agent_task_status_failed">ล้มเหลว</string>
   <string name="agent_task_status_cancelled">ยกเลิกแล้ว</string>
+  <string name="my_qr_code">คิวอาร์โค้ดของฉัน</string>
+  <string name="network_and_advanced">เครือข่ายและขั้นสูง</string>
+  <string name="me_protect_note">ซ่อนแชทในตัวสลับแอปและภาพหน้าจอ</string>
+  <string name="me_sanitize_note">ลบรหัสติดตามออกจากลิงก์ที่คุณส่ง</string>
 </resources>

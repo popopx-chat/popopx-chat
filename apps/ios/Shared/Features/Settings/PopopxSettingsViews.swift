@@ -272,55 +272,22 @@ struct PopopxSettingsView: View {
         }
     }
 
-    // MARK: Network and servers
+    // MARK: Network and advanced
 
-    /// Device round 8, task six (hierarchy rearrangement): this card went from one entry to three entries at the same level.
-    /// The 'Advanced network settings' and 'Network connection' rows were originally buried in that 'Relays and servers' page
-    /// (`NetworkAndServers`) as its last two Sections; they are now raised to this level and deleted from where they were, leaving that page only
-    /// the server rows themselves (preset servers / your servers / save).
-    /// The push mechanism of the three rows was not chosen casually; each has a reason:
-    /// · 'Relays and servers' = a plain `Button` + one `settingsTrack.path.append` (decision 3 in the file header) --
-    ///   changed to `NavigationLink(value:)`, a tap on a real device only redraws this page and Back is what pushes it.
-    /// · 'Advanced network settings' = a destination-closure `NavigationLink` (`PopopxSettingsRowLink`), the very same mechanism as every other
-    ///   row on this page: it writes no value into the path and is resolved by registration, so it does not depend on the broken lever of decision 3, and a tap pushes immediately.
-    ///   Availability matches the original: that page reads and writes network configuration, so it disables when no session is running (same rule as `callsAndNtfsCard`).
-    /// · 'Network connection' = a read-only status row. On its original page it was also not an entry but a stretch of reading, and flattening does not invent
-    ///   a destination that does not exist for it, so it gets no chevron and takes no tap.
+    /// UX streamline round: this card is deliberately one row again. The three rows of device round 8
+    /// (relays / advanced network settings / connection reading) plus the WebRTC ICE page moved one level
+    /// down into `PopopxNetworkAdvancedView`, so the Settings home keeps only the entries people touch
+    /// often, and this card's footnote fits on a single plain-language line.
     private var networkCard: some View {
-        PopopxSectionCard(Copy.groupNetwork, footnote: Copy.networkFootnote) {
-            // Plain Button + one path assignment, not `NavigationLink(value:)`: on a real device that hop only redraws this page when tapped.
-            Button {
-                settingsTrack.path.append(ServersDestination.networkAndServers)
-            } label: {
-                PopopxSettingsRowLabel(
-                    title: Copy.serversRow,
-                    systemImage: "externaldrive.connected.to.line.below",
-                    tint: .brand
-                )
-                .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget, alignment: .leading)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(PopopxPressButtonStyle())
-            .accessibilityHint(Text(verbatim: Copy.openHint))
-            .disabled(chatModel.chatRunning != true)
-            .opacity(chatModel.chatRunning == true ? 1 : 0.45)
-            PopopxSettingsDivider()
+        PopopxSectionCard {
             PopopxSettingsRowLink(
-                PopopxNetworkCopy.advancedRow,
+                PopopxNetworkAdvancedCopy.title,
+                note: PopopxNetworkAdvancedCopy.footnote,
                 systemImage: "network",
-                tint: .brand,
-                enabled: chatModel.chatRunning == true,
-                hint: PopopxGeneralCopy.openHint
+                tint: .brand
             ) {
-                AdvancedNetworkSettings()
-                    .navigationTitle(PopopxNetworkCopy.advancedTitle)
-                    .modifier(ThemedBackground(grouped: true))
+                PopopxNetworkAdvancedView()
             }
-            PopopxSettingsDivider()
-            PopopxNetworkStatusRow(
-                type: chatModel.networkInfo.networkType,
-                online: chatModel.networkInfo.online
-            )
         }
     }
 
@@ -610,6 +577,81 @@ private struct PopopxNetworkStatusRow: View {
     }
 }
 
+// MARK: - Network and advanced (secondary page)
+
+/// The low-frequency network controls that left the Settings home this round: relays, WebRTC ICE
+/// servers, the advanced network page and the read-only connection reading. It is pushed through
+/// the same `NavigationStack` the settings sheet already lives in, so Back is the system one.
+///
+/// The relays row keeps the plain-Button + `settingsTrack.path.append` mechanism (decision 3 in the
+/// file header): `NavigationLink(value:)` on a real device only redraws the page it is on.
+/// Availability follows the original pages: all three write network configuration and disable when
+/// no session is running (same rule as the settings root's call card).
+@MainActor
+struct PopopxNetworkAdvancedView: View {
+    @Environment(PopopxSettingsNavTrack.self) private var settingsTrack
+    @EnvironmentObject private var chatModel: ChatModel
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
+                PopopxSectionCard {
+                    Button {
+                        settingsTrack.path.append(ServersDestination.networkAndServers)
+                    } label: {
+                        PopopxSettingsRowLabel(
+                            title: Copy.serversRow,
+                            systemImage: "externaldrive.connected.to.line.below",
+                            tint: .brand
+                        )
+                        .frame(maxWidth: .infinity, minHeight: PopopxMetrics.minHitTarget, alignment: .leading)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(PopopxPressButtonStyle())
+                    .accessibilityHint(Text(verbatim: Copy.openHint))
+                    .disabled(chatModel.chatRunning != true)
+                    .opacity(chatModel.chatRunning == true ? 1 : 0.45)
+                    PopopxSettingsDivider()
+                    PopopxSettingsRowLink(
+                        PopopxNetworkAdvancedCopy.iceRow,
+                        systemImage: "phone.connection",
+                        tint: .brand,
+                        enabled: chatModel.chatRunning == true,
+                        hint: PopopxGeneralCopy.openHint
+                    ) {
+                        RTCServers()
+                            .navigationTitle(PopopxNetworkAdvancedCopy.iceTitle)
+                            .modifier(ThemedBackground(grouped: true))
+                    }
+                    PopopxSettingsDivider()
+                    PopopxSettingsRowLink(
+                        PopopxNetworkCopy.advancedRow,
+                        systemImage: "wrench.and.screwdriver",
+                        tint: .brand,
+                        enabled: chatModel.chatRunning == true,
+                        hint: PopopxGeneralCopy.openHint
+                    ) {
+                        AdvancedNetworkSettings()
+                            .navigationTitle(PopopxNetworkCopy.advancedTitle)
+                            .modifier(ThemedBackground(grouped: true))
+                    }
+                    PopopxSettingsDivider()
+                    PopopxNetworkStatusRow(
+                        type: chatModel.networkInfo.networkType,
+                        online: chatModel.networkInfo.online
+                    )
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, PopopxMetrics.spaceS)
+            .padding(.bottom, PopopxMetrics.space2XL)
+        }
+        .background(PopopxPalette.base)
+        .navigationTitle(PopopxNetworkAdvancedCopy.title)
+        .toolbarBackground(PopopxMaterial.bar, for: .navigationBar)
+    }
+}
+
 /// The divider inside a card: a hairline `PopopxMetrics.divider` high, with `spaceXS` left above and below.
 private struct PopopxSettingsDivider: View {
     var body: some View {
@@ -859,10 +901,9 @@ private enum Copy {
     static let relayCallsNoteOn = NSLocalizedString("A relay protects your IP address, but it can see how long a call lasts.", comment: "POPOPX settings tree")
     static let relayCallsNoteOff = NSLocalizedString("The relay is used only when it is necessary; the other side may see your IP address.", comment: "POPOPX settings tree")
 
-    // Network and servers
-    static let groupNetwork = NSLocalizedString("Network and servers", comment: "POPOPX settings tree")
+    // Network and advanced -- `groupNetwork` and the old long `networkFootnote` left this table in the
+    // UX streamline round: the card is now a single row named by `PopopxNetworkAdvancedCopy` below.
     static let serversRow = NSLocalizedString("Relays and servers", comment: "POPOPX settings tree")
-    static let networkFootnote = NSLocalizedString("Going back asks you once whether to save; if you do not save, the last core configuration stays in effect.", comment: "POPOPX settings tree")
 
     // Data and migration
     static let groupData = NSLocalizedString("Data and migration", comment: "POPOPX settings tree")
@@ -898,6 +939,24 @@ private enum PopopxGeneralCopy {
     static let notifyOff = key("This identity is muted")
     /// The row-end VoiceOver hint: its Chinese value is 'Open', the same as the Chinese `Copy.openHint` above, so the wording is not split two ways.
     static let openHint = key("Open")
+}
+
+// MARK: - Copy for the 'Network and advanced' card (the English source sentence is the Key)
+
+/// The card that replaced the three-row network section in the UX streamline round. All three
+/// entries were appended to the 20 localized directories (and to `zh-Hans`, so the i18n gate keeps
+/// them in its expected set); the two row titles below are new keys, while `serversRow` and the ICE
+/// page title reuse existing translations.
+private enum PopopxNetworkAdvancedCopy {
+    private static func key(_ value: String) -> String {
+        NSLocalizedString(value, comment: "POPOPX settings tree")
+    }
+
+    static let title = key("Network and advanced")
+    static let footnote = key("Relays, calls and diagnostics.")
+    /// The row wording of `CallSettings`'s existing entry, so the page keeps one name everywhere.
+    static let iceRow = NSLocalizedString("WebRTC ICE servers", comment: "POPOPX settings tree")
+    static let iceTitle = NSLocalizedString("Your ICE servers", comment: "POPOPX settings tree")
 }
 
 // MARK: - New copy for the 'Network and servers' card (the English source sentence is the Key)

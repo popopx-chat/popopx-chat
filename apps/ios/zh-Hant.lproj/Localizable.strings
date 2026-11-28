@@ -10324,3 +10324,17 @@ alert title */
 
 /* discover setup guide */
 "Pair now" = "立即配對";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "我的二維碼";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "網絡與高級設置";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "中繼、通話與診斷。";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "在應用切換器與截圖中隱藏聊天。";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "移除你傳送連結中的追蹤代碼。";

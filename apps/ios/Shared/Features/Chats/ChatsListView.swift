@@ -211,6 +211,7 @@ struct ChatsListView: View {
     @State private var showsCreateGroup = false
     @State private var showsCreateChannel = false
     @State private var showsScan = false
+    @State private var showsMyAddressQR = false
     /// The "Configure relays" row in the create-channel page pushes `NetworkAndServers` by value (`AddChannelView.swift:85`),
     /// the same policy as the Me tab's stack (`MainTabView.swift:121`): whoever hosts the stack holds the `SaveableSettings`.
     @StateObject private var serversSettings = SaveableSettings()
@@ -362,6 +363,9 @@ struct ChatsListView: View {
         .sheet(isPresented: $showsAddFriend) {
             PopopxAddFriendView()
         }
+        .sheet(isPresented: $showsMyAddressQR) {
+            PopopxMyAddressQRSheet()
+        }
         // The pioneer trial badge notice dialog. Hung on this page rather than on the `POPOPXApp` layer: the chat stack already exists here,
         // so the sheet has something to attach to; `PopopxTrialWelcomeModal` carries its own "claim" button and its failure reasons,
         // so this layer only decides "should we ask this time" and does not claim on its behalf.
@@ -403,7 +407,8 @@ struct ChatsListView: View {
                 onAddFriend: { showsAddFriend = true },
                 onStartGroupChat: { showsCreateGroup = true },
                 onCreateChannel: { showsCreateChannel = true },
-                onScan: { showsScan = true }
+                onScan: { showsScan = true },
+                onMyQR: { showsMyAddressQR = true }
             )
             if showsSearchRow {
                 PopopxChatSearchRow(text: $searchText, onClose: closeSearchRow)

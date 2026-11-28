@@ -742,6 +742,7 @@ private fun ChatListToolbar(userPickerState: MutableStateFlow<AnimatedViewState>
         }
       },
       onScan = openNewChat(NewChatOption.CONNECT, true),
+      onMyQR = { showPopopxMyAddress(chatModel) },
       onMintLink = openNewChat(NewChatOption.INVITE, false),
     )
   } else {

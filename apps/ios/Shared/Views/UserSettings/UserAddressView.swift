@@ -1015,6 +1015,28 @@ struct SetPopopxDomainView: View {
     }
 }
 
+/// Modal wrapper around `UserAddressView` so the permanent `/i/v1/` contact
+/// address page can be presented from anywhere (Messages plus menu, Contacts
+/// toolbar, Me tab) as the single shared "My QR Code" entry point.
+@MainActor
+struct PopopxMyAddressQRSheet: View {
+    @EnvironmentObject private var chatModel: ChatModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            UserAddressView(shareViaProfile: chatModel.currentUser?.addressShared ?? false)
+                .navigationTitle("POPOPX address")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Done") { dismiss() }
+                    }
+                }
+        }
+    }
+}
+
 struct UserAddressView_Previews: PreviewProvider {
     static var previews: some View {
         let chatModel = ChatModel()

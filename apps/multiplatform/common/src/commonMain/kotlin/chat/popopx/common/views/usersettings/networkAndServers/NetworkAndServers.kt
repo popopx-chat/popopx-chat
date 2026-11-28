@@ -208,7 +208,7 @@ fun ModalData.NetworkAndServersView(closeNetworkAndServers: () -> Unit) {
     val showModal = { it: @Composable ModalData.() -> Unit -> ModalManager.start.showModal(content = it) }
     val showCustomModal = { it: @Composable (close: () -> Unit) -> Unit -> ModalManager.start.showCustomModal { close -> it(close) } }
 
-    AppBarTitle(stringResource(MR.strings.network_and_servers))
+    AppBarTitle(stringResource(MR.strings.network_and_advanced))
     // TODO: Review this and socks.
     if (!chatModel.desktopNoUserNoRemote) {
       SectionView(generalGetString(MR.strings.network_preset_servers_title)) {

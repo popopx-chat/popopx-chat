@@ -6880,3 +6880,17 @@ server test failure */
 
 /* discover setup guide */
 "Pair now" = "Spárovat nyní";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "Můj QR kód";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "Síť a pokročilá nastavení";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "Relé, hovory a diagnostika.";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "Skryje chaty v přepínači aplikací a na snímcích obrazovky.";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "Odstraňuje sledovací kódy z odesílaných odkazů.";

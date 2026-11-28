@@ -6786,3 +6786,17 @@ server test failure */
 
 /* discover setup guide */
 "Pair now" = "今すぐペアリング";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "マイQRコード";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "ネットワークと詳細設定";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "リレー・通話・診断。";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "アプリ切替画面とスクリーンショットでチャットを隠します。";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "送信するリンクから追跡コードを削除します。";

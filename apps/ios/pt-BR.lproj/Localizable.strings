@@ -4933,3 +4933,17 @@
 
 /* discover setup guide */
 "Pair now" = "Parear agora";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "Meu código QR";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "Rede e avançado";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "Retransmissores, chamadas e diagnóstico.";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "Oculta as conversas no seletor de apps e nas capturas de tela.";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "Remove códigos de rastreamento dos links que você envia.";

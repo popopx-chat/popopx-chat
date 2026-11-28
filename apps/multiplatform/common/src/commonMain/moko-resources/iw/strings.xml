@@ -2083,4 +2083,8 @@
   <string name="agent_task_status_completed">הושלם</string>
   <string name="agent_task_status_failed">נכשל</string>
   <string name="agent_task_status_cancelled">בוטל</string>
+  <string name="my_qr_code">קוד ה-QR שלי</string>
+  <string name="network_and_advanced">רשת ומתקדם</string>
+  <string name="me_protect_note">מסתיר צ׳אטים בבורר האפליקציות ובצילומי מסך.</string>
+  <string name="me_sanitize_note">מסיר קודי מעקב מקישורים שאתה שולח.</string>
 </resources>

@@ -2988,4 +2988,8 @@
   <string name="agent_task_status_completed">Tamamlandı</string>
   <string name="agent_task_status_failed">Başarısız</string>
   <string name="agent_task_status_cancelled">İptal edildi</string>
+  <string name="my_qr_code">QR kodum</string>
+  <string name="network_and_advanced">Ağ ve gelişmiş</string>
+  <string name="me_protect_note">Sohbetleri uygulama değiştiricide ve ekran görüntülerinde gizler.</string>
+  <string name="me_sanitize_note">Gönderdiğiniz bağlantılardan izleme kodlarını kaldırır.</string>
 </resources>

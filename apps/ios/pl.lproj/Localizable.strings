@@ -9571,3 +9571,17 @@ alert title */
 
 /* discover setup guide */
 "Pair now" = "Sparuj teraz";
+/* ux streamline: My QR Code entry */
+"My QR Code" = "Mój kod QR";
+
+/* ux streamline: network secondary page */
+"Network and advanced" = "Sieć i ustawienia zaawansowane";
+
+/* ux streamline: network secondary page note */
+"Relays, calls and diagnostics." = "Przekaźniki, połączenia i diagnostyka.";
+
+/* ux streamline: Me home, one-line security notes */
+"Hides chats in the app switcher and screenshots." = "Ukrywa czaty w przełączniku aplikacji i na zrzutach ekranu.";
+
+/* ux streamline: Me home, one-line security notes */
+"Removes tracking codes from links you send." = "Usuwa kody śledzące z wysyłanych linków.";
