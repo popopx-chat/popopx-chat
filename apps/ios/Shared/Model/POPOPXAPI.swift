@@ -4118,14 +4118,29 @@ extension PopopxMessageRouter: @retroactive PopopxMeshRoutingObserving {
 /// three-tap gesture cannot arm. The package's `PopopxPanicWipeGate` still owns the gesture, the
 /// The 1-second triple-tap test, the confirmation sheet and the wipe order -- here only its existence is decided.
 ///
-/// `PopopxKeyboardObserver.isVisible` is the second half of that condition, and it is load-bearing.
 /// The overlay is the frontmost view of the whole app and `Color.clear` + a tap gesture CLAIMS its
-/// square; when the keyboard rises, the root's bottom-trailing corner rises with it and lands exactly
-/// on the composer's send button (the "Launch" of `PopopxCabinView` and the send key of the chat room are both in that one cell).
-/// With the fuse on, the first tap of every send was being eaten by the wipe counter -- the real-device reports
-/// "Cabin: tapping Launch does nothing" and "private note: tapping send does nothing" are one and the same root cause; neither composer was broken.
-/// Now the corner does not take over taps while the keyboard is raised, the fuse's triple-tap stays usable in the same corner after the keyboard drops,
-/// and the triple-tap on the logo (both the top bar and the Me page) is unaffected at any moment.
+/// square, so the condition that decides whether the square exists is load-bearing. It is the one
+/// rule "never take over a tap a control of the app can use", and three bottom-trailing occupants
+/// are measured against it (iPhone 17 Pro, iOS 26.4; trigger square at (349,787,45,45) in full-app
+/// coordinates, i.e. the 44 pt corner plus its 8 pt inset):
+///
+/// - The keyboard (`PopopxKeyboardObserver.isVisible`): when it rises the corner rises with it and
+///   lands on the composer's send key (the "Launch" of `PopopxCabinView` and the send key of the chat
+///   room are both in that one cell). With the fuse on, the first tap of every send was eaten by the
+///   wipe counter -- the real-device reports "Cabin: tapping Launch does nothing" and "private note:
+///   tapping send does nothing" were this one root cause, neither composer was broken.
+/// - An open conversation (`ChatModel.chatId != nil`): the composer owns that cell with or without
+///   the keyboard. Measured 2026-11-28: the idle composer's live-message button reports
+///   (361,801,21,21) and a staged attachment's send button (356,797,29,29) -- both entirely inside
+///   the square, and with the keyboard down neither tap did anything, which is how a staged photo
+///   could not be sent at all. The keyboard guard alone never covered this state.
+/// - The tab bar (`PopopxTabBarPresence.isVisible`): its Me cell reports (324,792,76,48) and its
+///   right half lies under the square; a tap there reached neither the tab nor anything else (the
+///   left half of the same cell navigates, which is the control that proved the corner swallowed it).
+///
+/// With all three yielded to, the corner still arms the fuse wherever a pushed screen leaves it
+/// empty, and the fuse's two documented entry points -- the brand-mark triple-tap (top bar and Me
+/// page) and the red row on the Me page -- are unaffected at any moment.
 @MainActor
 struct PopopxMeshPanicWipeMount: ViewModifier {
     /// The corner's side, copied from module 7's own trigger so the hidden target is the size the
@@ -4134,13 +4149,108 @@ struct PopopxMeshPanicWipeMount: ViewModifier {
 
     @ObservedObject private var runtime = PopopxMeshRuntime.shared
     @ObservedObject private var keyboard = PopopxKeyboardObserver.shared
+    @ObservedObject private var chatModel = ChatModel.shared
+    @ObservedObject private var tabBar = PopopxTabBarPresence.shared
 
     func body(content: Content) -> some View {
-        content.overlay(alignment: .bottomTrailing) {
-            if runtime.isFuseOn, !keyboard.isVisible {
-                PopopxPanicWipeGate(runtime.panicWipe) {
-                    Color.clear.frame(width: Self.hitTargetSide, height: Self.hitTargetSide)
+        content
+            .background { PopopxTabBarProbe().frame(width: 0, height: 0) }
+            .overlay(alignment: .bottomTrailing) {
+                if runtime.isFuseOn, !keyboard.isVisible, chatModel.chatId == nil, !tabBar.isVisible {
+                    PopopxPanicWipeGate(runtime.panicWipe) {
+                        Color.clear.frame(width: Self.hitTargetSide, height: Self.hitTargetSide)
+                    }
                 }
+            }
+    }
+}
+
+/// Whether the app's tab bar is on screen, so the mount above can yield the corner to it.
+///
+/// Read from the live `UITabBar` instead of a flag each screen would have to maintain: screens hide
+/// the bar with `.toolbar(.hidden, for: .tabBar)`, declared per destination (ChatsListView.swift:334,
+/// 341, 351, `PopopxCabinView.swift:617, 1964`, ...), and a screen that forgot to report itself would
+/// be exactly the dead corner this exists to prevent. KVO on `isHidden` follows the system's own
+/// show/hide, whichever line declared it.
+@MainActor
+final class PopopxTabBarPresence: ObservableObject {
+    static let shared = PopopxTabBarPresence()
+
+    @Published private(set) var isVisible = false
+
+    private var observation: NSKeyValueObservation?
+    private weak var observedBar: UITabBar?
+
+    /// True when no bar has been found yet, so the probe can keep retrying the first frames.
+    var needsAttach: Bool { observedBar == nil }
+
+    private init() {}
+
+    func attach(to window: UIWindow?) {
+        guard let window else { return }
+        guard let bar = Self.firstTabBar(in: window) else { return }
+        if bar === observedBar {
+            update(bar)
+            return
+        }
+        observedBar = bar
+        observation = bar.observe(\.isHidden, options: [.initial, .new]) { [weak self] bar, _ in
+            let visible = !bar.isHidden && bar.window != nil
+            DispatchQueue.main.async { self?.isVisible = visible }
+        }
+    }
+
+    private func update(_ bar: UITabBar) {
+        let visible = !bar.isHidden && bar.window != nil
+        if isVisible != visible { isVisible = visible }
+    }
+
+    private static func firstTabBar(in window: UIWindow) -> UITabBar? {
+        var found: UITabBar?
+        func walk(_ view: UIView) {
+            if found != nil { return }
+            if let bar = view as? UITabBar {
+                found = bar
+                return
+            }
+            for sub in view.subviews { walk(sub) }
+        }
+        walk(window)
+        return found
+    }
+}
+
+/// Zero-sized carrier that hands the mount's window to `PopopxTabBarPresence`. A representable rather
+/// than UIKit introspection from the modifier because `didMoveToWindow` is the one callback that both
+/// guarantees a window and repeats when the scene's window changes. The first layout pass can beat the
+/// tab bar's creation, so a missing bar is retried for a few seconds before giving up (the mount then
+/// behaves exactly as before this probe existed).
+private struct PopopxTabBarProbe: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let view = ProbeView()
+        view.isUserInteractionEnabled = false
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        (uiView as? ProbeView)?.attach()
+    }
+
+    final class ProbeView: UIView {
+        private var attempts = 0
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            attempts = 0
+            attach()
+        }
+
+        func attach() {
+            PopopxTabBarPresence.shared.attach(to: window)
+            guard PopopxTabBarPresence.shared.needsAttach, attempts < 10 else { return }
+            attempts += 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.attach()
             }
         }
     }
