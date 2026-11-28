@@ -6747,3 +6747,42 @@ server test failure */
 
 /* agent task status */
 "Cancelled" = "キャンセル済み";
+
+/* discover setup guide */
+"Install and use Mac Node" = "Mac Node のインストールと使用";
+
+/* discover setup guide */
+"Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." = "3 ステップ：Mac アプリをインストールし、1 回限りのペアリング資格情報を作成し、スキャンして接続します。";
+
+/* discover setup guide */
+"Usage guide" = "使用ガイド";
+
+/* discover setup guide */
+"Opens the three-step Mac Node setup guide" = "3 ステップの Mac Node セットアップガイドを開きます";
+
+/* discover setup guide */
+"Mac Node setup guide" = "Mac Node セットアップガイド";
+
+/* discover setup guide */
+"Install the Mac Node app" = "Mac Node アプリをインストール";
+
+/* discover setup guide */
+"Download the Mac Node desktop app from https://node.popopx.chat and install it." = "https://node.popopx.chat から Mac Node デスクトップアプリをダウンロードしてインストールします。";
+
+/* discover setup guide */
+"Create a pairing credential" = "ペアリング資格情報を作成";
+
+/* discover setup guide */
+"In the Mac app's local console, generate a one-time signed pairing credential." = "Mac アプリのローカルコンソールで、1 回限りの署名済みペアリング資格情報を生成します。";
+
+/* discover setup guide */
+"Scan to pair" = "スキャンしてペアリング";
+
+/* discover setup guide */
+"Scan the QR code with this phone, or paste the credential, to finish secure pairing." = "このスマートフォンで QR コードをスキャンするか、資格情報を貼り付けて安全なペアリングを完了します。";
+
+/* discover setup guide */
+"Copy site link" = "サイトリンクをコピー";
+
+/* discover setup guide */
+"Pair now" = "今すぐペアリング";

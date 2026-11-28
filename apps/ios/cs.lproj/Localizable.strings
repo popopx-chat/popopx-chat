@@ -6841,3 +6841,42 @@ server test failure */
 
 /* agent task status */
 "Cancelled" = "Zrušeno";
+
+/* discover setup guide */
+"Install and use Mac Node" = "Instalace a používání Mac Node";
+
+/* discover setup guide */
+"Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." = "Tři kroky: nainstalujte aplikaci pro Mac, vytvořte jednorázový párovací údaj a naskenováním se připojte.";
+
+/* discover setup guide */
+"Usage guide" = "Průvodce používáním";
+
+/* discover setup guide */
+"Opens the three-step Mac Node setup guide" = "Otevře tříkrokového průvodce nastavením Mac Node";
+
+/* discover setup guide */
+"Mac Node setup guide" = "Průvodce nastavením Mac Node";
+
+/* discover setup guide */
+"Install the Mac Node app" = "Instalace aplikace Mac Node";
+
+/* discover setup guide */
+"Download the Mac Node desktop app from https://node.popopx.chat and install it." = "Stáhněte desktopovou aplikaci Mac Node z https://node.popopx.chat a nainstalujte ji.";
+
+/* discover setup guide */
+"Create a pairing credential" = "Vytvoření párovacího údaje";
+
+/* discover setup guide */
+"In the Mac app's local console, generate a one-time signed pairing credential." = "V místní konzoli aplikace pro Mac vygenerujte podepsaný jednorázový párovací údaj.";
+
+/* discover setup guide */
+"Scan to pair" = "Naskenováním spárovat";
+
+/* discover setup guide */
+"Scan the QR code with this phone, or paste the credential, to finish secure pairing." = "Naskenujte QR kód tímto telefonem nebo vložte párovací údaj a dokončete zabezpečené párování.";
+
+/* discover setup guide */
+"Copy site link" = "Kopírovat odkaz na web";
+
+/* discover setup guide */
+"Pair now" = "Spárovat nyní";

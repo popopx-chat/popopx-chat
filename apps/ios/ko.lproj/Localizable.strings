@@ -4894,3 +4894,42 @@
 
 /* agent task status */
 "Cancelled" = "취소됨";
+
+/* discover setup guide */
+"Install and use Mac Node" = "Mac Node 설치 및 사용";
+
+/* discover setup guide */
+"Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." = "세 단계: Mac 앱을 설치하고, 일회용 페어링 자격 증명을 만들고, 스캔하여 연결하세요.";
+
+/* discover setup guide */
+"Usage guide" = "사용 안내";
+
+/* discover setup guide */
+"Opens the three-step Mac Node setup guide" = "3단계 Mac Node 설정 안내를 엽니다";
+
+/* discover setup guide */
+"Mac Node setup guide" = "Mac Node 설정 안내";
+
+/* discover setup guide */
+"Install the Mac Node app" = "Mac Node 앱 설치";
+
+/* discover setup guide */
+"Download the Mac Node desktop app from https://node.popopx.chat and install it." = "https://node.popopx.chat 에서 Mac Node 데스크톱 앱을 내려받아 설치하세요.";
+
+/* discover setup guide */
+"Create a pairing credential" = "페어링 자격 증명 만들기";
+
+/* discover setup guide */
+"In the Mac app's local console, generate a one-time signed pairing credential." = "Mac 앱의 로컬 콘솔에서 일회용 서명된 페어링 자격 증명을 생성하세요.";
+
+/* discover setup guide */
+"Scan to pair" = "스캔하여 페어링";
+
+/* discover setup guide */
+"Scan the QR code with this phone, or paste the credential, to finish secure pairing." = "이 휴대폰으로 QR 코드를 스캔하거나 자격 증명을 붙여넣어 보안 페어링을 완료하세요.";
+
+/* discover setup guide */
+"Copy site link" = "사이트 링크 복사";
+
+/* discover setup guide */
+"Pair now" = "지금 페어링";

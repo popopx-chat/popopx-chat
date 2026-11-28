@@ -7544,3 +7544,42 @@ server test failure */
 
 /* agent task status */
 "Cancelled" = "Отказано";
+
+/* discover setup guide */
+"Install and use Mac Node" = "Инсталиране и използване на Mac Node";
+
+/* discover setup guide */
+"Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." = "Три стъпки: инсталирайте приложението за Mac, създайте еднократни данни за сдвояване, след което сканирайте, за да се свържете.";
+
+/* discover setup guide */
+"Usage guide" = "Ръководство за употреба";
+
+/* discover setup guide */
+"Opens the three-step Mac Node setup guide" = "Отваря тристепенното ръководство за настройка на Mac Node";
+
+/* discover setup guide */
+"Mac Node setup guide" = "Ръководство за настройка на Mac Node";
+
+/* discover setup guide */
+"Install the Mac Node app" = "Инсталиране на приложението Mac Node";
+
+/* discover setup guide */
+"Download the Mac Node desktop app from https://node.popopx.chat and install it." = "Изтеглете приложението Mac Node за настолен компютър от https://node.popopx.chat и го инсталирайте.";
+
+/* discover setup guide */
+"Create a pairing credential" = "Създаване на данни за сдвояване";
+
+/* discover setup guide */
+"In the Mac app's local console, generate a one-time signed pairing credential." = "В локалната конзола на приложението за Mac генерирайте подписани еднократни данни за сдвояване.";
+
+/* discover setup guide */
+"Scan to pair" = "Сканиране за сдвояване";
+
+/* discover setup guide */
+"Scan the QR code with this phone, or paste the credential, to finish secure pairing." = "Сканирайте QR кода с този телефон или поставете данните за сдвояване, за да завършите сигурното сдвояване.";
+
+/* discover setup guide */
+"Copy site link" = "Копиране на връзката към сайта";
+
+/* discover setup guide */
+"Pair now" = "Сдвояване сега";

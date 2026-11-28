@@ -3745,6 +3745,18 @@
        Nothing here promises a network round trip, and no value carries a recipient: the bar reports on
        the phone and writes to the calendar only after the confirm tap. -->
   <string name="discover_private_assistant">My private assistant</string>
+  <string name="discover_guide_card_title">Install and use Mac Node</string>
+  <string name="discover_guide_card_subtitle">Three steps: install the Mac app, create a one-time pairing credential, then scan to bond.</string>
+  <string name="discover_guide_chip">Usage guide</string>
+  <string name="discover_guide_title">Mac Node setup guide</string>
+  <string name="discover_guide_step_install_title">Install the Mac Node app</string>
+  <string name="discover_guide_step_install_detail">Download the Mac Node desktop app from https://node.popopx.chat and install it.</string>
+  <string name="discover_guide_step_credential_title">Create a pairing credential</string>
+  <string name="discover_guide_step_credential_detail">In the Mac app\'s local console, generate a one-time signed pairing credential.</string>
+  <string name="discover_guide_step_scan_title">Scan to pair</string>
+  <string name="discover_guide_step_scan_detail">Scan the QR code with this phone, or paste the credential, to finish secure pairing.</string>
+  <string name="discover_guide_copy_link">Copy site link</string>
+  <string name="discover_guide_pair_now">Pair now</string>
   <string name="copilot_local_only_note">On this phone · never sent</string>
   <string name="copilot_bar_placeholder">Ask the on-device assistant</string>
   <string name="copilot_ask">Ask</string>

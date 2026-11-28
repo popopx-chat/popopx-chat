@@ -6387,3 +6387,42 @@ server test failure */
 
 /* agent task status */
 "Cancelled" = "ยกเลิกแล้ว";
+
+/* discover setup guide */
+"Install and use Mac Node" = "ติดตั้งและใช้งาน Mac Node";
+
+/* discover setup guide */
+"Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." = "สามขั้นตอน: ติดตั้งแอป Mac สร้างข้อมูลรับรองการจับคู่แบบใช้ครั้งเดียว แล้วสแกนเพื่อเชื่อมต่อ";
+
+/* discover setup guide */
+"Usage guide" = "คู่มือการใช้งาน";
+
+/* discover setup guide */
+"Opens the three-step Mac Node setup guide" = "เปิดคู่มือการตั้งค่า Mac Node สามขั้นตอน";
+
+/* discover setup guide */
+"Mac Node setup guide" = "คู่มือการตั้งค่า Mac Node";
+
+/* discover setup guide */
+"Install the Mac Node app" = "ติดตั้งแอป Mac Node";
+
+/* discover setup guide */
+"Download the Mac Node desktop app from https://node.popopx.chat and install it." = "ดาวน์โหลดแอป Mac Node สำหรับเดสก์ท็อปจาก https://node.popopx.chat แล้วติดตั้ง";
+
+/* discover setup guide */
+"Create a pairing credential" = "สร้างข้อมูลรับรองการจับคู่";
+
+/* discover setup guide */
+"In the Mac app's local console, generate a one-time signed pairing credential." = "ในคอนโซลโลคัลของแอป Mac ให้สร้างข้อมูลรับรองการจับคู่ที่ลงนามแล้วแบบใช้ครั้งเดียว";
+
+/* discover setup guide */
+"Scan to pair" = "สแกนเพื่อจับคู่";
+
+/* discover setup guide */
+"Scan the QR code with this phone, or paste the credential, to finish secure pairing." = "สแกนคิวอาร์โค้ดด้วยโทรศัพท์เครื่องนี้ หรือวางข้อมูลรับรอง เพื่อจับคู่อย่างปลอดภัย";
+
+/* discover setup guide */
+"Copy site link" = "คัดลอกลิงก์เว็บไซต์";
+
+/* discover setup guide */
+"Pair now" = "จับคู่เลย";

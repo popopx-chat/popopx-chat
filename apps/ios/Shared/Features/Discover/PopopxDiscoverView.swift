@@ -39,6 +39,11 @@ struct PopopxDiscoverView: View {
     @State private var search = ""
     @State private var detailService: PopopxNodeServiceId?
     @State private var showsPairing = false
+    /// "Pair now" inside the setup guide cannot present the pairing sheet from within the guide sheet —
+    /// two sheets cannot stand in one transaction. The guide sets this flag and dismisses itself; the
+    /// pairing sheet is presented from the guide sheet's `onDismiss`.
+    @State private var pendingPairingAfterGuide = false
+    @State private var showsGuide = false
     @State private var showsAssistant = false
     @FocusState private var searchFocused: Bool
 
@@ -51,6 +56,10 @@ struct PopopxDiscoverView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: PopopxMetrics.spaceL) {
                 PopopxDiscoverBanner { showsPairing = true }
+
+                // Directly under the node banner: when nothing is bonded, the question the banner
+                // raises ("how do I get one?") is answered here, before the catalogue begins.
+                PopopxDiscoverGuideEntry { showsGuide = true }
 
                 PopopxDiscoverAssistantEntry { showsAssistant = true }
 
@@ -95,6 +104,14 @@ struct PopopxDiscoverView: View {
         }
         .sheet(isPresented: $showsPairing) {
             MacNodePairingSheet()
+        }
+        .sheet(isPresented: $showsGuide, onDismiss: {
+            if pendingPairingAfterGuide {
+                pendingPairingAfterGuide = false
+                showsPairing = true
+            }
+        }) {
+            MacNodeGuideSheet { pendingPairingAfterGuide = true }
         }
         .sheet(isPresented: $showsAssistant) {
             PopopxCopilotAssistantView()
@@ -199,6 +216,208 @@ struct PopopxDiscoverBanner: View {
         guard let binding else { return DiscoverCopy.pairingIntro }
         if binding.contactId == nil { return DiscoverCopy.bannerNeedsChat }
         return isConnected ? DiscoverCopy.bannerReady : DiscoverCopy.nodeIdle
+    }
+}
+
+// MARK: - Setup guide
+
+/// 「发现 → 如何安装并使用 Mac Node」: the guide entry, and the only place that answers
+/// "how do I get one of these Macs" before the user has one.
+///
+/// It has two faces, chosen by whether a node is bonded at all:
+///  * **No node** — a prominent brand-washed card. The pairing sheet alone assumes the user already
+///    holds a signed credential; this card is what teaches the three steps that produce one.
+///  * **Bonded** — collapses to a compact "Usage guide" shortcut, because a five-line installation
+///    card under a working banner is noise; the guide stays reachable for the second Mac.
+///
+/// The card is a button for the same reason the banner is one: its only job is to open the sheet.
+struct PopopxDiscoverGuideEntry: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var data = DiscoverSubscriptionManager.shared
+
+    private let action: () -> Void
+
+    init(action: @escaping () -> Void) {
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            if data.binding == nil {
+                prominentCard
+            } else {
+                compactShortcut
+            }
+        }
+        .buttonStyle(PopopxPressButtonStyle())
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(Text(DiscoverCopy.guideEntryHint))
+        .accessibilityIdentifier("popopx.discover.guideEntry")
+        .padding(.horizontal, PopopxMetrics.gutter)
+    }
+
+    private var prominentCard: some View {
+        HStack(spacing: PopopxMetrics.spaceS) {
+            Image(systemName: "checklist")
+                .font(.system(size: 22, weight: .regular))
+                .foregroundStyle(PopopxPalette.brand)
+                .frame(width: 38, height: 38)
+                .background(PopopxPalette.brand.opacity(0.14), in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(DiscoverCopy.guideCardTitle)
+                    .font(PopopxType.emphasis)
+                    .foregroundStyle(PopopxPalette.label)
+                    .lineLimit(1)
+                Text(DiscoverCopy.guideCardSubtitle)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: PopopxMetrics.spaceXS)
+
+            Image(systemName: "chevron.forward")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(PopopxPalette.labelHint)
+        }
+        .padding(PopopxMetrics.spaceS)
+        // The wash is what makes this card read as "start here" above the white banner; the fill
+        // stays translucent so the grouped background shows through in both schemes.
+        .background(PopopxPalette.brand.opacity(0.10), in: .rect(cornerRadius: PopopxMetrics.radiusCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: PopopxMetrics.radiusCard)
+                .strokeBorder(PopopxPalette.brand.opacity(0.28), lineWidth: PopopxMetrics.hairline)
+        )
+        .popopxCardElevation(colorScheme: colorScheme)
+    }
+
+    private var compactShortcut: some View {
+        HStack(spacing: PopopxMetrics.space2XS) {
+            Image(systemName: "checklist")
+                .font(PopopxType.microTag)
+                .imageScale(.medium)
+                .accessibilityHidden(true)
+            Text(DiscoverCopy.guideChipTitle)
+                .font(PopopxType.meta)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+        }
+        .foregroundStyle(PopopxPalette.brand)
+        .padding(.horizontal, PopopxMetrics.spaceS)
+        .frame(minHeight: PopopxMetrics.minHitTarget)
+        .background(PopopxPalette.brand.opacity(0.12), in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+        .overlay(
+            RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
+                .strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
+        )
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// The three steps that end with a bonded Mac, in the order the machines require them:
+/// the Mac must exist before it can mint a credential, and the credential must exist before a phone
+/// can scan it. The sheet deliberately does no pairing itself — 「立即配对」 hands over to
+/// `MacNodePairingSheet`, the one screen that owns the code scanner and the bond store.
+struct MacNodeGuideSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var copied = false
+
+    private let onPairNow: () -> Void
+
+    /// The address the copy button carries across. Only one of the three steps happens on a phone,
+    /// so the most useful thing this screen can hand over is where the desktop half lives.
+    private static let siteLink = "https://popopx.chat"
+
+    init(onPairNow: @escaping () -> Void) {
+        self.onPairNow = onPairNow
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: PopopxMetrics.spaceM) {
+                    PopopxSectionCard {
+                        VStack(alignment: .leading, spacing: PopopxMetrics.spaceM) {
+                            stepRow(
+                                1,
+                                title: DiscoverCopy.guideStepInstallTitle,
+                                detail: DiscoverCopy.guideStepInstallDetail
+                            )
+                            stepRow(
+                                2,
+                                title: DiscoverCopy.guideStepCredentialTitle,
+                                detail: DiscoverCopy.guideStepCredentialDetail
+                            )
+                            stepRow(
+                                3,
+                                title: DiscoverCopy.guideStepScanTitle,
+                                detail: DiscoverCopy.guideStepScanDetail
+                            )
+                        }
+                    }
+                    .padding(.horizontal, PopopxMetrics.gutter)
+                    .padding(.top, PopopxMetrics.spaceXS)
+
+                    VStack(spacing: PopopxMetrics.spaceS) {
+                        PopopxButton(
+                            copied ? DiscoverCopy.copiedNotice : DiscoverCopy.copySiteLink,
+                            systemImage: "doc.on.doc",
+                            role: .secondary
+                        ) {
+                            UIPasteboard.general.string = Self.siteLink
+                            copied = true
+                            PopopxHaptics.impact(.light)
+                        }
+                        .accessibilityIdentifier("popopx.discover.guideCopy")
+
+                        PopopxButton(DiscoverCopy.pairNow, systemImage: PopopxMacNodeVisual.cameraSymbol, role: .primary) {
+                            // The caller presents the pairing sheet from this sheet's dismissal,
+                            // so the hand-over is a flag plus this dismissal, never a second sheet here.
+                            onPairNow()
+                            dismiss()
+                        }
+                        .accessibilityIdentifier("popopx.discover.guidePair")
+                    }
+                    .padding(.horizontal, PopopxMetrics.gutter)
+                }
+                .padding(.bottom, PopopxMetrics.space2XL)
+            }
+            .background(PopopxPalette.base)
+            .navigationTitle(DiscoverCopy.guideTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(DiscoverCopy.closeRoom) { dismiss() }
+                        .font(PopopxType.meta)
+                        .foregroundStyle(PopopxPalette.labelSecondary)
+                }
+            }
+        }
+    }
+
+    private func stepRow(_ index: Int, title: String, detail: String) -> some View {
+        HStack(alignment: .top, spacing: PopopxMetrics.spaceS) {
+            Text(verbatim: "\(index)")
+                .font(.system(.footnote, weight: .semibold).monospacedDigit())
+                .foregroundStyle(PopopxPalette.onBrand)
+                .frame(width: 22, height: 22)
+                .background(PopopxPalette.brand, in: .circle)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(PopopxType.meta)
+                    .foregroundStyle(PopopxPalette.label)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(detail)
+                    .font(PopopxType.caption)
+                    .foregroundStyle(PopopxPalette.labelSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -753,6 +972,33 @@ extension DiscoverCopy {
     static let filterBarLabel = NSLocalizedString("Filter services", comment: "discover filter bar")
     static let noResultsFilter = NSLocalizedString("No service in this shelf", comment: "discover empty shelf")
     static let openServiceHint = NSLocalizedString("Opens the service details", comment: "discover accessibility hint")
+    // The setup guide ("how to install and use Mac Node"). The guide button copies this address,
+    // which is also the download page the first step names.
+    static let guideCardTitle = NSLocalizedString("Install and use Mac Node", comment: "discover setup guide card")
+    static let guideCardSubtitle = NSLocalizedString(
+        "Three steps: install the Mac app, create a one-time pairing credential, then scan to bond.",
+        comment: "discover setup guide card"
+    )
+    static let guideChipTitle = NSLocalizedString("Usage guide", comment: "discover setup guide shortcut")
+    static let guideEntryHint = NSLocalizedString("Opens the three-step Mac Node setup guide", comment: "discover setup guide accessibility hint")
+    static let guideTitle = NSLocalizedString("Mac Node setup guide", comment: "discover setup guide sheet title")
+    static let guideStepInstallTitle = NSLocalizedString("Install the Mac Node app", comment: "discover setup guide step 1")
+    static let guideStepInstallDetail = NSLocalizedString(
+        "Download the Mac Node desktop app from https://node.popopx.chat and install it.",
+        comment: "discover setup guide step 1"
+    )
+    static let guideStepCredentialTitle = NSLocalizedString("Create a pairing credential", comment: "discover setup guide step 2")
+    static let guideStepCredentialDetail = NSLocalizedString(
+        "In the Mac app's local console, generate a one-time signed pairing credential.",
+        comment: "discover setup guide step 2"
+    )
+    static let guideStepScanTitle = NSLocalizedString("Scan to pair", comment: "discover setup guide step 3")
+    static let guideStepScanDetail = NSLocalizedString(
+        "Scan the QR code with this phone, or paste the credential, to finish secure pairing.",
+        comment: "discover setup guide step 3"
+    )
+    static let copySiteLink = NSLocalizedString("Copy site link", comment: "discover setup guide copy button")
+    static let pairNow = NSLocalizedString("Pair now", comment: "discover setup guide primary button")
 }
 
 extension PopopxDiscoverServiceStatus {

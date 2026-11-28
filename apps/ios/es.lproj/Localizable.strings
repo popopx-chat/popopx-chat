@@ -10284,3 +10284,42 @@ alert title */
 
 /* agent task status */
 "Cancelled" = "Cancelada";
+
+/* discover setup guide */
+"Install and use Mac Node" = "Instalar y usar Mac Node";
+
+/* discover setup guide */
+"Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." = "Tres pasos: instala la app de Mac, crea una credencial de emparejamiento de un solo uso y escanea para vincular.";
+
+/* discover setup guide */
+"Usage guide" = "Guía de uso";
+
+/* discover setup guide */
+"Opens the three-step Mac Node setup guide" = "Abre la guía de configuración de Mac Node en tres pasos";
+
+/* discover setup guide */
+"Mac Node setup guide" = "Guía de configuración de Mac Node";
+
+/* discover setup guide */
+"Install the Mac Node app" = "Instalar la app Mac Node";
+
+/* discover setup guide */
+"Download the Mac Node desktop app from https://node.popopx.chat and install it." = "Descarga la app de escritorio Mac Node desde https://node.popopx.chat e instálala.";
+
+/* discover setup guide */
+"Create a pairing credential" = "Crear una credencial de emparejamiento";
+
+/* discover setup guide */
+"In the Mac app's local console, generate a one-time signed pairing credential." = "En la consola local de la app de Mac, genera una credencial de emparejamiento firmada de un solo uso.";
+
+/* discover setup guide */
+"Scan to pair" = "Escanear para emparejar";
+
+/* discover setup guide */
+"Scan the QR code with this phone, or paste the credential, to finish secure pairing." = "Escanea el código QR con este teléfono o pega la credencial para completar el emparejamiento seguro.";
+
+/* discover setup guide */
+"Copy site link" = "Copiar enlace del sitio";
+
+/* discover setup guide */
+"Pair now" = "Emparejar ahora";

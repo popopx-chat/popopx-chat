@@ -6471,3 +6471,42 @@ server test failure */
 
 /* agent task status */
 "Cancelled" = "Peruutettu";
+
+/* discover setup guide */
+"Install and use Mac Node" = "Mac Noden asennus ja käyttö";
+
+/* discover setup guide */
+"Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." = "Kolme vaihetta: asenna Mac-sovellus, luo kertakäyttöinen paritustieto ja skannaa yhdistääksesi.";
+
+/* discover setup guide */
+"Usage guide" = "Käyttöohje";
+
+/* discover setup guide */
+"Opens the three-step Mac Node setup guide" = "Avaa Mac Noden kolmivaiheinen asennusohje";
+
+/* discover setup guide */
+"Mac Node setup guide" = "Mac Noden asennusohje";
+
+/* discover setup guide */
+"Install the Mac Node app" = "Asenna Mac Node -sovellus";
+
+/* discover setup guide */
+"Download the Mac Node desktop app from https://node.popopx.chat and install it." = "Lataa Mac Node -työpöytäsovellus osoitteesta https://node.popopx.chat ja asenna se.";
+
+/* discover setup guide */
+"Create a pairing credential" = "Luo paritustieto";
+
+/* discover setup guide */
+"In the Mac app's local console, generate a one-time signed pairing credential." = "Luo Mac-sovelluksen paikallisessa konsolissa allekirjoitettu kertakäyttöinen paritustieto.";
+
+/* discover setup guide */
+"Scan to pair" = "Skannaa ja parita";
+
+/* discover setup guide */
+"Scan the QR code with this phone, or paste the credential, to finish secure pairing." = "Skannaa QR-koodi tällä puhelimella tai liitä paritustieto viimeistelläksesi turvallisen parituksen.";
+
+/* discover setup guide */
+"Copy site link" = "Kopioi sivuston linkki";
+
+/* discover setup guide */
+"Pair now" = "Parita nyt";

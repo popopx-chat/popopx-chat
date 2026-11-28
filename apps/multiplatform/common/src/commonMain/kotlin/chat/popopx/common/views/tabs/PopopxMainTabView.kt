@@ -129,7 +129,7 @@ fun PopopxTabScaffold(userPickerState: MutableStateFlow<AnimatedViewState>) {
       when (tab) {
         PopopxTab.CHATS -> StartPartOfScreen(userPickerState)
         PopopxTab.CONTACTS -> WithAppBar { PopopxContactsTabView() }
-        PopopxTab.CABIN -> WithAppBar { PopopxCabinView() }
+        PopopxTab.CABIN -> WithAppBar { PopopxCabinView(onBack = { selected.value = PopopxTab.CHATS.ordinal }) }
         PopopxTab.DISCOVER -> WithAppBar { PopopxDiscoverTabView() }
         PopopxTab.ME -> WithAppBar { PopopxMeView() }
       }

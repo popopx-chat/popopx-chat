@@ -10285,3 +10285,42 @@ alert title */
 
 /* agent task status */
 "Cancelled" = "已取消";
+
+/* discover setup guide */
+"Install and use Mac Node" = "安装并使用 Mac Node";
+
+/* discover setup guide */
+"Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." = "三步完成：安装 Mac 应用，生成一次性配对凭证，然后扫码完成绑定。";
+
+/* discover setup guide */
+"Usage guide" = "使用指南";
+
+/* discover setup guide */
+"Opens the three-step Mac Node setup guide" = "打开三步 Mac Node 安装指南";
+
+/* discover setup guide */
+"Mac Node setup guide" = "Mac Node 安装指南";
+
+/* discover setup guide */
+"Install the Mac Node app" = "安装 Mac Node 应用";
+
+/* discover setup guide */
+"Download the Mac Node desktop app from https://node.popopx.chat and install it." = "从 https://node.popopx.chat 下载 Mac Node 桌面端并安装。";
+
+/* discover setup guide */
+"Create a pairing credential" = "生成配对凭证";
+
+/* discover setup guide */
+"In the Mac app's local console, generate a one-time signed pairing credential." = "在 Mac 应用的本地控制台中，生成一次性签名配对凭证。";
+
+/* discover setup guide */
+"Scan to pair" = "扫码配对";
+
+/* discover setup guide */
+"Scan the QR code with this phone, or paste the credential, to finish secure pairing." = "用这台手机扫描二维码，或粘贴凭证，完成安全配对。";
+
+/* discover setup guide */
+"Copy site link" = "复制站点链接";
+
+/* discover setup guide */
+"Pair now" = "立即配对";

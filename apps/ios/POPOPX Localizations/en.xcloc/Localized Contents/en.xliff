@@ -20587,6 +20587,71 @@ last received msg: %2$@</target>
         <target>Cancelled</target>
         <note>agent task status</note>
       </trans-unit>
+      <trans-unit id="Install and use Mac Node" xml:space="preserve">
+        <source>Install and use Mac Node</source>
+        <target>Install and use Mac Node</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." xml:space="preserve">
+        <source>Three steps: install the Mac app, create a one-time pairing credential, then scan to bond.</source>
+        <target>Three steps: install the Mac app, create a one-time pairing credential, then scan to bond.</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="Usage guide" xml:space="preserve">
+        <source>Usage guide</source>
+        <target>Usage guide</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="Opens the three-step Mac Node setup guide" xml:space="preserve">
+        <source>Opens the three-step Mac Node setup guide</source>
+        <target>Opens the three-step Mac Node setup guide</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="Mac Node setup guide" xml:space="preserve">
+        <source>Mac Node setup guide</source>
+        <target>Mac Node setup guide</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="Install the Mac Node app" xml:space="preserve">
+        <source>Install the Mac Node app</source>
+        <target>Install the Mac Node app</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="Download the Mac Node desktop app from https://node.popopx.chat and install it." xml:space="preserve">
+        <source>Download the Mac Node desktop app from https://node.popopx.chat and install it.</source>
+        <target>Download the Mac Node desktop app from https://node.popopx.chat and install it.</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="Create a pairing credential" xml:space="preserve">
+        <source>Create a pairing credential</source>
+        <target>Create a pairing credential</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="In the Mac app's local console, generate a one-time signed pairing credential." xml:space="preserve">
+        <source>In the Mac app's local console, generate a one-time signed pairing credential.</source>
+        <target>In the Mac app's local console, generate a one-time signed pairing credential.</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="Scan to pair" xml:space="preserve">
+        <source>Scan to pair</source>
+        <target>Scan to pair</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="Scan the QR code with this phone, or paste the credential, to finish secure pairing." xml:space="preserve">
+        <source>Scan the QR code with this phone, or paste the credential, to finish secure pairing.</source>
+        <target>Scan the QR code with this phone, or paste the credential, to finish secure pairing.</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="Copy site link" xml:space="preserve">
+        <source>Copy site link</source>
+        <target>Copy site link</target>
+        <note>discover setup guide</note>
+      </trans-unit>
+      <trans-unit id="Pair now" xml:space="preserve">
+        <source>Pair now</source>
+        <target>Pair now</target>
+        <note>discover setup guide</note>
+      </trans-unit>
     </body>
   </file>
   <file original="en.lproj/POPOPX--iOS--InfoPlist.strings" source-language="en" target-language="en" datatype="plaintext">

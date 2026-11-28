@@ -9469,3 +9469,42 @@ alert title */
 
 /* agent task status */
 "Cancelled" = "İptal edildi";
+
+/* discover setup guide */
+"Install and use Mac Node" = "Mac Node'u yükleme ve kullanma";
+
+/* discover setup guide */
+"Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." = "Üç adım: Mac uygulamasını yükleyin, tek kullanımlık bir eşleştirme kimlik bilgisi oluşturun, ardından bağlanmak için tarayın.";
+
+/* discover setup guide */
+"Usage guide" = "Kullanım kılavuzu";
+
+/* discover setup guide */
+"Opens the three-step Mac Node setup guide" = "Üç adımlı Mac Node kurulum kılavuzunu açar";
+
+/* discover setup guide */
+"Mac Node setup guide" = "Mac Node kurulum kılavuzu";
+
+/* discover setup guide */
+"Install the Mac Node app" = "Mac Node uygulamasını yükleyin";
+
+/* discover setup guide */
+"Download the Mac Node desktop app from https://node.popopx.chat and install it." = "Mac Node masaüstü uygulamasını https://node.popopx.chat adresinden indirip yükleyin.";
+
+/* discover setup guide */
+"Create a pairing credential" = "Eşleştirme kimlik bilgisi oluşturun";
+
+/* discover setup guide */
+"In the Mac app's local console, generate a one-time signed pairing credential." = "Mac uygulamasının yerel konsolunda tek kullanımlık, imzalı bir eşleştirme kimlik bilgisi oluşturun.";
+
+/* discover setup guide */
+"Scan to pair" = "Eşleştirmek için tarayın";
+
+/* discover setup guide */
+"Scan the QR code with this phone, or paste the credential, to finish secure pairing." = "Güvenli eşleştirmeyi tamamlamak için QR kodunu bu telefonla tarayın veya kimlik bilgisini yapıştırın.";
+
+/* discover setup guide */
+"Copy site link" = "Site bağlantısını kopyala";
+
+/* discover setup guide */
+"Pair now" = "Şimdi eşleştir";

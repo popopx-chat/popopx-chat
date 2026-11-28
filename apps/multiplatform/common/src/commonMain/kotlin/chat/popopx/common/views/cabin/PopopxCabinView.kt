@@ -48,12 +48,14 @@ import chat.popopx.common.platform.ColumnWithScrollBar
 import chat.popopx.common.ui.components.PopopxDivider
 import chat.popopx.common.ui.components.PopopxIconBadge
 import chat.popopx.common.ui.components.PopopxPickerRow
+import chat.popopx.common.ui.components.PopopxPressable
 import chat.popopx.common.ui.components.PopopxPrimaryButton
 import chat.popopx.common.ui.components.PopopxSecondaryButton
 import chat.popopx.common.ui.components.PopopxSection
 import chat.popopx.common.ui.components.PopopxSwitch
 import chat.popopx.common.ui.theme.PopopxAlpha
 import chat.popopx.common.ui.theme.PopopxDuration
+import chat.popopx.common.ui.theme.PopopxHairlineStrong
 import chat.popopx.common.ui.theme.PopopxMesh
 import chat.popopx.common.ui.theme.PopopxMeshInk
 import chat.popopx.common.ui.theme.PopopxOnMesh
@@ -63,6 +65,7 @@ import chat.popopx.common.ui.theme.PopopxSurface
 import chat.popopx.common.ui.theme.PopopxTypeScale
 import chat.popopx.common.ui.theme.popopxReducedMotion
 import chat.popopx.common.views.helpers.AppBarTitle
+import chat.popopx.common.views.helpers.AutoMirroredIcon
 import chat.popopx.res.*
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -333,7 +336,7 @@ class PopopxCabinStore(
 }
 
 @Composable
-fun PopopxCabinView() {
+fun PopopxCabinView(onBack: () -> Unit) {
   val store = PopopxCabinStore.shared
   val fuse = PopopxMeshKillSwitch.shared
   val uiScope = rememberCoroutineScope()
@@ -376,7 +379,7 @@ fun PopopxCabinView() {
         .padding(top = 8.dp, bottom = CABIN_GUTTER * 3),
       verticalArrangement = Arrangement.spacedBy(CABIN_SECTION_GAP),
     ) {
-      CabinHeader(enabled)
+      CabinHeader(enabled, onBack)
 
       PopopxCabinStatusCard(
         radio = radio,
@@ -413,12 +416,14 @@ fun PopopxCabinView() {
 // MARK: - header
 
 /**
- * The page header plus iOS' top-trailing "Settings" capsule (`meshSettingsEntry`). Android's tab shell
- * draws no per-page top bar, so the capsule sits at the top of the page content, level with the title;
- * the dot on it is the fuse state, the same fact the first card in the sheet reports.
+ * The page header plus iOS' top-trailing "Settings" capsule (`meshSettingsEntry`), and — since this
+ * round — the iOS root bar's back capsule at the top-left (`backToChatsEntry` in `PopopxCabinView.swift`
+ * now carries `chevron.backward` + "Back"). Android's tab shell draws no per-page top bar, so both
+ * capsules sit at the top of the page content, level with the title; the dot on the Settings capsule is
+ * the fuse state, the same fact the first card in the sheet reports.
  */
 @Composable
-private fun CabinHeader(enabled: Boolean) {
+private fun CabinHeader(enabled: Boolean, onBack: () -> Unit) {
   val relayHopCap = PopopxMeshConfig.default.fragmentRelayTtlCap
   val broadcastTTL = PopopxMeshConfig.default.ttlDefault
   val entryLabel = stringResource(MR.strings.cabin_settings_entry)
@@ -426,6 +431,8 @@ private fun CabinHeader(enabled: Boolean) {
     if (enabled) MR.strings.cabin_settings_fuse_open else MR.strings.cabin_settings_fuse_closed
   )
   Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+    CabinBackCapsule(onBack)
+    Spacer(Modifier.width(12.dp))
     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
       Text(
         stringResource(MR.strings.cabin_page_title),
@@ -461,6 +468,43 @@ private fun CabinHeader(enabled: Boolean) {
           )
       )
       Text(stringResource(MR.strings.cabin_settings_capsule), style = PopopxTypeScale.subheadline, maxLines = 1)
+    }
+  }
+}
+
+/**
+ * The iOS root bar's top-left back capsule on Android tokens: `ic_arrow_back_ios_new` + "Back", a
+ * translucent surface fill (`PopopxSurface` at 88%) and the 0.5dp `PopopxHairlineStrong` edge — the
+ * same edge every Android card strokes itself with, so it stays visible on the light canvas and on
+ * the OLED ladder. `PopopxPressable` owns the spring press-scale and deliberately no haptic:
+ * navigation is not a commit (`PopopxControls.kt` states that rule on the `haptic` parameter).
+ * Under RTL `AutoMirroredIcon` flips the arrow and `Row` lays the word out on the mirrored side,
+ * so the whole capsule reads right-to-left in Arabic.
+ */
+@Composable
+private fun CabinBackCapsule(onBack: () -> Unit) {
+  PopopxPressable(onClick = onBack) {
+    Row(
+      Modifier
+        .heightIn(min = PopopxSize.control)
+        .background(PopopxSurface.copy(alpha = 0.88f), RoundedCornerShape(PopopxRadiusControl))
+        .border(PopopxSize.hairline, PopopxHairlineStrong, RoundedCornerShape(PopopxRadiusControl))
+        .padding(horizontal = 10.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      AutoMirroredIcon(
+        painterResource(MR.images.ic_arrow_back_ios_new),
+        null,
+        Modifier.size(14.dp),
+        tint = MaterialTheme.colors.onSurface,
+      )
+      Text(
+        stringResource(MR.strings.back),
+        style = PopopxTypeScale.subheadline,
+        color = MaterialTheme.colors.onSurface,
+        maxLines = 1,
+      )
     }
   }
 }

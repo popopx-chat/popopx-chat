@@ -765,24 +765,38 @@ struct PopopxMeshPlazaRootView: View {
     // MARK: The three top-bar entries
 
     /// Top-left: back to the "Chat" tab. After this tab went full-screen immersive there is no cross-cutting navigation at the bottom of the screen, so this capsule is the only exit,
-    /// and therefore it must always be present and be recognisable at a glance. Its drawing is the same tier as the drawer's dismiss key (`cabinPanelCloseEntry`): neutral background,
-    /// icon only with no text — this bar's width accounting for the four capsules is written entry by entry above `meshDiscoveryEntry`, and the back key taking
-    /// only 35pt comes from exactly that; giving it one more word would be a fourth truncation point. `chevron.left` is the system's direction word for "back",
-    /// and VoiceOver reads the `.accessibilityLabel` sentence rather than the icon.
+    /// and therefore it must always be present and be recognisable at a glance. The icon alone turned out too quiet against the plaza's own canvas while
+    /// scrolling, so this capsule now carries its word: `chevron.backward` + "Back", `PopopxMaterial.chip` (the token named for exactly this — a header pill over scrolling
+    /// content) with the house 0.5pt `hairlineInner` edge, so the fill lifts off both the light and the dark canvas without painting an opaque card onto it. The label colour is
+    /// `PopopxPalette.label`, the palette's highest-contrast ink, rather than the mesh teal: this is navigation, not a mesh entry. `chevron.backward` (not `.left`) is the
+    /// direction word that mirrors itself in RTL — with the word "Back" localised straight from the catalogue, the Arabic capsule reads arrow-then-رجوع in its own order.
+    /// Width: the capsule costs ≈65pt (accounting above `meshDiscoveryEntry`); the word is the deliberate trade for glanceability, and VoiceOver still reads the full
+    /// `.accessibilityLabel` sentence.
     private var backToChatsEntry: some View {
         Button {
             PopopxHaptics.impact(.light)
             tabSelection = .chats
         } label: {
-            Image(systemName: "chevron.left")
-                .font(PopopxType.microTag)
-                .imageScale(.medium)
-                .foregroundStyle(PopopxPalette.meshInk)
-                .accessibilityHidden(true)
-                .padding(.horizontal, PopopxMetrics.spaceS)
-                .frame(minHeight: PopopxMetrics.minHitTarget)
-                .background(PopopxPalette.card, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
-                .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
+            HStack(spacing: PopopxMetrics.space2XS) {
+                Image(systemName: "chevron.backward")
+                    .font(PopopxType.microTag)
+                    .imageScale(.medium)
+                    .accessibilityHidden(true)
+                Text(Copy.back)
+                    .font(PopopxType.meta)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+            .foregroundStyle(PopopxPalette.label)
+            .padding(.horizontal, PopopxMetrics.spaceXS)
+            .frame(minHeight: PopopxMetrics.minHitTarget)
+            .background(PopopxMaterial.chip, in: .rect(cornerRadius: PopopxMetrics.radiusControl))
+            .overlay(
+                RoundedRectangle(cornerRadius: PopopxMetrics.radiusControl)
+                    .strokeBorder(PopopxPalette.hairlineInner, lineWidth: PopopxMetrics.hairline)
+            )
+            .contentShape(.rect(cornerRadius: PopopxMetrics.radiusControl))
+            .fixedSize()
         }
         .buttonStyle(PopopxPressButtonStyle())
         .accessibilityLabel(Text(Copy.backToMessages))
@@ -810,14 +824,16 @@ struct PopopxMeshPlazaRootView: View {
     /// ⇒ the ceiling for all four combined **≈353pt**:
     /// · this capsule: padding 8×2 = 16 + icon ≈ 20 + gap 4 + "Groups" 49.9 = **≈ 90pt**
     ///   (the zh tier of this Key already has a value in the catalogue: "Groups" 14.9 → ≈ 55pt);
-    /// · `backToChatsEntry`: padding 12×2 = 24 + `chevron.left` ≈ 11 = **≈ 35pt**;
+    /// · `backToChatsEntry`: padding 8×2 = 16 + `chevron.backward` ≈ 11 + gap 4 + "Back" 33.7 (measured, same CoreText run as the words below)
+    ///   = **≈ 65pt** (the zh tier "Back" 29.8 → ≈ 61pt);
     /// · `cabinPanelEntry` (`.principal`): padding 8×2 = 16 + icon ≈ 13 + gap 4 + "Cabin" 39.5 = **≈ 73pt**
     ///   (the zh tier "Cabin" 29.8 → ≈ 63pt);
     /// · `meshSettingsEntry`: padding 12×2 = 24 + icon ≈ 15 + gap 4 + dot 8 + gap 4 + "Settings" 56.6
     ///   = **≈ 112pt** (the zh tier of this Key already has a value in the catalogue: "Settings" 29.8 → ≈ 85pt);
-    /// · total 90 + 35 + 73 + 112 = **310pt**, plus that 8pt gap in the same group = **318 ≤ 361 ⇒ 43pt of slack (12%)**,
-    ///   and that slack is what is left for Dynamic Type and the longest translations: one font size larger (about +20%) and the whole bar reaches 372pt,
-    ///   crossing the line, so every one of the four capsules carries `lineLimit(1)` + `minimumScaleFactor(0.85)` — shrink the text first, then give way.
+    /// · total 90 + 65 + 73 + 112 = **340pt**, plus that 8pt gap in the same group = **348 ≤ 361 ⇒ 13pt of slack (3.7%)**.
+    ///   The back capsule's word widened the bar by 30pt from the icon-only tier; that is the price of the one glanceable exit, and it is the last width this bar has —
+    ///   one font size larger (about +20%) already crosses the line, which is exactly why every one of the four capsules carries
+    ///   `lineLimit(1)` + `minimumScaleFactor(0.85)` — shrink the text first, then give way.
     /// The right-hand capsule was shortened this round from the offline mesh settings label (with "Offline mesh settings" measured at 145.8pt, that capsule alone would need 201pt) to
     /// "Settings": the whole bar was already eating 389pt, and without that change this top-left capsule's icon + word had nowhere to be placed.
     /// Not one word of the full statement is lost — a short word on the screen, and VoiceOver reads the complete
@@ -2980,8 +2996,11 @@ private enum Copy {
     /// the `en` tier reads characters that were never translated, and nobody in the 16 catalogues can write a translation against a Key that mixes two languages.
     /// The bottom-bar cell (`MainTabView.swift:245`, untouched this round and not this file's business) is a different matter.
     static let cabinPanelEntryHint = key("Opens the Cabin panel: the master switch, the channels and the nearby nodes")
-    /// The VoiceOver wording of the top-left back key (the screen shows only an icon, taking up not one character of width). After this tab went full-screen immersive
-    /// it is this tab's only exit, so this sentence states the destination rather than the direction of the action.
+    /// The word on the top-left back capsule's face. It is the same catalogue Key the onboarding flow already ships (`OnboardingView.swift:165`),
+    /// so all 20 catalogues already carry it — the back capsule introduced no new translation.
+    static let back = key("Back")
+    /// The VoiceOver wording of the top-left back key. The capsule's face now says "Back" (it used to be icon-only); this sentence still states
+    /// the destination rather than the direction of the action, because after this tab went full-screen immersive it is this tab's only exit.
     static let backToMessages = key("Back to messages")
     /// The same Key as `PopopxAddFriendView.swift:718`: the titles of the two entries are therefore necessarily the same sentence.
     static let plazaTitle = key("Nearby mesh plaza")

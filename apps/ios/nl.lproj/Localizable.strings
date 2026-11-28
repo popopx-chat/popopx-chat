@@ -9234,3 +9234,42 @@ server test failure */
 
 /* agent task status */
 "Cancelled" = "Geannuleerd";
+
+/* discover setup guide */
+"Install and use Mac Node" = "Mac Node installeren en gebruiken";
+
+/* discover setup guide */
+"Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." = "Drie stappen: installeer de Mac-app, maak een eenmalige koppelingsreferentie en scan om te verbinden.";
+
+/* discover setup guide */
+"Usage guide" = "Gebruiksgids";
+
+/* discover setup guide */
+"Opens the three-step Mac Node setup guide" = "Opent de drieledige Mac Node-instellingsgids";
+
+/* discover setup guide */
+"Mac Node setup guide" = "Mac Node-instellingsgids";
+
+/* discover setup guide */
+"Install the Mac Node app" = "De Mac Node-app installeren";
+
+/* discover setup guide */
+"Download the Mac Node desktop app from https://node.popopx.chat and install it." = "Download de Mac Node-desktopapp van https://node.popopx.chat en installeer deze.";
+
+/* discover setup guide */
+"Create a pairing credential" = "Een koppelingsreferentie maken";
+
+/* discover setup guide */
+"In the Mac app's local console, generate a one-time signed pairing credential." = "Genereer in de lokale console van de Mac-app een ondertekende eenmalige koppelingsreferentie.";
+
+/* discover setup guide */
+"Scan to pair" = "Scannen om te koppelen";
+
+/* discover setup guide */
+"Scan the QR code with this phone, or paste the credential, to finish secure pairing." = "Scan de QR-code met deze telefoon, of plak de referentie, om de beveiligde koppeling te voltooien.";
+
+/* discover setup guide */
+"Copy site link" = "Sitelink kopiëren";
+
+/* discover setup guide */
+"Pair now" = "Nu koppelen";

@@ -3,12 +3,14 @@ package chat.popopx.common.views.tabs
 import SectionItemView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
@@ -50,6 +52,9 @@ import chat.popopx.common.signal.PopopxSilentSignalingRouter
 import chat.popopx.common.ui.components.PopopxCard
 import chat.popopx.common.ui.components.PopopxChip
 import chat.popopx.common.ui.components.PopopxDivider
+import chat.popopx.common.ui.components.PopopxPressable
+import chat.popopx.common.ui.components.PopopxPrimaryButton
+import chat.popopx.common.ui.components.PopopxSecondaryButton
 import chat.popopx.common.ui.theme.PopopxAlpha
 import chat.popopx.common.ui.theme.PopopxBrand
 import chat.popopx.common.ui.theme.PopopxElevation
@@ -57,6 +62,7 @@ import chat.popopx.common.ui.theme.PopopxFieldSurface
 import chat.popopx.common.ui.theme.PopopxHairlineStrong
 import chat.popopx.common.ui.theme.PopopxLabelHint
 import chat.popopx.common.ui.theme.PopopxMeshInk
+import chat.popopx.common.ui.theme.PopopxOnBrand
 import chat.popopx.common.ui.theme.PopopxRadiusChip
 import chat.popopx.common.ui.theme.PopopxRadiusControl
 import chat.popopx.common.ui.theme.PopopxSize
@@ -113,6 +119,7 @@ fun PopopxDiscoverTabView() {
       }
       item { PopopxDiscoverAssistantRow() }
       item { PopopxDiscoverNodeRow(binding) }
+      item { PopopxDiscoverGuideRow(binding) }
       item { Spacer(Modifier.height(PopopxSpace.m)) }
     }
   }
@@ -534,6 +541,176 @@ private fun PopopxDiscoverNodeBanner(binding: PopopxMacNodeBinding?) {
 private fun showNodePairingSheet() {
   ModalManager.start.showModalCloseable(cardScreen = true) { close ->
     PopopxNodePairingSheet(close)
+  }
+}
+
+/**
+ * 「发现 → 如何安装并使用 Mac Node」(`PopopxDiscoverGuideEntry` in `PopopxDiscoverView.swift`): with no
+ * node bonded it is a prominent brand-washed card — the pairing sheet assumes a signed credential
+ * already exists, and this card teaches the three steps that produce one. With a node bonded it
+ * collapses to the compact "Usage guide" shortcut, because a five-line installation card under a
+ * working banner is noise. The word inside the card carries every sentence; the card is a button
+ * for the same reason the node banner is one. Desktop keeps the screen it always had.
+ */
+@Composable
+private fun PopopxDiscoverGuideRow(binding: PopopxMacNodeBinding?) {
+  if (!appPlatform.isAndroid) return
+  if (binding == null) {
+    PopopxCard(
+      modifier = Modifier
+        .padding(horizontal = PopopxSpace.gutter)
+        .padding(top = PopopxSpace.xxs),
+      color = PopopxBrand.copy(alpha = 0.10f),
+      border = BorderStroke(PopopxSize.hairline, PopopxBrand.copy(alpha = 0.28f)),
+      contentPadding = PaddingValues(0.dp),
+    ) {
+      Row(
+        Modifier
+          .fillMaxWidth()
+          .clickable { showNodeGuideSheet() }
+          .padding(PopopxSpace.s),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s)
+      ) {
+        Box(
+          Modifier
+            .size(38.dp)
+            .clip(RoundedCornerShape(PopopxRadiusControl))
+            .background(PopopxBrand.copy(alpha = PopopxAlpha.washStrong)),
+          contentAlignment = Alignment.Center
+        ) {
+          Icon(painterResource(MR.images.ic_checklist), null, Modifier.size(22.dp), tint = PopopxBrand)
+        }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+          Text(
+            stringResource(MR.strings.discover_guide_card_title),
+            style = PopopxTypeScale.headline,
+            color = MaterialTheme.colors.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+          )
+          Text(
+            stringResource(MR.strings.discover_guide_card_subtitle),
+            style = PopopxTypeScale.subheadline,
+            color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+          )
+        }
+        Spacer(Modifier.width(PopopxSpace.xxs))
+        AutoMirroredIcon(painterResource(MR.images.ic_chevron_right), null, Modifier.size(PopopxSize.iconXs), tint = PopopxLabelHint)
+      }
+    }
+  } else {
+    Row(Modifier.fillMaxWidth().padding(horizontal = PopopxSpace.gutter, vertical = PopopxSpace.xxs)) {
+      PopopxPressable(onClick = { showNodeGuideSheet() }) {
+        Row(
+          Modifier
+            .heightIn(min = PopopxSize.control)
+            .background(PopopxBrand.copy(alpha = 0.12f), RoundedCornerShape(PopopxRadiusControl))
+            .border(PopopxSize.hairline, PopopxHairlineStrong, RoundedCornerShape(PopopxRadiusControl))
+            .padding(horizontal = PopopxSpace.s),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          Icon(painterResource(MR.images.ic_checklist), null, Modifier.size(PopopxSize.iconM), tint = PopopxBrand)
+          Text(
+            stringResource(MR.strings.discover_guide_chip),
+            style = PopopxTypeScale.subheadline,
+            color = PopopxBrand,
+            maxLines = 1
+          )
+        }
+      }
+    }
+  }
+}
+
+private fun showNodeGuideSheet() {
+  ModalManager.start.showModalCloseable(cardScreen = true) { close ->
+    PopopxNodeGuideSheet(close)
+  }
+}
+
+/** The address the guide's copy button carries across; the desktop half of the guide lives there. */
+private const val DISCOVER_GUIDE_SITE_LINK = "https://popopx.chat"
+
+/**
+ * The three steps that end with a bonded Mac, in the order the machines require them: the Mac must
+ * exist before it can mint a credential, and the credential must exist before a phone can scan it.
+ * 「立即配对」 hands over to `PopopxNodePairingSheet` — the one screen that owns the scanner and the
+ * bond store. `close()` followed immediately by the next sheet is the modal manager's documented
+ * supported sequence (`showCustomModal` flushes the close queue first).
+ */
+@Composable
+private fun PopopxNodeGuideSheet(close: () -> Unit) {
+  val clipboard = LocalClipboardManager.current
+  var copied by remember { mutableStateOf(false) }
+  ColumnWithScrollBar {
+    AppBarTitle(stringResource(MR.strings.discover_guide_title))
+    Column(Modifier.padding(horizontal = PopopxSpace.gutter)) {
+      PopopxCard {
+        Column(verticalArrangement = Arrangement.spacedBy(PopopxSpace.m)) {
+          GuideStepRow(
+            stringResource(MR.strings.discover_guide_step_install_title),
+            stringResource(MR.strings.discover_guide_step_install_detail),
+            "1"
+          )
+          GuideStepRow(
+            stringResource(MR.strings.discover_guide_step_credential_title),
+            stringResource(MR.strings.discover_guide_step_credential_detail),
+            "2"
+          )
+          GuideStepRow(
+            stringResource(MR.strings.discover_guide_step_scan_title),
+            stringResource(MR.strings.discover_guide_step_scan_detail),
+            "3"
+          )
+        }
+      }
+      Spacer(Modifier.height(PopopxSpace.m))
+      PopopxSecondaryButton(
+        text = stringResource(if (copied) MR.strings.copied else MR.strings.discover_guide_copy_link),
+        onClick = {
+          clipboard.setText(AnnotatedString(DISCOVER_GUIDE_SITE_LINK))
+          copied = true
+        },
+        icon = MR.images.ic_content_copy,
+      )
+      Spacer(Modifier.height(PopopxSpace.xs))
+      PopopxPrimaryButton(
+        text = stringResource(MR.strings.discover_guide_pair_now),
+        onClick = {
+          close()
+          showNodePairingSheet()
+        },
+        icon = MR.images.ic_qr_code_scanner,
+      )
+      Spacer(Modifier.height(PopopxSpace.m))
+      SheetDone(close)
+    }
+  }
+}
+
+@Composable
+private fun GuideStepRow(title: String, detail: String, number: String) {
+  Row(horizontalArrangement = Arrangement.spacedBy(PopopxSpace.s), verticalAlignment = Alignment.Top) {
+    Box(
+      Modifier
+        .size(22.dp)
+        .background(PopopxBrand, CircleShape),
+      contentAlignment = Alignment.Center
+    ) {
+      Text(number, style = PopopxTypeScale.caption, color = PopopxOnBrand)
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+      Text(title, style = PopopxTypeScale.headline, color = MaterialTheme.colors.onBackground)
+      Text(
+        detail,
+        style = PopopxTypeScale.caption,
+        color = MaterialTheme.colors.onBackground.copy(alpha = PopopxAlpha.secondary)
+      )
+    }
   }
 }
 

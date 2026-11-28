@@ -4894,3 +4894,42 @@
 
 /* agent task status */
 "Cancelled" = "ملغى";
+
+/* discover setup guide */
+"Install and use Mac Node" = "ثبّت Mac Node واستخدمه";
+
+/* discover setup guide */
+"Three steps: install the Mac app, create a one-time pairing credential, then scan to bond." = "ثلاث خطوات: ثبّت تطبيق Mac، وأنشئ بيانات اقتران لمرة واحدة، ثم امسح الرمز لإتمام الاقتران.";
+
+/* discover setup guide */
+"Usage guide" = "دليل الاستخدام";
+
+/* discover setup guide */
+"Opens the three-step Mac Node setup guide" = "يفتح دليل إعداد Mac Node من ثلاث خطوات";
+
+/* discover setup guide */
+"Mac Node setup guide" = "دليل إعداد Mac Node";
+
+/* discover setup guide */
+"Install the Mac Node app" = "ثبّت تطبيق Mac Node";
+
+/* discover setup guide */
+"Download the Mac Node desktop app from https://node.popopx.chat and install it." = "نزّل تطبيق Mac Node لسطح المكتب من https://node.popopx.chat وثبّته.";
+
+/* discover setup guide */
+"Create a pairing credential" = "أنشئ بيانات اقتران";
+
+/* discover setup guide */
+"In the Mac app's local console, generate a one-time signed pairing credential." = "في وحدة التحكم المحلية لتطبيق Mac، أنشئ بيانات اقتران موقّعة لمرة واحدة.";
+
+/* discover setup guide */
+"Scan to pair" = "امسح للاقتران";
+
+/* discover setup guide */
+"Scan the QR code with this phone, or paste the credential, to finish secure pairing." = "امسح رمز QR بهذا الهاتف، أو الصق بيانات الاقتران، لإتمام الاقتران الآمن.";
+
+/* discover setup guide */
+"Copy site link" = "نسخ رابط الموقع";
+
+/* discover setup guide */
+"Pair now" = "اقترن الآن";
