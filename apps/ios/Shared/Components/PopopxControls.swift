@@ -450,6 +450,10 @@ struct PopopxCheckboxToggleStyle: ToggleStyle {
                 )
         }
         .contentShape(Rectangle())
+        // A custom `ToggleStyle` gets no built-in gesture: without this the row draws a checkbox
+        // that does nothing when tapped. VoiceOver activate also arrives here as one tap, so the
+        // state changes exactly once per activation.
+        .onTapGesture { configuration.isOn.toggle() }
     }
 }
 

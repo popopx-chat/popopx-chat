@@ -452,6 +452,9 @@ struct PopopxMeView: View {
                 PopopxPresenceGated(reason: Copy.presenceReasonPrivacy) {
                     PrivacySettings()
                         .navigationTitle(Copy.privacySettings)
+                        // The sentence is 30 characters long: as a large title on a 402pt screen it
+                        // truncates to "Privacy and security s…", so this page wears an inline title.
+                        .navigationBarTitleDisplayMode(.inline)
                         .modifier(ThemedBackground(grouped: true))
                 }
             }

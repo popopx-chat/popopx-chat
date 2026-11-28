@@ -46,10 +46,13 @@ private enum PopopxAddFriendLink: Hashable {
     static func classify(_ raw: String) -> PopopxAddFriendLink {
         let link = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !link.isEmpty else { return .unknown }
-        if PopopxOfflineBridge.normalizedInviteLink(link) != nil { return .offline }
         // The published share form is online by definition: its address is sealed, so this function
         // cannot see a mesh invite inside it even when one is there. `planAndConnect` opens it.
+        // It has to be tested before the offline gate: `normalizedInviteLink` accepts every
+        // `https://popopx.chat/` path, so a sealed `/i/v1/` link would otherwise be rewritten into a
+        // `popopx:/` link and sent into the offline path, which then rejects it as an invalid link.
         if PopopxOpaqueInviteCodec.looksLikeOpaqueLink(link) { return .online }
+        if PopopxOfflineBridge.normalizedInviteLink(link) != nil { return .offline }
         if onlinePrefixes.contains(where: { link.hasPrefix($0) }) { return .online }
         return .unknown
     }
